@@ -32,6 +32,7 @@
     BOOL _showsUserLocation;
     NSURL *_styleURL;
     double _zoomLevel;
+    
     UIButton *_rightCalloutAccessory;
 }
 
@@ -77,8 +78,8 @@ RCT_EXPORT_MODULE();
 
 - (void)createMap
 {
-    [MGLAccountManager setMapboxMetricsEnabledSettingShownInApp: YES];
-    _map = [[MGLMapView alloc] initWithFrame:self.bounds accessToken:_accessToken styleURL:_styleURL];
+    _map = [[MGLMapView alloc] initWithFrame:self.bounds styleURL:_styleURL];
+    [MGLAccountManager setAccessToken:_accessToken];
     _map.autoresizingMask = UIViewAutoresizingFlexibleWidth | UIViewAutoresizingFlexibleHeight;
     _map.delegate = self;
     _map.userTrackingMode = MGLUserTrackingModeFollow;
@@ -105,12 +106,19 @@ RCT_EXPORT_MODULE();
     if (_newAnnotations) {
         // Take into account any already placed pins
         if (_annotations.count) {
-            [_map removeAnnotations: _annotations];
+//            [_map removeAnnotations: _annotations];
+            for (int i = 0; i < [_annotations count]; i++) {
+                RCTMGLAnnotation *annotation = [(RCTMGLAnnotation *) _annotations[i] coordinates];
+                [_map addAnnotation:annotation];
+            }
             _annotations = nil;
         }
         
         _annotations = _newAnnotations;
-        [_map addAnnotations:_newAnnotations];
+        for (int i = 0; i < [_newAnnotations count]; i++) {
+            RCTMGLAnnotation *annotation = [(RCTMGLAnnotation *) _newAnnotations[i] coordinates];
+            [_map addAnnotation:annotation];
+        }
     }
 }
 
@@ -186,6 +194,32 @@ RCT_EXPORT_MODULE();
 -(void)setCenterCoordinateZoomLevelAnimated:(CLLocationCoordinate2D)coordinates zoomLevel:(double)zoomLevel
 {
     [_map setCenterCoordinate:coordinates zoomLevel:zoomLevel animated:YES];
+}
+
+- (CGFloat)mapView:(MGLMapView *)mapView alphaForShapeAnnotation:(RCTMGLAnnotation *)annotation
+{
+    return 0.2;
+}
+
+- (UIColor *)mapView:(MGLMapView *)mapView strokeColorForShapeAnnotation:(RCTMGLAnnotation *)annotation
+{
+//    NSString *fillColor = [(RCTMGLAnnotation *) annotation fillColor];
+
+    unsigned rgbValue = 0;
+    NSScanner *scanner = [NSScanner scannerWithString:@"#ddd"];
+    [scanner setScanLocation:1];
+    [scanner scanHexInt:&rgbValue];
+    return [UIColor colorWithRed:((rgbValue & 0xFF0000) >> 16)/255.0 green:((rgbValue & 0xFF00) >> 8)/255.0 blue:(rgbValue & 0xFF)/255.0 alpha:1.0];
+}
+
+- (UIColor *)mapView:(MGLMapView *)mapView fillColorForPolygonAnnotation:(RCTMGLAnnotation *)annotation
+{
+    return [UIColor greenColor];
+}
+
+- (CGFloat)mapView:(MGLMapView *)mapView lineWidthForPolylineAnnotation:(RCTMGLAnnotation *)annotation
+{
+    return 100.0;
 }
 
 - (void)mapView:(MGLMapView *)mapView didUpdateUserLocation:(MGLUserLocation *)userLocation;
@@ -299,6 +333,7 @@ RCT_EXPORT_MODULE();
         [_eventDispatcher sendInputEventWithName:@"topBlur" body:event];
     }
 }
+
 @end
 
 /* RCTMGLAnnotation */
@@ -324,6 +359,13 @@ RCT_EXPORT_MODULE();
 }
 
 
++ (instancetype)shapeAnnotation:(MGLPolygon *)coordinates fillColor:(NSString *)fillColor strokeColor:(NSString *)strokeColor strokeWidth:(double)strokeWidth alpha:(double)alpha id:(NSString *)id
+{
+    return [[self alloc] initShapeAnnotation:coordinates fillColor:fillColor strokeColor:strokeColor strokeWidth:strokeWidth alpha:alpha id:id];
+}
+
+
+
 - (instancetype)initWithLocation:(CLLocationCoordinate2D)coordinate title:(NSString *)title subtitle:(NSString *)subtitle id:(NSString *)id
 {
     if (self = [super init]) {
@@ -336,7 +378,6 @@ RCT_EXPORT_MODULE();
     return self;
 }
 
-
 - (instancetype)initWithLocationRightCallout:(CLLocationCoordinate2D)coordinate title:(NSString *)title subtitle:(NSString *)subtitle id:(NSString *)id rightCalloutAccessory:(UIButton *)rightCalloutAccessory
 {
     if (self = [super init]) {
@@ -344,6 +385,20 @@ RCT_EXPORT_MODULE();
         _coordinate = coordinate;
         _title = title;
         _subtitle = subtitle;
+        _id = id;
+    }
+    
+    return self;
+}
+
+- (instancetype)initShapeAnnotation:(MGLPolygon *)coordinates fillColor:(NSString *)fillColor strokeColor:(NSString *)strokeColor strokeWidth:(double)strokeWidth alpha:(double)alpha id:(NSString *)id
+{
+    if (self = [super init]) {
+        _coordinates = coordinates;
+        _fillColor = fillColor;
+        _strokeColor = strokeColor;
+        _strokeWidth = &strokeWidth;
+        _alpha = &alpha;
         _id = id;
     }
     

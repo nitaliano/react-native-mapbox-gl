@@ -237,5 +237,57 @@ RCT_CUSTOM_VIEW_PROPERTY(annotations, CLLocationCoordinate2D, RCTMapboxGL) {
     }
 }
 
+RCT_CUSTOM_VIEW_PROPERTY(shapes, CLLocationCoordinate2D, RCTMapboxGL) {
+    if ([json isKindOfClass:[NSArray class]]) {
+        NSMutableArray* shapes = [NSMutableArray array];
+        id anObject;
+        NSEnumerator *enumerator = [json objectEnumerator];
+        
+        while (anObject = [enumerator nextObject]) {
+    //            CLLocationCoordinate2D coordinate = [RCTConvert CLLocationCoordinate2D:anObject];
+    //                {
+    //                coordinates: [
+    //                              [44, -122],
+    //                              [46, -122],
+    //                              [46, -121]
+    //                              ],
+    //                    id: 'foo',
+    //                fill: 'red'
+    //                }
+            NSString *fill = @"";
+            if ([anObject objectForKey:@"fill"]) {
+                fill = [RCTConvert NSString:[anObject valueForKey:@"fill"]];
+            }
+            
+            NSString *id = @"";
+            if ([anObject objectForKey:@"id"]) {
+                id = [RCTConvert NSString:[anObject valueForKey:@"id"]];
+            }
+            
+            NSArray *coordinates = [RCTConvert NSArray:[anObject valueForKey:@"coordinates"]];
+            long numberOfPoints = coordinates.count;
+            int coordIndex = 0;
+            CLLocationCoordinate2D *coord = malloc(sizeof(CLLocationCoordinate2D) * numberOfPoints);
+            
+            if ([anObject objectForKey:@"coordinates"]) {
+                for (int i = 0; i < [coordinates count]; i++) {
+                    NSLog(@"%d: %@", i, coordinates[i][1]);
+                    CLLocationDegrees lat = [coordinates[i][0] doubleValue];
+                    CLLocationDegrees lng = [coordinates[i][1] doubleValue];
+                    CLLocationCoordinate2D currCoord = CLLocationCoordinate2DMake(lat, lng);
+                    coord[coordIndex] = currCoord;
+                    coordIndex++;
+                }
+            }
+
+            MGLPolygon *coordShape = [MGLPolygon polygonWithCoordinates:coord count:numberOfPoints];
+            RCTMGLAnnotation *shape = [[RCTMGLAnnotation alloc] initShapeAnnotation:coordShape fillColor:@"#ddd" strokeColor:@"#555" strokeWidth:1 alpha:1 id:@"foo"];
+            [shapes addObject:shape];
+        }
+        
+        view.annotations = shapes;
+    }
+}
+
 
 @end

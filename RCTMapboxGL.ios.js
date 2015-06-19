@@ -82,6 +82,14 @@ var MapView = React.createClass({
         url: React.PropTypes.string,
       })
     })),
+    shapes: React.PropTypes.arrayOf(React.PropTypes.shape({
+      coordinates: React.PropTypes.arrayOf(),
+      id: React.PropTypes.sting,
+      fillColor: React.PropTypes.sting,
+      strokeColor: React.PropTypes.sting,
+      strokeWidth: React.PropTypes.number,
+      alpha: React.PropTypes.number
+    })),
     onRegionChange: React.PropTypes.func,
     onRegionWillChange: React.PropTypes.func,
     onOpenAnnotation: React.PropTypes.func,
