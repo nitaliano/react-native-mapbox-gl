@@ -41,24 +41,26 @@
 
 @property (nonatomic, strong) UIButton *rightCalloutAccessory;
 @property (nonatomic) NSString *id;
-@property (nonatomic) MGLPolygon *coordinates;
+@property (nonatomic) CLLocationCoordinate2D *coordinates;
 @property (nonatomic) NSString *fillColor;
 @property (nonatomic) NSString *strokeColor;
 @property (nonatomic) double *strokeWidth;
 @property (nonatomic) double *alpha;
+@property (nonatomic) NSString *type;
+@property (nonatomic) NSUInteger *count;
 
 + (instancetype)annotationWithLocation:(CLLocationCoordinate2D)coordinate title:(NSString *)title subtitle:(NSString *)subtitle id:(NSString *)id;
 
 + (instancetype)annotationWithLocationRightCallout:(CLLocationCoordinate2D)coordinate title:(NSString *)title subtitle:(NSString *)subtitle id:(NSString *)id rightCalloutAccessory:(UIButton *)rightCalloutAccessory;
 
-+ (instancetype)shapeAnnotation:(MGLPolygon *)coordinates fillColor:(NSString *)fillColor strokeColor:(NSString *)strokeColor strokeWidth:(double)strokeWidth alpha:(double)alpha id:(NSString *)id ;
++ (instancetype)shapeAnnotation:(CLLocationCoordinate2D *)coordinates fillColor:(NSString *)fillColor strokeColor:(NSString *)strokeColor strokeWidth:(double)strokeWidth alpha:(double)alpha id:(NSString *)id type:(NSString *)type count:(NSUInteger)count;
 
 
 - (instancetype)initWithLocation:(CLLocationCoordinate2D)coordinate title:(NSString *)title subtitle:(NSString *)subtitle id:(NSString *)id;
 
 - (instancetype)initWithLocationRightCallout:(CLLocationCoordinate2D)coordinate title:(NSString *)title subtitle:(NSString *)subtitle id:(NSString *)id rightCalloutAccessory:(UIButton *)rightCalloutAccessory;
 
-- (instancetype)initShapeAnnotation:(MGLPolygon *)coordinates fillColor:(NSString *)fillColor strokeColor:(NSString *)strokeColor strokeWidth:(double)strokeWidth alpha:(double)alpha id:(NSString *)id ;
+- (instancetype)initShapeAnnotation:(CLLocationCoordinate2D *)coordinates fillColor:(NSString *)fillColor strokeColor:(NSString *)strokeColor strokeWidth:(double)strokeWidth alpha:(double)alpha id:(NSString *)id type:(NSString *)type count:(NSUInteger)count;
 
 
 @end

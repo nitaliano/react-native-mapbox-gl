@@ -67,8 +67,6 @@ RCT_EXPORT_MODULE();
         _map.styleURL = _styleURL;
         _map.zoomLevel = _zoomLevel;
     } else {
-        /* A bit of a hack because hooking into the fully rendered event didn't seem to work */
-        [self performSelector:@selector(updateAnnotations) withObject:nil afterDelay:1];
         /* We need to have a height/width specified in order to render */
         if (_accessToken && _styleURL && self.bounds.size.height > 0 && self.bounds.size.width > 0) {
             [self createMap];
@@ -104,21 +102,32 @@ RCT_EXPORT_MODULE();
 - (void)updateAnnotations
 {
     if (_newAnnotations) {
+
         // Take into account any already placed pins
         if (_annotations.count) {
-//            [_map removeAnnotations: _annotations];
-            for (int i = 0; i < [_annotations count]; i++) {
-                RCTMGLAnnotation *annotation = [(RCTMGLAnnotation *) _annotations[i] coordinates];
-                [_map addAnnotation:annotation];
-            }
+            [_map removeAnnotations:_annotations];
             _annotations = nil;
         }
         
         _annotations = _newAnnotations;
+        
         for (int i = 0; i < [_newAnnotations count]; i++) {
-            RCTMGLAnnotation *annotation = [(RCTMGLAnnotation *) _newAnnotations[i] coordinates];
-            [_map addAnnotation:annotation];
+            
+            NSString *type = [(RCTMGLAnnotation *) _newAnnotations[i] type];
+            
+            if ([type  isEqual: @"polygon"]) {
+                CLLocationCoordinate2D *coords = [(RCTMGLAnnotation *) _newAnnotations[i] coordinates];
+                MGLPolygon *coordShape = [MGLPolygon polygonWithCoordinates:coords count:6];
+                [_map addAnnotation:coordShape];
+            } else if ([type  isEqual: @"polyline"]) {
+                CLLocationCoordinate2D *coords = [(RCTMGLAnnotation *) _newAnnotations[i] coordinates];
+                MGLPolyline *coordShape = [MGLPolyline  polylineWithCoordinates:coords count:8];
+                [_map addAnnotation:coordShape];
+            } else {
+                [_map addAnnotation: _newAnnotations[i]];
+            }
         }
+        
     }
 }
 
@@ -198,15 +207,13 @@ RCT_EXPORT_MODULE();
 
 - (CGFloat)mapView:(MGLMapView *)mapView alphaForShapeAnnotation:(RCTMGLAnnotation *)annotation
 {
-    return 0.2;
+    return 0.5;
 }
 
 - (UIColor *)mapView:(MGLMapView *)mapView strokeColorForShapeAnnotation:(RCTMGLAnnotation *)annotation
 {
-//    NSString *fillColor = [(RCTMGLAnnotation *) annotation fillColor];
-
     unsigned rgbValue = 0;
-    NSScanner *scanner = [NSScanner scannerWithString:@"#ddd"];
+    NSScanner *scanner = [NSScanner scannerWithString:@"#999"];
     [scanner setScanLocation:1];
     [scanner scanHexInt:&rgbValue];
     return [UIColor colorWithRed:((rgbValue & 0xFF0000) >> 16)/255.0 green:((rgbValue & 0xFF00) >> 8)/255.0 blue:(rgbValue & 0xFF)/255.0 alpha:1.0];
@@ -219,7 +226,7 @@ RCT_EXPORT_MODULE();
 
 - (CGFloat)mapView:(MGLMapView *)mapView lineWidthForPolylineAnnotation:(RCTMGLAnnotation *)annotation
 {
-    return 100.0;
+    return 2;
 }
 
 - (void)mapView:(MGLMapView *)mapView didUpdateUserLocation:(MGLUserLocation *)userLocation;
@@ -238,7 +245,8 @@ RCT_EXPORT_MODULE();
 
 -(void)mapView:(MGLMapView *)mapView didSelectAnnotation:(id<MGLAnnotation>)annotation
 {
-    if (annotation.title && annotation.subtitle) {
+        NSString *type = [(RCTMGLAnnotation *) annotation type];
+    if (annotation.title && annotation.subtitle && [type  isEqual: @"point"]) {
         
         NSString *id = [(RCTMGLAnnotation *) annotation id];
         
@@ -358,10 +366,9 @@ RCT_EXPORT_MODULE();
     return [[self alloc] initWithLocationRightCallout:coordinate title:title subtitle:subtitle id:id rightCalloutAccessory:rightCalloutAccessory];
 }
 
-
-+ (instancetype)shapeAnnotation:(MGLPolygon *)coordinates fillColor:(NSString *)fillColor strokeColor:(NSString *)strokeColor strokeWidth:(double)strokeWidth alpha:(double)alpha id:(NSString *)id
++ (instancetype)shapeAnnotation:(CLLocationCoordinate2D *)coordinates fillColor:(NSString *)fillColor strokeColor:(NSString *)strokeColor strokeWidth:(double)strokeWidth alpha:(double)alpha id:(NSString *)id type:(NSString *)type count:(NSUInteger)count
 {
-    return [[self alloc] initShapeAnnotation:coordinates fillColor:fillColor strokeColor:strokeColor strokeWidth:strokeWidth alpha:alpha id:id];
+    return [[self alloc] initShapeAnnotation:coordinates fillColor:fillColor strokeColor:strokeColor strokeWidth:strokeWidth alpha:alpha id:id type:type count:count];
 }
 
 
@@ -369,7 +376,7 @@ RCT_EXPORT_MODULE();
 - (instancetype)initWithLocation:(CLLocationCoordinate2D)coordinate title:(NSString *)title subtitle:(NSString *)subtitle id:(NSString *)id
 {
     if (self = [super init]) {
-        _coordinate = coordinate;
+        coordinate = coordinate;
         _title = title;
         _subtitle = subtitle;
         _id = id;
@@ -391,7 +398,7 @@ RCT_EXPORT_MODULE();
     return self;
 }
 
-- (instancetype)initShapeAnnotation:(MGLPolygon *)coordinates fillColor:(NSString *)fillColor strokeColor:(NSString *)strokeColor strokeWidth:(double)strokeWidth alpha:(double)alpha id:(NSString *)id
+- (instancetype)initShapeAnnotation:(CLLocationCoordinate2D *)coordinates fillColor:(NSString *)fillColor strokeColor:(NSString *)strokeColor strokeWidth:(double)strokeWidth alpha:(double)alpha id:(NSString *)id type:(NSString *)type count:(NSUInteger)count
 {
     if (self = [super init]) {
         _coordinates = coordinates;
@@ -400,6 +407,8 @@ RCT_EXPORT_MODULE();
         _strokeWidth = &strokeWidth;
         _alpha = &alpha;
         _id = id;
+        _type = type;
+        _count = &count;
     }
     
     return self;
