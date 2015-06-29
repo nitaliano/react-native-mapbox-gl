@@ -32,6 +32,11 @@ var MapView = React.createClass({
   statics: {
     Mixin: MapMixins
   },
+  getInitialState() {
+    return {
+      userLocation: null
+    }
+  },
   _onChange(event: Event) {
     if (!this.props.onRegionChange) {
       return;
@@ -56,6 +61,25 @@ var MapView = React.createClass({
       return;
     }
     this.props.onUpdateUserLocation(event.nativeEvent.userLocation);
+    this.setState({userLocation: event.nativeEvent.userLocation });
+  },
+  geocode(query, proximity, callback) {
+    if (!query) return callback('No query');
+    var request = new XMLHttpRequest();
+    var url;
+
+    request.onreadystatechange = (e) => {
+      if (request.readyState !== 4) return;
+      if (request.status !== 200) return callback(request.status, request.responseText);
+
+      return callback(null, request.responseText);
+    };
+
+    if (!proximity || !this.state.userLocation) url = `http://api.tiles.mapbox.com/v4/geocode/mapbox.places/${query}.json?access_token=${this.props.accessToken}`;
+    if (proximity && this.state.userLocation) url = `http://api.tiles.mapbox.com/v4/geocode/mapbox.places/${query}.json?proximity=${this.state.userLocation.longitude},${this.state.userLocation.latitude}&access_token=${this.props.accessToken}`;
+
+    request.open('GET', url);
+    request.send();
   },
   propTypes: {
     showsUserLocation: React.PropTypes.bool,
