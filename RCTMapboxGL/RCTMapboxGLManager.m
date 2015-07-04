@@ -130,6 +130,16 @@ RCT_EXPORT_METHOD(removeAnnotation:(NSNumber *) reactTag
     }];
 }
 
+RCT_EXPORT_METHOD(emptyMemoryCache:(NSNumber *)reactTag)
+{
+    [_bridge.uiManager addUIBlock:^(RCTUIManager *uiManager, RCTSparseArray *viewRegistry) {
+        RCTMapboxGL *mapView = viewRegistry[reactTag];
+        if([mapView isKindOfClass:[RCTMapboxGL class]]) {
+            [mapView emptyMemoryCache];
+        }
+    }];
+}
+
 RCT_EXPORT_METHOD(addAnnotations:(NSNumber *)reactTag
                   annotations:(NSArray *) annotations)
 {
