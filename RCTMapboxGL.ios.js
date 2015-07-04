@@ -24,6 +24,9 @@ var MapMixins = {
   },
   removeAnnotation(mapRef, annotationInArray) {
     NativeModules.MapboxGLManager.removeAnnotation(React.findNodeHandle(this.refs[mapRef]), annotationInArray);
+  },
+  emptyMemoryCache(mapRef) {
+    NativeModules.MapboxGLManager.emptyMemoryCache(React.findNodeHandle(this.refs[mapRef]));
   }
 };
 

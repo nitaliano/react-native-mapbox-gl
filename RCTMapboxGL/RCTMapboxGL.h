@@ -38,6 +38,7 @@ extern NSString *const RCTMGLOnUpdateUserLocation;
 - (void)setCenterCoordinateZoomLevelAnimated:(CLLocationCoordinate2D)coordinates zoomLevel:(double)zoomLevel;
 - (void)selectAnnotationAnimated:(NSUInteger)annotationInArray;
 - (void)removeAnnotation:(NSUInteger)annotationInArray;
+- (void)emptyMemoryCache;
 
 @end
 

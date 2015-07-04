@@ -37,6 +37,8 @@ These methods require you to use `MapboxGLMap.Mixin` to access the methods. Each
 | `addAnnotations` | `mapViewRef`, `[{latitude: number, longitude: number, title: string, subtitle: string, id: string, rightCalloutAccessory: { url: string, height: int, width: int }}]` (array of objects) | Adds an annotation to the map without redrawing the map. Note, this will remove all previous annotations from the map.
 | `selectAnnotationAnimated` | `mapViewRef`, `annotationPlaceInArray` | Open the callout of the selected annotation. This method works with the current annotations on the map. `annotationPlaceInArray` starts at 0 and refers to the first annotation.
 | `removeAnnotation`  | `mapViewRef`, `annotationPlaceInArray` | Removes the selected annotation from the map. This method works with the current annotations on the map. `annotationPlaceInArray` starts at 0 and refers to the first annotation.
+| `emptyMemoryCache` | `mapViewRef` | Empties the in-memory tile cache.
+
 
 ## GL Styles
 

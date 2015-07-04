@@ -198,6 +198,11 @@ RCT_EXPORT_MODULE();
     [_map setCenterCoordinate:coordinates zoomLevel:zoomLevel animated:YES];
 }
 
+-(void)emptyMemoryCache
+{
+    [_map emptyMemoryCache];
+}
+
 - (void)mapView:(MGLMapView *)mapView didUpdateUserLocation:(MGLUserLocation *)userLocation;
 {
     NSDictionary *event = @{ @"target": self.reactTag,
