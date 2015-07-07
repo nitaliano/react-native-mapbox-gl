@@ -44,8 +44,8 @@
 @property (nonatomic) CLLocationCoordinate2D *coordinates;
 @property (nonatomic) NSString *fillColor;
 @property (nonatomic) NSString *strokeColor;
-@property (nonatomic) double *strokeWidth;
-@property (nonatomic) double *alpha;
+@property (nonatomic) double width;
+@property (nonatomic) double alpha;
 @property (nonatomic) NSString *type;
 @property (nonatomic) NSUInteger *count;
 
@@ -53,14 +53,14 @@
 
 + (instancetype)annotationWithLocationRightCallout:(CLLocationCoordinate2D)coordinate title:(NSString *)title subtitle:(NSString *)subtitle id:(NSString *)id rightCalloutAccessory:(UIButton *)rightCalloutAccessory;
 
-+ (instancetype)shapeAnnotation:(CLLocationCoordinate2D *)coordinates fillColor:(NSString *)fillColor strokeColor:(NSString *)strokeColor strokeWidth:(double)strokeWidth alpha:(double)alpha id:(NSString *)id type:(NSString *)type count:(NSUInteger)count;
++ (instancetype)shapeAnnotation:(CLLocationCoordinate2D *)coordinates fillColor:(NSString *)fillColor strokeColor:(NSString *)strokeColor width:(double)width alpha:(double)alpha id:(NSString *)id type:(NSString *)type count:(NSUInteger)count;
 
 
 - (instancetype)initWithLocation:(CLLocationCoordinate2D)coordinate title:(NSString *)title subtitle:(NSString *)subtitle id:(NSString *)id;
 
 - (instancetype)initWithLocationRightCallout:(CLLocationCoordinate2D)coordinate title:(NSString *)title subtitle:(NSString *)subtitle id:(NSString *)id rightCalloutAccessory:(UIButton *)rightCalloutAccessory;
 
-- (instancetype)initShapeAnnotation:(CLLocationCoordinate2D *)coordinates fillColor:(NSString *)fillColor strokeColor:(NSString *)strokeColor strokeWidth:(double)strokeWidth alpha:(double)alpha id:(NSString *)id type:(NSString *)type count:(NSUInteger)count;
+- (instancetype)initShapeAnnotation:(CLLocationCoordinate2D *)coordinates fillColor:(NSString *)fillColor strokeColor:(NSString *)strokeColor width:(double)width alpha:(double)alpha id:(NSString *)id type:(NSString *)type count:(NSUInteger)count;
 
 
 @end
