@@ -1,8 +1,7 @@
 'use strict';
 
 var React = require('react-native');
-var requireNativeComponent = require('requireNativeComponent');
-var { NativeModules } = React;
+var { NativeModules, requireNativeComponent } = React;
 
 var MapMixins = {
   setDirectionAnimated(mapRef, heading) {
@@ -32,30 +31,20 @@ var MapView = React.createClass({
   statics: {
     Mixin: MapMixins
   },
-  _onChange(event: Event) {
-    if (!this.props.onRegionChange) {
-      return;
-    }
-    this.props.onRegionChange(event.nativeEvent.region);
-    this.props.onRegionWillChange(event.nativeEvent.region);
+  _onRegionChange(event: Event) {
+    if (this.props.onRegionChange) this.props.onRegionChange(event.nativeEvent.src);
+  },
+  _onRegionWillChange(event: Event) {
+    if (this.props.onRegionWillChange) this.props.onRegionWillChange(event.nativeEvent.src);
   },
   _onOpenAnnotation(event: Event) {
-    if (!this.props.onOpenAnnotation) {
-      return;
-    }
-    this.props.onOpenAnnotation(event.nativeEvent.annotation);
+    if (this.props.onOpenAnnotation) this.props.onOpenAnnotation(event.nativeEvent.src);
   },
   _onRightAnnotationTapped(event: Event) {
-    if (!this.props.onRightAnnotationTapped) {
-      return;
-    }
-    this.props.onRightAnnotationTapped(event.nativeEvent.annotation);
+    if (this.props.onRightAnnotationTapped) this.props.onRightAnnotationTapped(event.nativeEvent.src);
   },
   _onUpdateUserLocation(event: Event) {
-    if (!this.props.onUpdateUserLocation) {
-      return;
-    }
-    this.props.onUpdateUserLocation(event.nativeEvent.userLocation);
+    if (this.props.onUpdateUserLocation) this.props.onUpdateUserLocation(event.nativeEvent.src);
   },
   propTypes: {
     showsUserLocation: React.PropTypes.bool,
@@ -83,7 +72,7 @@ var MapView = React.createClass({
       rightCalloutAccessory: React.PropTypes.object({
         height: React.PropTypes.number,
         width: React.PropTypes.number,
-        url: React.PropTypes.string,
+        url: React.PropTypes.string
       })
     })),
     onRegionChange: React.PropTypes.func,
@@ -92,21 +81,20 @@ var MapView = React.createClass({
     onUpdateUserLocation: React.PropTypes.func,
     onRightAnnotationTapped: React.PropTypes.func
   },
+  getDefaultProps() {
+    return {
+      styleURL: 'asset://styles/mapbox-streets-v7.json'
+    };
+  },
 
   render: function() {
-
-    var props = this.props;
-
-    if (!this.props.styleURL) {
-      props.styleURL = 'asset://styles/mapbox-streets-v7.json';
-    }
-
-    return <MapboxGLView
-      {...props}
-      onChange={this._onChange}
-      onBlur={this._onOpenAnnotation}
-      topTap={this._onRightAnnotationTapped}
-      onLoadingFinish={this._onUpdateUserLocation} />;
+    return (<MapboxGLView
+      {...this.props}
+      onRegionChange={this._onRegionChange}
+      onRegionWillChange={this._onRegionWillChange}
+      onOpenAnnotation={this._onOpenAnnotation}
+      onRightAnnotationTapped={this._onRightAnnotationTapped}
+      onUpdateUserLocation={this._onUpdateUserLocation} />);
   }
 });
 

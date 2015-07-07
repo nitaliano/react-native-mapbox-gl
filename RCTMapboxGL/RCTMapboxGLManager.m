@@ -32,6 +32,27 @@ RCT_EXPORT_MODULE();
     return _bridge.uiManager.methodQueue;
 }
 
+- (NSDictionary *)customDirectEventTypes
+{
+    return @{
+             RCTMGLOnRegionChange: @{
+                     @"registrationName": @"onRegionChange"
+                     },
+             RCTMGLOnRegionWillChange: @{
+                     @"registrationName": @"onRegionWillChange"
+                     },
+             RCTMGLOnOpenAnnotation: @{
+                     @"registrationName": @"onOpenAnnotation"
+                     },
+             RCTMGLOnRightAnnotationTapped: @{
+                     @"registrationName": @"onRightAnnotationTapped"
+                     },
+             RCTMGLOnUpdateUserLocation: @{
+                     @"registrationName": @"onUpdateUserLocation"
+                     }
+             };
+}
+
 RCT_EXPORT_VIEW_PROPERTY(accessToken, NSString);
 RCT_EXPORT_VIEW_PROPERTY(centerCoordinate, CLLocationCoordinate2D);
 RCT_EXPORT_VIEW_PROPERTY(clipsToBounds, BOOL);
@@ -238,7 +259,7 @@ RCT_CUSTOM_VIEW_PROPERTY(annotations, CLLocationCoordinate2D, RCTMapboxGL) {
         NSMutableArray* newAnnotations = [NSMutableArray array];
         id anObject;
         NSEnumerator *enumerator = [json objectEnumerator];
-
+        
         while (anObject = [enumerator nextObject]) {
             
             NSString *title = @"";
@@ -289,10 +310,10 @@ RCT_CUSTOM_VIEW_PROPERTY(annotations, CLLocationCoordinate2D, RCTMapboxGL) {
                     UIButton *imageButton = [UIButton buttonWithType:UIButtonTypeCustom];
                     imageButton.frame = CGRectMake(0, 0, height, width);
                     [imageButton setImage:image forState:UIControlStateNormal];
-                    
+
                     RCTMGLAnnotation *pin = [[RCTMGLAnnotation alloc] initWithLocationRightCallout:coordinate title:title subtitle:subtitle id:id rightCalloutAccessory:imageButton];
                     [newAnnotations addObject:pin];
-
+                    
                 } else {
                     RCTMGLAnnotation *pin = [[RCTMGLAnnotation alloc] initWithLocation:coordinate title:title subtitle:subtitle id:id];
                     [newAnnotations addObject:pin];
