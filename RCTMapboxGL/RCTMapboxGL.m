@@ -11,7 +11,6 @@
 #import "RCTEventDispatcher.h"
 #import "UIView+React.h"
 #import "RCTLog.h"
-#import <objc/runtime.h>
 
 @implementation RCTMapboxGL {
     /* Required to publish events */
