@@ -218,7 +218,7 @@ RCT_EXPORT_METHOD(addAnnotations:(NSNumber *)reactTag
                             }
                         }
                         
-                        RCTMGLAnnotation *shape = [[RCTMGLAnnotation alloc] initShapeAnnotation:coord fillColor:@"#ddd" strokeColor:@"#ddd" width:1 alpha:1 id:id type:type count:(NSUInteger)[coordinates count]];
+                        RCTMGLAnnotationPolyline *shape = [[RCTMGLAnnotationPolyline alloc] initPolylineAnnotation:coord strokeColor:@"#ddd" width:1 alpha:1 id:id type:type count:(NSUInteger)[coordinates count]];
                         
                         [newAnnotations addObject:shape];
                         
@@ -240,7 +240,7 @@ RCT_EXPORT_METHOD(addAnnotations:(NSNumber *)reactTag
                             }
                         }
                         
-                        RCTMGLAnnotation *shape = [[RCTMGLAnnotation alloc] initShapeAnnotation:coord fillColor:@"#ddd" strokeColor:@"#ddd" width:1 alpha:1 id:id type:type count:(NSUInteger)[coordinates count]];
+                        RCTMGLAnnotationPolyline *shape = [[RCTMGLAnnotationPolyline alloc] initPolylineAnnotation:coord strokeColor:@"#ddd" width:1 alpha:1 id:id type:type count:(NSUInteger)[coordinates count]];
                         
                         [newAnnotations addObject:shape];
                         
@@ -336,7 +336,7 @@ RCT_CUSTOM_VIEW_PROPERTY(annotations, CLLocationCoordinate2D, RCTMapboxGL) {
                     }
                 }
                 
-                RCTMGLAnnotation *shape = [[RCTMGLAnnotation alloc] initShapeAnnotation:coord fillColor:@"#ddd" strokeColor:@"#ddd" width:1 alpha:1 id:id type:type count:(NSUInteger)[coordinates count]];
+                RCTMGLAnnotationPolyline *shape = [[RCTMGLAnnotationPolyline alloc] initPolylineAnnotation:coord strokeColor:@"#ddd" width:10.0 alpha:1 id:id type:type count:(NSUInteger)[coordinates count]];
                 
                 [newAnnotations addObject:shape];
                 
@@ -358,7 +358,7 @@ RCT_CUSTOM_VIEW_PROPERTY(annotations, CLLocationCoordinate2D, RCTMapboxGL) {
                     }
                 }
                 
-                RCTMGLAnnotation *shape = [[RCTMGLAnnotation alloc] initShapeAnnotation:coord fillColor:@"#ddd" strokeColor:@"#ddd" width:1 alpha:1 id:id type:type count:(NSUInteger)[coordinates count]];
+                RCTMGLAnnotationPolyline *shape = [[RCTMGLAnnotationPolyline alloc] initPolylineAnnotation:coord strokeColor:@"#ddd" width:1 alpha:1 id:id type:type count:(NSUInteger)[coordinates count]];
                 
                 [newAnnotations addObject:shape];
                 
