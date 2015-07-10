@@ -43,10 +43,14 @@ extern NSString *const RCTMGLOnUpdateUserLocation;
 
 @end
 
+
+
 @interface RCTMGLAnnotation : NSObject <MGLAnnotation>
 
 @property (nonatomic, strong) UIButton *rightCalloutAccessory;
 @property (nonatomic) NSString *id;
+@property (nonatomic) CLLocationCoordinate2D *coordinates;
+@property (nonatomic) NSString *type;
 
 + (instancetype)annotationWithLocation:(CLLocationCoordinate2D)coordinate title:(NSString *)title subtitle:(NSString *)subtitle id:(NSString *)id;
 
@@ -56,5 +60,21 @@ extern NSString *const RCTMGLOnUpdateUserLocation;
 
 - (instancetype)initWithLocationRightCallout:(CLLocationCoordinate2D)coordinate title:(NSString *)title subtitle:(NSString *)subtitle id:(NSString *)id rightCalloutAccessory:(UIButton *)rightCalloutAccessory;
 
+
+@end
+
+@interface RCTMGLAnnotationPolyline : MGLPolyline <MGLOverlay>
+
+@property (nonatomic) NSString *id;
+@property (nonatomic) CLLocationCoordinate2D *coordinates;
+@property (nonatomic) NSString *strokeColor;
+@property (nonatomic) double width;
+@property (nonatomic) double alpha;
+@property (nonatomic) NSString *type;
+@property (nonatomic) NSUInteger count;
+
++ (instancetype)polylineAnnotation:(CLLocationCoordinate2D *)coordinates strokeColor:(NSString *)strokeColor width:(double)width alpha:(double)alpha id:(NSString *)id type:(NSString *)type count:(NSUInteger)count;
+
+- (instancetype)initPolylineAnnotation:(CLLocationCoordinate2D *)coordinates strokeColor:(NSString *)strokeColor width:(double)width alpha:(double)alpha id:(NSString *)id type:(NSString *)type count:(NSUInteger)count;
 
 @end

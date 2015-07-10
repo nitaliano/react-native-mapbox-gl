@@ -10,7 +10,7 @@
 | `zoomEnabled` | `bool`  |  Optional | `true`  | Whether the map zoom level can be changed |
 |`showsUserLocation` | `bool` | Optional | `false` | Whether the user's location is shown on the map. Note - the map will not zoom to their location.|
 | `styleURL` | `string` | Optional | Mapbox Streets |  A Mapbox GL style sheet. Defaults to `mapbox-streets`. More styles [can be viewed here](https://www.mapbox.com/mapbox-gl-styles).
-| `annotations` | `array` | Optional | NA |  An array of annotation objects. See [annotation detail](https://github.com/bsudekum/react-native-mapbox-gl/blob/master/API.md#annotations)
+| `annotations` | `array` | Optional | NA |  An array of annotation objects. See [annotation object](API.md#annotation-object)
 | `direction`  | `double` | Optional | `0` | Heading of the map in degrees where 0 is north and 180 is south |
 | `debugActive`  | `bool` | Optional | `false` | Turns on debug mode. |
 | `style`  | flexbox `view` | Optional | NA | Styles the actual map view container |
@@ -36,7 +36,7 @@ These methods require you to use `MapboxGLMap.Mixin` to access the methods. Each
 | `setZoomLevelAnimated` | `mapViewRef`, `zoomLevel` | Zooms the map to a new zoom level
 | `setCenterCoordinateAnimated` | `mapViewRef`, `latitude`, `longitude` | Moves the map to a new coordinate. Note, the zoom level stay at the current zoom level
 | `setCenterCoordinateZoomLevelAnimated` | `mapViewRef`, `latitude`, `longitude`, `zoomLevel` | Moves the map to a new coordinate and zoom level
-| `addAnnotations` | `mapViewRef`, `[{latitude: number, longitude: number, title: string, subtitle: string, id: string, rightCalloutAccessory: { url: string, height: int, width: int }}]` (array of objects) | Adds an annotation to the map without redrawing the map. Note, this will remove all previous annotations from the map.
+| `addAnnotations` | `mapViewRef`, [annotation object](API.md#annotation-object) | Adds an annotation to the map without redrawing the map. Note, this will remove all previous annotations from the map.
 | `selectAnnotationAnimated` | `mapViewRef`, `annotationPlaceInArray` | Open the callout of the selected annotation. This method works with the current annotations on the map. `annotationPlaceInArray` starts at 0 and refers to the first annotation.
 | `removeAnnotation`  | `mapViewRef`, `annotationPlaceInArray` | Removes the selected annotation from the map. This method works with the current annotations on the map. `annotationPlaceInArray` starts at 0 and refers to the first annotation.
 
@@ -49,11 +49,10 @@ You can change the `styleURL` to any valid GL stylesheet, here are a few:
 * `asset://styles/emerald-v7.json`
 * `asset://styles/mapbox-streets-v7.json`
 
-## Annotations
+## Annotations object
 ```json
 [{
-  "latitude": "required",
-  "longitude":  "required",
+  "coordinates": "Array of coordinates, lat lng",
   "title": "optional string",
   "subtitle": "optional string",
   "id": "optional string, unique identifier.",
@@ -61,16 +60,20 @@ You can change the `styleURL` to any valid GL stylesheet, here are a few:
     "url": "Optional. Either remote image or specify via 'image!yourImage.png'",
     "height": "required if url specified",
     "width": "required if url specified",
-  }
+  },
+  "fillColor": "optional hex color value",
+  "strokeColor": "optional hex color value",
+  "strokeWidth": "optional number width of linestring annotation",
+  "alpha": "optional number. Controls opacity of polygons and polylines.",
+  "type": "Required: point, polyline, polygon"
 }]
 ```
 **For adding local images via `image!yourImage.png` see [adding static resources to your app using Images.xcassets  docs](https://facebook.github.io/react-native/docs/image.html#adding-static-resources-to-your-app-using-images-xcassets)**.
 
-#### Example
+#### Annotation example
 ```json
 annotations: [{
-  "latitude": 40.72052634,
-  "longitude":  -73.94686958312988,
+  "coordinates": [40.72052634, -73.94686958312988],
   "title": "This is a title",
   "subtitle": "this is a subtitle",
   "id": "foobar1234",
@@ -80,8 +83,7 @@ annotations: [{
     "width": 30
   }
 }, {
-  "latitude": 40.72052634,
-  "longitude":  -73.95686958312988,
+  "coordinates": [40.72052634, -73.95686958312988],
   "title": "This is another title",
   "subtitle": "this is a subtitle",
   "id": "010101",
@@ -91,9 +93,21 @@ annotations: [{
     "width": 30
   }
 }, {
-  "latitude": 40.82052634,
-  "longitude":  -73.85686958312988,
+  "coordinates": [40.82052634, -73.85686958312988],
   "title": "This is another title",
   "subtitle": "this is a subtitle"
-}]
+}, {
+  "coordinates": [[40.749857912194386, -73.96820068359375], [40.741924698522055,-73.9735221862793], [40.735681504432264,-73.97523880004883], [40.7315190495212,-73.97438049316406], [40.729177554196376,-73.97180557250975], [40.72345355209305,-73.97438049316406], [40.719290332250544,-73.97455215454102], [40.71369559554873,-73.97729873657227], [40.71200407096382,-73.97850036621094], [40.71031250340588,-73.98691177368163], [40.71031250340588,-73.99154663085938]],
+  "type": "linestring",
+  "strokeColor": "#ddd",
+  "strokeWidth": 10,
+  "alpha": 1,
+  "id": "zap2222"
+}, {
+  "coordinates": [[40.726835976477936,-74.02158737182617],[40.721892375167045,-74.04321670532227], [40.71382571104455,-74.0397834777832], [40.71382571104455,-74.01369094848633], [40.72124187397379,-73.99892807006836], [40.742184818893335,-73.99892807006836], [40.726835976477936,-74.02158737182617]],
+  "type": "polygon",
+  "fillColor": "#999",
+  "alpha": 0.5,
+  "id": "neatID"
+}];
 ```
