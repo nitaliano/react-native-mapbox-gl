@@ -99,8 +99,19 @@ RCT_EXPORT_MODULE();
     [self updateMap];
     [self addSubview:_map];
     [self layoutSubviews];
+
+    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(onSuspend:) name:UIApplicationDidEnterBackgroundNotification object:nil];
+    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(onResume:) name:UIApplicationWillEnterForegroundNotification object:nil];
 }
 
+- (void) onSuspend:(NSNotification*)notification
+{
+    _map.showsUserLocation = NO;
+}
+- (void) onResume:(NSNotification*)notification
+{
+    _map.showsUserLocation = YES;
+}
 
 - (void)layoutSubviews
 {
