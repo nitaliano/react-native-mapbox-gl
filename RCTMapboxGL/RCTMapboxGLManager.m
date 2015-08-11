@@ -64,7 +64,6 @@ RCT_EXPORT_VIEW_PROPERTY(zoomEnabled, BOOL);
 RCT_EXPORT_VIEW_PROPERTY(showsUserLocation, BOOL);
 RCT_EXPORT_VIEW_PROPERTY(styleURL, NSURL);
 RCT_EXPORT_VIEW_PROPERTY(zoomLevel, double);
-//RCT_EXPORT_VIEW_PROPERTY(updateLocationInBackground, BOOL);
 
 RCT_EXPORT_METHOD(setZoomLevelAnimated:(NSNumber *)reactTag
                   zoomLevel:(double)zoomLevel)
