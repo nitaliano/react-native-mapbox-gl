@@ -51,6 +51,7 @@ RCT_EXPORT_MODULE();
         _eventDispatcher = eventDispatcher;
         _clipsToBounds = YES;
         _finishedLoading = NO;
+        _updateLocationInBackground = YES;
     }
     
     return self;
@@ -99,18 +100,23 @@ RCT_EXPORT_MODULE();
     [self updateMap];
     [self addSubview:_map];
     [self layoutSubviews];
-
+    
+    // Listen to pause/resume events in order to toggle #updateLocationInBackground
     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(onSuspend:) name:UIApplicationDidEnterBackgroundNotification object:nil];
     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(onResume:) name:UIApplicationWillEnterForegroundNotification object:nil];
 }
 
 - (void) onSuspend:(NSNotification*)notification
 {
-    _map.showsUserLocation = NO;
+    if (!_updateLocationInBackground) {
+        _map.showsUserLocation = NO;
+    }
 }
 - (void) onResume:(NSNotification*)notification
 {
-    _map.showsUserLocation = YES;
+    if (_showsUserLocation) {
+        _map.showsUserLocation = YES;
+    }
 }
 
 - (void)layoutSubviews
@@ -237,6 +243,11 @@ RCT_EXPORT_MODULE();
                                         @"isUpdating": [NSNumber numberWithBool:userLocation.isUpdating]} };
     
     [_eventDispatcher sendInputEventWithName:RCTMGLOnUpdateUserLocation body:event];
+}
+
+- (void)setUpdateLocationInBackground:(BOOL)value
+{
+    _updateLocationInBackground = value;
 }
 
 

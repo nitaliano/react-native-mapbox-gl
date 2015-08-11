@@ -101,6 +101,7 @@ var Example = React.createClass({
           scrollEnabled={true}
           zoomEnabled={true}
           showsUserLocation={true}
+          updateLocationInBackground={true}
           ref={mapRef}
           accessToken={'your-mapbox.com-access-token'}
           styleURL={'asset://styles/mapbox-streets-v7.json'}
