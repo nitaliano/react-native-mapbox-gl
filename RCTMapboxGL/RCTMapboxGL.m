@@ -178,9 +178,17 @@ RCT_EXPORT_MODULE();
 - (void)setShowsUserLocation:(BOOL)showsUserLocation
 {
     _showsUserLocation = showsUserLocation;
-    [self updateMap];
+    
+    if (_map) {
+        _map.showsUserLocation = _showsUserLocation;
+    }
 }
-
+- (void)setUserTrackingMode:(MGLUserTrackingMode)value
+{
+    if (_map) {
+        _map.userTrackingMode = value;
+    }
+}
 - (void)setClipsToBounds:(BOOL)clipsToBounds
 {
     _clipsToBounds = clipsToBounds;

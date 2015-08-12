@@ -35,6 +35,7 @@ extern NSString *const RCTMGLOnUpdateUserLocation;
 - (void)setZoomEnabled:(BOOL)zoomEnabled;
 - (void)setShowsUserLocation:(BOOL)showsUserLocation;
 - (void)setUpdateLocationInBackground:(BOOL)value;
+- (void)setUserTrackingMode:(MGLUserTrackingMode)trackingMode;
 - (void)setStyleURL:(NSURL *)styleURL;
 - (void)setZoomLevel:(double)zoomLevel;
 - (void)setZoomLevelAnimated:(double)zoomLevel;

@@ -4,6 +4,9 @@ var React = require('react-native');
 var { NativeModules, requireNativeComponent } = React;
 
 var MapMixins = {
+  _findHandle(mapRef) {
+    return React.findNodeHandle(this.refs[mapRef]);
+  },
   setDirectionAnimated(mapRef, heading) {
     NativeModules.MapboxGLManager.setDirectionAnimated(React.findNodeHandle(this.refs[mapRef]), heading);
   },
@@ -11,7 +14,7 @@ var MapMixins = {
     NativeModules.MapboxGLManager.setZoomLevelAnimated(React.findNodeHandle(this.refs[mapRef]), zoomLevel);
   },
   setCenterCoordinateAnimated(mapRef, latitude, longitude) {
-    NativeModules.MapboxGLManager.setCenterCoordinateAnimated(React.findNodeHandle(this.refs[mapRef]), latitude, longitude);
+    NativeModules.MapboxGLManager.setCenterCoordinateAnimated(this._findHandle(mapRef), latitude, longitude);
   },
   setCenterCoordinateZoomLevelAnimated(mapRef, latitude, longitude, zoomLevel) {
     NativeModules.MapboxGLManager.setCenterCoordinateZoomLevelAnimated(React.findNodeHandle(this.refs[mapRef]), latitude, longitude, zoomLevel);
@@ -24,6 +27,12 @@ var MapMixins = {
   },
   removeAnnotation(mapRef, annotationInArray) {
     NativeModules.MapboxGLManager.removeAnnotation(React.findNodeHandle(this.refs[mapRef]), annotationInArray);
+  },
+  setShowsUserLocation(mapRef, value) {
+    NativeModules.MapboxGLManager.setShowsUserLocation(this._findHandle(mapRef), value);
+  },
+  setUserTrackingMode(mapRef, value) {
+    NativeModules.MapboxGLManager.setUserTrackingMode(this._findHandle(mapRef), value);
   }
 };
 
