@@ -20,6 +20,8 @@ extern NSString *const RCTMGLOnUpdateUserLocation;
 
 @interface RCTMapboxGL : RCTView <MGLMapViewDelegate, RCTBridgeModule>
 
+@property (nonatomic) BOOL updateLocationInBackground;
+
 - (instancetype)initWithEventDispatcher:(RCTEventDispatcher *)eventDispatcher;
 
 - (void)setAccessToken:(NSString *)accessToken;
@@ -32,6 +34,8 @@ extern NSString *const RCTMGLOnUpdateUserLocation;
 - (void)setScrollEnabled:(BOOL)scrollEnabled;
 - (void)setZoomEnabled:(BOOL)zoomEnabled;
 - (void)setShowsUserLocation:(BOOL)showsUserLocation;
+- (void)setUpdateLocationInBackground:(BOOL)value;
+- (void)setUserTrackingMode:(MGLUserTrackingMode)trackingMode;
 - (void)setStyleURL:(NSURL *)styleURL;
 - (void)setZoomLevel:(double)zoomLevel;
 - (void)setZoomLevelAnimated:(double)zoomLevel;

@@ -51,6 +51,7 @@ RCT_EXPORT_MODULE();
         _eventDispatcher = eventDispatcher;
         _clipsToBounds = YES;
         _finishedLoading = NO;
+        _updateLocationInBackground = YES;
     }
     
     return self;
@@ -99,8 +100,24 @@ RCT_EXPORT_MODULE();
     [self updateMap];
     [self addSubview:_map];
     [self layoutSubviews];
+    
+    // Listen to pause/resume events in order to toggle #updateLocationInBackground
+    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(onSuspend:) name:UIApplicationDidEnterBackgroundNotification object:nil];
+    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(onResume:) name:UIApplicationWillEnterForegroundNotification object:nil];
 }
 
+- (void) onSuspend:(NSNotification*)notification
+{
+    if (!_updateLocationInBackground) {
+        _map.showsUserLocation = NO;
+    }
+}
+- (void) onResume:(NSNotification*)notification
+{
+    if (_showsUserLocation) {
+        _map.showsUserLocation = YES;
+    }
+}
 
 - (void)layoutSubviews
 {
@@ -161,9 +178,17 @@ RCT_EXPORT_MODULE();
 - (void)setShowsUserLocation:(BOOL)showsUserLocation
 {
     _showsUserLocation = showsUserLocation;
-    [self updateMap];
+    
+    if (_map) {
+        _map.showsUserLocation = _showsUserLocation;
+    }
 }
-
+- (void)setUserTrackingMode:(MGLUserTrackingMode)value
+{
+    if (_map) {
+        _map.userTrackingMode = value;
+    }
+}
 - (void)setClipsToBounds:(BOOL)clipsToBounds
 {
     _clipsToBounds = clipsToBounds;
@@ -226,6 +251,11 @@ RCT_EXPORT_MODULE();
                                         @"isUpdating": [NSNumber numberWithBool:userLocation.isUpdating]} };
     
     [_eventDispatcher sendInputEventWithName:RCTMGLOnUpdateUserLocation body:event];
+}
+
+- (void)setUpdateLocationInBackground:(BOOL)value
+{
+    _updateLocationInBackground = value;
 }
 
 
@@ -404,5 +434,11 @@ RCT_EXPORT_MODULE();
     
     return self;
 }
+
+- (void)dealloc
+{
+    [[NSNotificationCenter defaultCenter] removeObserver:self];
+}
+
 
 @end

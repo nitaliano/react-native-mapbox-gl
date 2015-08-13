@@ -64,6 +64,27 @@ RCT_EXPORT_VIEW_PROPERTY(zoomEnabled, BOOL);
 RCT_EXPORT_VIEW_PROPERTY(showsUserLocation, BOOL);
 RCT_EXPORT_VIEW_PROPERTY(styleURL, NSURL);
 RCT_EXPORT_VIEW_PROPERTY(zoomLevel, double);
+
+
+RCT_EXPORT_METHOD(setShowsUserLocation:(NSNumber *)reactTag value:(BOOL)value)
+{
+    [_bridge.uiManager addUIBlock:^(RCTUIManager *uiManager, RCTSparseArray *viewRegistry) {
+        RCTMapboxGL *mapView = viewRegistry[reactTag];
+        if([mapView isKindOfClass:[RCTMapboxGL class]]) {
+            [mapView setShowsUserLocation:value];
+        }
+    }];
+}
+RCT_EXPORT_METHOD(setUserTrackingMode:(NSNumber *)reactTag value:(int)value)
+{
+    [_bridge.uiManager addUIBlock:^(RCTUIManager *uiManager, RCTSparseArray *viewRegistry) {
+        RCTMapboxGL *mapView = viewRegistry[reactTag];
+        if([mapView isKindOfClass:[RCTMapboxGL class]]) {
+            [mapView setUserTrackingMode:value];
+        }
+    }];
+}
+
 RCT_EXPORT_METHOD(setZoomLevelAnimated:(NSNumber *)reactTag
                   zoomLevel:(double)zoomLevel)
 {
@@ -230,6 +251,9 @@ RCT_EXPORT_METHOD(addAnnotations:(NSNumber *)reactTag
     }];
 }
 
+RCT_CUSTOM_VIEW_PROPERTY(updateLocationInBackground, BOOL, RCTMapboxGL) {
+    view.updateLocationInBackground = [json boolValue];
+}
 RCT_CUSTOM_VIEW_PROPERTY(annotations, CLLocationCoordinate2D, RCTMapboxGL) {
     if ([json isKindOfClass:[NSArray class]]) {
         NSMutableArray* pins = [NSMutableArray array];
