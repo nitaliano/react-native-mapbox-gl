@@ -8,25 +8,25 @@ var MapMixins = {
     return React.findNodeHandle(this.refs[mapRef]);
   },
   setDirectionAnimated(mapRef, heading) {
-    NativeModules.MapboxGLManager.setDirectionAnimated(React.findNodeHandle(this.refs[mapRef]), heading);
+    NativeModules.MapboxGLManager.setDirectionAnimated(this._findHandle(mapRef), heading);
   },
   setZoomLevelAnimated(mapRef, zoomLevel) {
-    NativeModules.MapboxGLManager.setZoomLevelAnimated(React.findNodeHandle(this.refs[mapRef]), zoomLevel);
+    NativeModules.MapboxGLManager.setZoomLevelAnimated(this._findHandle(mapRef), zoomLevel);
   },
   setCenterCoordinateAnimated(mapRef, latitude, longitude) {
     NativeModules.MapboxGLManager.setCenterCoordinateAnimated(this._findHandle(mapRef), latitude, longitude);
   },
   setCenterCoordinateZoomLevelAnimated(mapRef, latitude, longitude, zoomLevel) {
-    NativeModules.MapboxGLManager.setCenterCoordinateZoomLevelAnimated(React.findNodeHandle(this.refs[mapRef]), latitude, longitude, zoomLevel);
+    NativeModules.MapboxGLManager.setCenterCoordinateZoomLevelAnimated(this._findHandle(mapRef), latitude, longitude, zoomLevel);
   },
   addAnnotations(mapRef, annotations) {
-    NativeModules.MapboxGLManager.addAnnotations(React.findNodeHandle(this.refs[mapRef]), annotations);
+    NativeModules.MapboxGLManager.addAnnotations(this._findHandle(mapRef), annotations);
   },
   selectAnnotationAnimated(mapRef, annotationInArray) {
-    NativeModules.MapboxGLManager.selectAnnotationAnimated(React.findNodeHandle(this.refs[mapRef]), annotationInArray);
+    NativeModules.MapboxGLManager.selectAnnotationAnimated(this._findHandle(mapRef), annotationInArray);
   },
   removeAnnotation(mapRef, annotationInArray) {
-    NativeModules.MapboxGLManager.removeAnnotation(React.findNodeHandle(this.refs[mapRef]), annotationInArray);
+    NativeModules.MapboxGLManager.removeAnnotation(this._findHandle(mapRef), annotationInArray);
   },
   setShowsUserLocation(mapRef, value) {
     NativeModules.MapboxGLManager.setShowsUserLocation(this._findHandle(mapRef), value);
