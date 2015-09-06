@@ -17,7 +17,7 @@
 - (instancetype)initWithEventDispatcher:(RCTEventDispatcher *)eventDispatcher;
 
 - (void)setAccessToken:(NSString *)accessToken;
-- (void)setAnnotations:(NSArray *)annotations;
+- (void)setAnnotations:(NSMutableArray *)annotations;
 - (void)setCenterCoordinate:(CLLocationCoordinate2D)centerCoordinate;
 - (void)setClipsToBounds:(BOOL)clipsToBounds;
 - (void)setDebugActive:(BOOL)debugActive;
