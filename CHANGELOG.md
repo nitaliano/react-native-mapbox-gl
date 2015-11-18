@@ -1,3 +1,13 @@
+# v1.2.0
+
+* [iOS] Adds optional pod installation
+* [iOS] If `showsUserLocation` is `false` the Mapbox layer will no longer require location permissions
+* [iOS] Fixed a bug where icons would overwrite other icons
+* [iOS] Minimum deployment level set to 7.0
+* [iOS] Fixed a bug where when returning to map/rotating the UI, markers would disappear
+* [iOS] An empty popup will no longer be shown when there is no title and text
+* [Android] Upgrades to react-native v0.14.x
+
 # v1.1.0
 
 * Fixed a regression in the `Header Search Paths`
