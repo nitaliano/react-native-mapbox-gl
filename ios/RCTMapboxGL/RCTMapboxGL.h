@@ -22,7 +22,7 @@
 - (void)setClipsToBounds:(BOOL)clipsToBounds;
 - (void)setDebugActive:(BOOL)debugActive;
 - (void)setDirection:(double)direction;
-- (void)setRotateEnabled:(BOOL)rotateEnabled;
+- (void)setRotationEnabled:(BOOL)rotateEnabled;
 - (void)setScrollEnabled:(BOOL)scrollEnabled;
 - (void)setZoomEnabled:(BOOL)zoomEnabled;
 - (void)setShowsUserLocation:(BOOL)showsUserLocation;

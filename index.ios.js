@@ -71,7 +71,7 @@ var MapView = React.createClass({
   },
   propTypes: {
     showsUserLocation: React.PropTypes.bool,
-    rotateEnabled: React.PropTypes.bool,
+    rotationEnabled: React.PropTypes.bool,
     scrollEnabled: React.PropTypes.bool,
     zoomEnabled: React.PropTypes.bool,
     accessToken: React.PropTypes.string.isRequired,
