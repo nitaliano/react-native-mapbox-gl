@@ -131,7 +131,7 @@ var MapExample = React.createClass({
         <Mapbox
           style={styles.map}
           direction={0}
-          rotateEnabled={true}
+          rotationEnabled={true}
           scrollEnabled={true}
           zoomEnabled={true}
           showsUserLocation={true}
