@@ -517,6 +517,26 @@ RCT_EXPORT_MODULE();
     return color;
 }
 
+- (NSDictionary*)getBounds{
+    MGLCoordinateBounds mapRect = _map.visibleCoordinateBounds;
+    NSNumber *swlat = [NSNumber numberWithDouble:mapRect.sw.latitude];
+    NSNumber *swlng = [NSNumber numberWithDouble:mapRect.sw.longitude];
+    NSNumber *nelat = [NSNumber numberWithDouble:mapRect.ne.latitude];
+    NSNumber *nelng = [NSNumber numberWithDouble:mapRect.ne.longitude];
+    
+    NSDictionary *bounds = @{
+                             @"sw": @{
+                                     @"lat": [swlat stringValue],
+                                     @"lng": [swlng stringValue]
+                                     },
+                             @"ne": @{
+                                     @"lat": [nelat stringValue],
+                                     @"lng": [nelng stringValue]
+                                     }
+                             };
+    return bounds;
+}
+
 @end
 
 

@@ -664,4 +664,15 @@ RCT_CUSTOM_VIEW_PROPERTY(annotations, CLLocationCoordinate2D, RCTMapboxGL) {
     }
 }
 
+RCT_EXPORT_METHOD(getBounds:(nonnull NSNumber *) reactTag callback:(RCTResponseSenderBlock)callback)
+{
+    [_bridge.uiManager addUIBlock:^(RCTUIManager *uiManager, NSDictionary<NSNumber *, RCTMapboxGL *> *viewRegistry) {
+        RCTMapboxGL *mapView = viewRegistry[reactTag];
+        if ([mapView isKindOfClass:[RCTMapboxGL class]]) {
+            NSDictionary *bounds = [mapView getBounds];
+            callback(@[bounds]);
+        }
+    }];
+}
+
 @end
