@@ -98,6 +98,16 @@ public class ReactNativeMapboxGLModule extends ReactContextBaseJavaModule {
     }
 
     @ReactMethod
+    public void updateAnnotation(int mapRef, ReadableMap annotation) {
+        aPackage.getManager().updateAnnotation(aPackage.getManager().getMapView(), annotation);
+    }
+
+    @ReactMethod
+    public void removeAnnotation(int mapRef, String selectedIdentifier) {
+        aPackage.getManager().removeAnnotation(aPackage.getManager().getMapView(), selectedIdentifier);
+    }
+
+    @ReactMethod
     public void removeAllAnnotations(int mapRef) {
         aPackage.getManager().removeAllAnnotations(aPackage.getManager().getMapView(), true);
     }
