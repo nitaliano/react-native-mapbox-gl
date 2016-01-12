@@ -38,6 +38,8 @@ Each method also requires you to pass in a string as the first argument which is
 | `setCenterCoordinateAnimated` | `mapViewRef`, `latitude`, `longitude` | Moves the map to a new coordinate. Note, the zoom level stay at the current zoom level
 | `setCenterCoordinateZoomLevelAnimated` | `mapViewRef`, `latitude`, `longitude`, `zoomLevel` | Moves the map to a new coordinate and zoom level
 | `addAnnotations` | `mapViewRef`, `` (array of annotation objects, see [#annotations](https://github.com/bsudekum/react-native-mapbox-gl/blob/master/android/API.md#annotations)) | Adds annotation(s) to the map without redrawing the map. Note, this will remove all previous annotations from the map.
+| `updateAnnotation`  | `mapViewRef`, `annotation object` | Replace annotation if it  exists on the map. This check happens based on the `id` of the object being passed in. The annotation will still be added if no previous one exists.
+| `removeAnnotation`  | `mapViewRef`, `marker id` | Removes annotation from map. This method requires that you supply an id to an annotation when creating. If 2 annotations have the same id, only the first will be removed.
 | `removeAllAnnotations`  | `mapViewRef` | Removes all annotations on map.
 | `setVisibleCoordinateBoundsAnimated`  | `mapViewRef`, `latitude1`, `longitude1`, `latitude2`, `longitude2`, `padding top`, `padding right`, `padding bottom`, `padding left`  | Changes the viewport to fit the given coordinate bounds and some additional padding on each side.
 | `setUserTrackingMode` | `mapViewRef`, `NONE` or `FOLLOW` | Modifies the tracking mode.

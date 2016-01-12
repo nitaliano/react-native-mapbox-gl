@@ -78,6 +78,19 @@ var MapExample = React.createClass({
         }])}>
           Add new marker
         </Text>
+        <Text onPress={() => this.updateAnnotation(mapRef, {
+          coordinates: [40.714541341726175,-74.00579452514648],
+          'type': 'point',
+          title: 'New Title!',
+          subtitle: 'New Subtitle',
+          annotationImage: {
+            url: 'https://cldup.com/7NLZklp8zS.png',
+            height: 25,
+            width: 25
+          },
+          id: 'marker2'
+        })}>
+          Update marker2
         <Text style={styles.text} onPress={() => this.setUserTrackingMode(mapRef, this.userTrackingMode.follow)}>
           Set userTrackingMode to follow
         </Text>
