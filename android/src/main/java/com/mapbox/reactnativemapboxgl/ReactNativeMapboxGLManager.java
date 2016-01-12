@@ -146,77 +146,6 @@ public class ReactNativeMapboxGLManager extends SimpleViewManager<MapView> {
             int size = value.size();
             for (int i = 0; i < size; i++) {
                 ReadableMap annotation = value.getMap(i);
-                String type = annotation.getString("type");
-                if (type.equals("point")) {
-                    double latitude = annotation.getArray("coordinates").getDouble(0);
-                    double longitude = annotation.getArray("coordinates").getDouble(1);
-                    LatLng markerCenter = new LatLng(latitude, longitude);
-                    MarkerOptions marker = new MarkerOptions();
-                    marker.position(markerCenter);
-                    if (annotation.hasKey("title")) {
-                        String title = annotation.getString("title");
-                        marker.title(title);
-                    }
-                    if (annotation.hasKey("subtitle")) {
-                        String subtitle = annotation.getString("subtitle");
-                        marker.snippet(subtitle);
-                    }
-                    if (annotation.hasKey("annotationImage")) {
-                        ReadableMap annotationImage = annotation.getMap("annotationImage");
-                        String annotationURL = annotationImage.getString("url");
-                        try {
-                            Drawable image = drawableFromUrl(mapView, annotationURL);
-                            IconFactory iconFactory = view.getIconFactory();
-                            Icon icon = iconFactory.fromDrawable(image);
-                            marker.icon(icon);
-                        } catch (Exception e) {
-                            e.printStackTrace();
-                        }
-                    }
-                    view.addMarker(marker);
-                } else if (type.equals("polyline")) {
-                    int coordSize = annotation.getArray("coordinates").size();
-                    PolylineOptions polyline = new PolylineOptions();
-                    for (int p = 0; p < coordSize; p++) {
-                        double latitude = annotation.getArray("coordinates").getArray(p).getDouble(0);
-                        double longitude = annotation.getArray("coordinates").getArray(p).getDouble(1);
-                        polyline.add(new LatLng(latitude, longitude));
-                    }
-                    if (annotation.hasKey("alpha")) {
-                        double strokeAlpha = annotation.getDouble("alpha");
-                        polyline.alpha((float) strokeAlpha);
-                    }
-                    if (annotation.hasKey("strokeColor")) {
-                        int strokeColor = Color.parseColor(annotation.getString("strokeColor"));
-                        polyline.color(strokeColor);
-                    }
-                    if (annotation.hasKey("strokeWidth")) {
-                        float strokeWidth = annotation.getInt("strokeWidth");
-                        polyline.width(strokeWidth);
-                    }
-                    view.addPolyline(polyline);
-                } else if (type.equals("polygon")) {
-                    int coordSize = annotation.getArray("coordinates").size();
-                    PolygonOptions polygon = new PolygonOptions();
-                    for (int p = 0; p < coordSize; p++) {
-                        double latitude = annotation.getArray("coordinates").getArray(p).getDouble(0);
-                        double longitude = annotation.getArray("coordinates").getArray(p).getDouble(1);
-                        polygon.add(new LatLng(latitude, longitude));
-                    }
-                    if (annotation.hasKey("alpha")) {
-                        double fillAlpha = annotation.getDouble("alpha");
-                        polygon.alpha((float) fillAlpha);
-                    }
-                    if (annotation.hasKey("fillColor")) {
-                        int fillColor = Color.parseColor(annotation.getString("fillColor"));
-                        polygon.fillColor(fillColor);
-                    }
-                    if (annotation.hasKey("strokeColor")) {
-                        int strokeColor = Color.parseColor(annotation.getString("strokeColor"));
-                        polygon.strokeColor(strokeColor);
-                    }
-                    view.addPolygon(polygon);
-                }
                 addAnnotation(view, annotation);
             }
         }
@@ -415,8 +344,8 @@ public class ReactNativeMapboxGLManager extends SimpleViewManager<MapView> {
             String annotationURL = annotationImage.getString("url");
             try {
                 Drawable image = drawableFromUrl(mapView, annotationURL);
-                SpriteFactory spriteFactory = view.getSpriteFactory();
-                Sprite icon = spriteFactory.fromDrawable(image);
+                IconFactory iconFactory = view.getIconFactory();
+                Icon icon = iconFactory.fromDrawable(image);
                 marker.icon(icon);
             } catch (Exception e) {
                 e.printStackTrace();

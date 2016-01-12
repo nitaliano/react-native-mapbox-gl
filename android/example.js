@@ -91,6 +91,7 @@ var MapExample = React.createClass({
           id: 'marker2'
         })}>
           Update marker2
+        </Text>
         <Text style={styles.text} onPress={() => this.setUserTrackingMode(mapRef, this.userTrackingMode.follow)}>
           Set userTrackingMode to follow
         </Text>
