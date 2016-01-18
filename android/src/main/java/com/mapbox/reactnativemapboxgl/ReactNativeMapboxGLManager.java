@@ -15,23 +15,20 @@ import com.facebook.react.bridge.WritableMap;
 import com.facebook.react.uimanager.ReactProp;
 import com.facebook.react.modules.core.DeviceEventManagerModule;
 import com.mapbox.mapboxsdk.annotations.Marker;
-import com.mapbox.mapboxsdk.constants.Style;
 import com.facebook.react.bridge.LifecycleEventListener;
 import android.graphics.RectF;
 import com.mapbox.mapboxsdk.geometry.CoordinateBounds;
 import com.facebook.react.uimanager.SimpleViewManager;
 import com.facebook.react.uimanager.ThemedReactContext;
-import com.facebook.react.uimanager.events.RCTEventEmitter;
 import com.mapbox.mapboxsdk.annotations.MarkerOptions;
 import com.mapbox.mapboxsdk.annotations.PolygonOptions;
 import com.mapbox.mapboxsdk.annotations.PolylineOptions;
-import com.mapbox.mapboxsdk.constants.MyLocationTracking;
 import com.mapbox.mapboxsdk.geometry.LatLng;
 import com.mapbox.mapboxsdk.geometry.LatLngZoom;
 import com.mapbox.mapboxsdk.views.MapView;
 import com.mapbox.mapboxsdk.annotations.Sprite;
 import com.mapbox.mapboxsdk.annotations.SpriteFactory;
-import android.support.v4.content.ContextCompat;
+
 import android.graphics.drawable.Drawable;
 import android.graphics.BitmapFactory;
 import android.graphics.Bitmap;
@@ -39,7 +36,7 @@ import java.io.InputStream;
 import java.io.IOException;
 import java.net.URL;
 import java.net.HttpURLConnection;
-import java.net.MalformedURLException;
+
 import android.graphics.drawable.BitmapDrawable;
 
 import javax.annotation.Nullable;
@@ -61,7 +58,8 @@ public class ReactNativeMapboxGLManager extends SimpleViewManager<MapView> {
     public static final String PROP_ONUSER_LOCATION_CHANGE = "onUserLocationChange";
     public static final String PROP_ROTATION_ENABLED = "rotateEnabled";
     public static final String PROP_SCROLL_ENABLED = "scrollEnabled";
-    public static final String PROP_USER_LOCATON = "showsUserLocation";
+    public static final String PROP_USER_LOCATION = "showsUserLocation";
+    public static final String PROP_DISABLE_BACKGROUND_USER_LOCATION = "disableBackgroundUserLocation";
     public static final String PROP_STYLE_URL = "styleUrl";
     public static final String PROP_USER_TRACKING_MODE = "userTrackingMode";
     public static final String PROP_ZOOM_ENABLED = "zoomEnabled";
@@ -71,7 +69,8 @@ public class ReactNativeMapboxGLManager extends SimpleViewManager<MapView> {
     public static final String PROP_LOGO_IS_HIDDEN = "logoIsHidden";
     public static final String PROP_ATTRIBUTION_BUTTON_IS_HIDDEN = "attributionButtonIsHidden";
     private MapView mapView;
-
+    private WritableMap properties;
+    private LifecycleEventListener lifecycleEventListener;
 
     @Override
     public String getName() {
@@ -82,6 +81,8 @@ public class ReactNativeMapboxGLManager extends SimpleViewManager<MapView> {
     public MapView createViewInstance(ThemedReactContext context) {
         mapView = new MapView(context, "pk.foo");
         mapView.onCreate(null);
+        properties = Arguments.createMap();
+
         StrictMode.ThreadPolicy policy = new StrictMode.ThreadPolicy.Builder().permitAll().build();
         StrictMode.setThreadPolicy(policy);
         return mapView;
@@ -311,9 +312,52 @@ public class ReactNativeMapboxGLManager extends SimpleViewManager<MapView> {
         view.setRotateEnabled(value);
     }
 
-    @ReactProp(name = PROP_USER_LOCATON, defaultBoolean = true)
+    @ReactProp(name = PROP_USER_LOCATION, defaultBoolean = true)
     public void setMyLocationEnabled(MapView view, Boolean value) {
+        properties.putBoolean(PROP_USER_LOCATION, value);
         view.setMyLocationEnabled(value);
+    }
+
+    @ReactProp(name = PROP_DISABLE_BACKGROUND_USER_LOCATION, defaultBoolean = false)
+    public void setDisableBackgroundUserLocation(MapView view, Boolean value) {
+        properties.putBoolean(PROP_DISABLE_BACKGROUND_USER_LOCATION, value);
+        ReactContext reactContext = (ReactContext) view.getContext();
+
+        if (lifecycleEventListener != null) {
+            reactContext.removeLifecycleEventListener(lifecycleEventListener);
+        }
+
+        // We need to be sure to disable location-tracking when app enters background, in-case some other module
+        // has acquired a wake-lock and is controlling location-updates, otherwise, MapBox location-manager will be left
+        // updating location constantly, killing the battery, even though some other location-mgmt module may
+        // desire to shut-down location-services.
+        lifecycleEventListener = new LifecycleEventListener() {
+            @Override
+            public void onHostResume() {
+                if (properties.hasKey(PROP_USER_LOCATION)) {
+                    Boolean showsUserLocation = properties.getBoolean(PROP_USER_LOCATION);
+                    if (showsUserLocation) {
+                        mapView.setMyLocationEnabled(true);
+                    }
+                }
+            }
+
+            @Override
+            public void onHostPause() {
+                if (properties.hasKey(PROP_DISABLE_BACKGROUND_USER_LOCATION)) {
+                    Boolean disableTracking = properties.getBoolean(PROP_DISABLE_BACKGROUND_USER_LOCATION);
+                    if (disableTracking) {
+                        mapView.setMyLocationEnabled(false);
+                    }
+                }
+            }
+
+            @Override
+            public void onHostDestroy() {
+
+            }
+        };
+        reactContext.addLifecycleEventListener(lifecycleEventListener);
     }
 
     @ReactProp(name = PROP_STYLE_URL)
