@@ -11,6 +11,7 @@
 #import "RCTEventDispatcher.h"
 #import "UIView+React.h"
 #import "RCTLog.h"
+#import "UIImage+Rotate.h"
 
 @implementation RCTMapboxGL {
     /* Required to publish events */
@@ -437,6 +438,12 @@ RCT_EXPORT_MODULE();
         if ([url hasPrefix:@"image!"]) {
             NSString* localImagePath = [url substringFromIndex:6];
             image = [UIImage imageNamed:localImagePath];
+        } if ([url hasPrefix:@"rotatedImage!"]) {
+            NSArray *parts = [url componentsSeparatedByString:@"!"];
+            double degrees = [parts[1] floatValue];
+            NSString* localImagePath = parts[2];
+            
+            image = [[UIImage imageNamed:localImagePath] imageRotatedByDegrees:degrees];
         } else {
             image = [UIImage imageWithData:[NSData dataWithContentsOfURL:[NSURL URLWithString:url]]];
         }
