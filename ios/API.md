@@ -38,9 +38,10 @@
 | `onLocateUserFailed` | `{message: message}` | Fired when there is an error getting the users location. Do not rely on the string that is returned for determining what kind of error it is. |
 | `getCenterCoordinateZoomLevel` | `mapViewRef`, `callback` | Gets the current center location and zoom level. Returns a single callback object. |
 | `getDirection` | `mapViewRef`, `callback` | Gets the current direction. Returns a single callback object. |
-
-
-
+| `onOfflineProgressDidChange` | `{countOfResourcesCompleted: 7, countOfResourcesExpected: 1284, name: "test", countOfBytesCompleted: 306543, maximumResourcesExpected: 1284}` | Event fired when the progress of an offline pack changes while downloading. |
+| `onOfflineMaxAllowedMapboxTiles` | `{maximumCount: number}` | Event fired when the maximum number of tiles has been hit. |
+| `onOfflineDidRecieveError` | `{error: error}` | Event fired when there is an error while downloading a pack. |
+| `getPacksWithCompletionHandler` | `array of packs` | Returns packs which have started and/or completed |
 
 ## Methods for Modifying the Map State
 
@@ -60,6 +61,7 @@ These methods require you to use `MapboxGLMap.Mixin` to access the methods. Each
 | `removeAllAnnotations`  | `mapViewRef`| Removes all annotations from the map.
 | `setVisibleCoordinateBoundsAnimated`  | `mapViewRef`, `latitude1`, `longitude1`, `latitude2`, `longitude2`, `padding top`, `padding right`, `padding bottom`, `padding left`  | Changes the viewport to fit the given coordinate bounds and some additional padding on each side.
 | `setUserTrackingMode` | `mapViewRef`, `userTrackingMode` | Modifies the tracking mode. Valid args: `this.userTrackingMode.none`, `this.userTrackingMode.follow`, `this.userTrackingMode.followWithCourse`, `this.userTrackingMode.followWithHeading`
+| `addPackForRegion` | `mapRef` `name` `type` `bounds` `minZoomLevel` `maxZoomLevel` `style` | Adds an offline region for a given bounding box. `name` is a string to represent an offline pack. `type` must be of type `bbox`. `bounds` is an array. `minZoomLevel` is an number representing the minimum zoom level of the offline pack. `maxZoomLevel` is an number representing the maximum zoom level of the offline pack. `style` is a style url to download.
 
 ## Styles
 

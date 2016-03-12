@@ -12,6 +12,10 @@
 #import "UIView+React.h"
 #import "RCTLog.h"
 
+@interface RCTMapboxGL ()
+@property (nonatomic) MGLOfflinePack *pack;
+@end
+
 @implementation RCTMapboxGL {
     /* Required to publish events */
     RCTEventDispatcher *_eventDispatcher;
@@ -91,6 +95,7 @@ RCT_EXPORT_MODULE();
     }
 }
 
+
 - (void)createMap
 {
     [MGLAccountManager setAccessToken:_accessToken];
@@ -106,6 +111,26 @@ RCT_EXPORT_MODULE();
     [self layoutSubviews];
 }
 
+-(void)createOfflinePack:(MGLCoordinateBounds)bounds style:(NSURL*)style fromZoomLevel:(double)fromZoomLevel toZoomLevel:(double)toZoomLevel name:(NSString*)name type:(NSString*)type
+{
+    
+    id <MGLOfflineRegion> region = [[MGLTilePyramidOfflineRegion alloc] initWithStyleURL:style bounds:bounds fromZoomLevel:fromZoomLevel toZoomLevel:toZoomLevel];
+    
+    NSDictionary *userInfo = @{ @"name": name };
+    NSData *context = [NSKeyedArchiver archivedDataWithRootObject:userInfo];
+    
+    __weak RCTMapboxGL *weakSelf = self;
+    [[MGLOfflineStorage sharedOfflineStorage] addPackForRegion:region withContext:context completionHandler:^(MGLOfflinePack *pack, NSError *error) {
+        RCTMapboxGL *strongSelf = weakSelf;
+        if (error) {
+            RCTLogError(@"Error creating pack.");
+        } else {
+            strongSelf.pack = pack;
+            pack.delegate = strongSelf;
+            [pack resume];
+        }
+    }];
+}
 
 - (void)layoutSubviews
 {
@@ -503,6 +528,40 @@ RCT_EXPORT_MODULE();
 
     [_eventDispatcher sendInputEventWithName:@"onStartLoadingMap" body:event];
 }
+
+- (void)offlinePack:(MGLOfflinePack *)pack progressDidChange:(MGLOfflinePackProgress)progress {
+    NSDictionary *userInfo = [NSKeyedUnarchiver unarchiveObjectWithData:pack.context];
+    NSDictionary *event = @{ @"target": self.reactTag,
+                             @"src": @{
+                                     @"name": userInfo[@"name"],
+                                     @"countOfResourcesCompleted": @(progress.countOfResourcesCompleted),
+                                     @"countOfResourcesExpected": @(progress.countOfResourcesExpected),
+                                     @"countOfBytesCompleted": @(progress.countOfBytesCompleted),
+                                     @"maximumResourcesExpected": @(progress.maximumResourcesExpected)
+                                     }
+                             };
+    
+    [_eventDispatcher sendInputEventWithName:@"onOfflineProgressDidChange" body:event];
+}
+
+- (void)offlinePack:(MGLOfflinePack *)pack didReceiveMaximumAllowedMapboxTiles:(uint64_t)maximumCount {
+    NSDictionary *event = @{ @"target": self.reactTag,
+                             @"src": @{
+                                     @"maximumCount": @(maximumCount)
+                                     }
+                             };
+    [_eventDispatcher sendInputEventWithName:@"onOfflineMaxAllowedMapboxTiles" body:event];
+}
+
+- (void)offlinePack:(MGLOfflinePack *)pack didReceiveError:(nonnull NSError *)error {
+    NSDictionary *event = @{ @"target": self.reactTag,
+                             @"src": @{
+                                     @"error": [error localizedDescription]
+                                     }
+                             };
+    [_eventDispatcher sendInputEventWithName:@"onOfflineDidRecieveError" body:event];
+}
+
 
 - (void)mapView:(MGLMapView *)mapView didFailToLocateUserWithError:(NSError *)error
 {

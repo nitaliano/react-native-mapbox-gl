@@ -154,6 +154,22 @@ var MapExample = React.createClass({
           })}>
           Get direction
         </Text>
+        <Text onPress={() => this.addPackForRegion(mapRef, {
+            name: 'test',
+            type: 'bbox',
+            bounds: [0, 0, 0, 0],
+            minZoomLevel: 0,
+            maxZoomLevel: 0,
+            style: this.mapStyles.emerald
+          })}>
+          Create offline pack
+        </Text>
+        <Text onPress={() => this.getPacksWithCompletionHandler(mapRef, (err, packs)=> {
+            if (err) console.log(err);
+            console.log(packs);
+          })}>
+          Get offline packs
+        </Text>
         <Mapbox
           style={styles.container}
           direction={0}
