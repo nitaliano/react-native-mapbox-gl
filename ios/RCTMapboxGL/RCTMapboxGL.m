@@ -124,11 +124,13 @@ RCT_EXPORT_MODULE();
     for (RCTMGLAnnotation *annotation in annotations) {
         NSString *id = [annotation id];
         if ([id length] != 0) {
-            [_annotations setObject:annotation forKey:id];
+            if (![_annotations  objectForKey:id]){
+                [_annotations setObject:annotation forKey:id];
+                [_map addAnnotation:annotation];
+            }
         } else {
             RCTLogError(@"field `id` is required on all annotations");
         }
-        [_map addAnnotation:annotation];
     }
 }
 
