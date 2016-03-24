@@ -3,21 +3,19 @@ package com.mapbox.reactnativemapboxgl;
 
 import android.content.Context;
 import android.util.Log;
-import java.util.HashMap;
-import java.util.Map;
 
-import com.mapbox.mapboxsdk.constants.Style;
 import com.facebook.react.bridge.Arguments;
+import com.facebook.react.bridge.Callback;
 import com.facebook.react.bridge.ReactApplicationContext;
 import com.facebook.react.bridge.ReactContextBaseJavaModule;
 import com.facebook.react.bridge.ReactMethod;
 import com.facebook.react.bridge.ReadableArray;
-import com.facebook.react.bridge.ReadableMap;
-import com.facebook.react.bridge.Callback;
 import com.facebook.react.bridge.WritableMap;
 import com.mapbox.mapboxsdk.constants.MyLocationTracking;
-import com.mapbox.mapboxsdk.geometry.LatLng;
-import com.mapbox.mapboxsdk.views.MapView;
+import com.mapbox.mapboxsdk.constants.Style;
+
+import java.util.HashMap;
+import java.util.Map;
 
 import javax.annotation.Nullable;
 

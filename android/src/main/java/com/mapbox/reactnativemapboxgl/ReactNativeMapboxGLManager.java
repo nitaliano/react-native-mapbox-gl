@@ -1,42 +1,45 @@
 
 package com.mapbox.reactnativemapboxgl;
 
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.graphics.Color;
-import android.util.Log;
-import android.os.StrictMode;
+import android.graphics.drawable.BitmapDrawable;
+import android.graphics.drawable.Drawable;
 import android.location.Location;
+import android.os.StrictMode;
+import android.support.annotation.NonNull;
+import android.util.Log;
 
 import com.facebook.react.bridge.Arguments;
 import com.facebook.react.bridge.ReactContext;
 import com.facebook.react.bridge.ReadableArray;
 import com.facebook.react.bridge.ReadableMap;
 import com.facebook.react.bridge.WritableMap;
-import com.facebook.react.uimanager.annotations.ReactProp;
 import com.facebook.react.modules.core.DeviceEventManagerModule;
-import com.mapbox.mapboxsdk.annotations.Marker;
-import com.mapbox.mapboxsdk.camera.CameraUpdateFactory;
-import android.graphics.RectF;
-import com.mapbox.mapboxsdk.geometry.CoordinateBounds;
 import com.facebook.react.uimanager.SimpleViewManager;
 import com.facebook.react.uimanager.ThemedReactContext;
+import com.facebook.react.uimanager.annotations.ReactProp;
+import com.mapbox.mapboxsdk.annotations.Marker;
 import com.mapbox.mapboxsdk.annotations.MarkerOptions;
 import com.mapbox.mapboxsdk.annotations.PolygonOptions;
 import com.mapbox.mapboxsdk.annotations.PolylineOptions;
-import com.mapbox.mapboxsdk.geometry.LatLng;
-import com.mapbox.mapboxsdk.views.MapView;
 import com.mapbox.mapboxsdk.camera.CameraPosition;
-import com.mapbox.mapboxsdk.annotations.Icon;
-import com.mapbox.mapboxsdk.annotations.IconFactory;
-import android.graphics.drawable.Drawable;
-import android.graphics.BitmapFactory;
-import android.graphics.Bitmap;
-import java.io.InputStream;
+import com.mapbox.mapboxsdk.camera.CameraUpdateFactory;
+import com.mapbox.mapboxsdk.geometry.LatLng;
+import com.mapbox.mapboxsdk.geometry.LatLngBounds;
+import com.mapbox.mapboxsdk.maps.MapView;
+import com.mapbox.mapboxsdk.maps.MapboxMap;
+import com.mapbox.mapboxsdk.maps.OnMapReadyCallback;
+import com.mapbox.mapboxsdk.maps.TrackingSettings;
+import com.mapbox.mapboxsdk.maps.UiSettings;
+
 import java.io.IOException;
-import java.net.URL;
+import java.io.InputStream;
 import java.net.HttpURLConnection;
-import android.graphics.drawable.BitmapDrawable;
+import java.net.URL;
+
 import javax.annotation.Nullable;
-import android.graphics.PointF;
 
 public class ReactNativeMapboxGLManager extends SimpleViewManager<MapView> {
 
@@ -63,6 +66,9 @@ public class ReactNativeMapboxGLManager extends SimpleViewManager<MapView> {
     public static final String PROP_LOGO_IS_HIDDEN = "logoIsHidden";
     public static final String PROP_ATTRIBUTION_BUTTON_IS_HIDDEN = "attributionButtonIsHidden";
     private MapView mapView;
+    private MapboxMap mapboxMap;
+    private UiSettings uiSettings;
+    private TrackingSettings trackingSettings;
 
 
     @Override
@@ -72,25 +78,41 @@ public class ReactNativeMapboxGLManager extends SimpleViewManager<MapView> {
 
     @Override
     public MapView createViewInstance(ThemedReactContext context) {
-        mapView = new MapView(context, "pk.foo");
+        mapView = new MapView(context);
+        mapView.setAccessToken("pk.foo");
         mapView.onCreate(null);
         StrictMode.ThreadPolicy policy = new StrictMode.ThreadPolicy.Builder().permitAll().build();
         StrictMode.setThreadPolicy(policy);
         return mapView;
     }
 
+    public void onMapReady(final MapView view, Boolean value) {
+        view.getMapAsync(new OnMapReadyCallback() {
+            @Override
+            public void onMapReady(@NonNull MapboxMap m) {
+                uiSettings = mapboxMap.getUiSettings();
+                trackingSettings = mapboxMap.getTrackingSettings();
+                mapboxMap = m;
+            }
+        });
+    }
+
+
     @ReactProp(name = PROP_ACCESS_TOKEN)
     public void setAccessToken(MapView view, @Nullable String value) {
         if (value == null || value.isEmpty()) {
             Log.e(REACT_CLASS, "Error: No access token provided");
         } else {
-            view.setAccessToken(value);
+            mapboxMap.setAccessToken(value);
         }
     }
 
     @ReactProp(name = PROP_SET_TILT)
     public void setTilt(MapView view, @Nullable double pitch) {
-        mapView.setTilt(pitch, 1L);
+        mapboxMap.moveCamera(CameraUpdateFactory.newCameraPosition(
+                new CameraPosition.Builder()
+                        .tilt(pitch)
+                        .build()));
     }
 
     public static Drawable drawableFromUrl(MapView view, String url) throws IOException {
@@ -114,7 +136,7 @@ public class ReactNativeMapboxGLManager extends SimpleViewManager<MapView> {
             Log.e(REACT_CLASS, "Error: No annotations");
         } else {
             if (clearMap) {
-                view.removeAllAnnotations();
+                mapboxMap.removeAnnotations();
             }
             int size = value.size();
             for (int i = 0; i < size; i++) {
@@ -138,15 +160,15 @@ public class ReactNativeMapboxGLManager extends SimpleViewManager<MapView> {
                         ReadableMap annotationImage = annotation.getMap("annotationImage");
                         String annotationURL = annotationImage.getString("url");
                         try {
-                            Drawable image = drawableFromUrl(mapView, annotationURL);
-                            IconFactory iconFactory = view.getIconFactory();
-                            Icon icon = iconFactory.fromDrawable(image);
-                            marker.icon(icon);
+//                            Drawable image = drawableFromUrl(mapView, annotationURL);
+//                            IconFactory iconFactory = mapboxMap.getIconFactory();
+//                            Icon icon = iconFactory.fromDrawable(image);
+//                            marker.icon(icon);
                         } catch (Exception e) {
                             e.printStackTrace();
                         }
                     }
-                    view.addMarker(marker);
+                    mapboxMap.addMarker(marker);
                 } else if (type.equals("polyline")) {
                     int coordSize = annotation.getArray("coordinates").size();
                     PolylineOptions polyline = new PolylineOptions();
@@ -167,7 +189,7 @@ public class ReactNativeMapboxGLManager extends SimpleViewManager<MapView> {
                         float strokeWidth = annotation.getInt("strokeWidth");
                         polyline.width(strokeWidth);
                     }
-                    view.addPolyline(polyline);
+                    mapboxMap.addPolyline(polyline);
                 } else if (type.equals("polygon")) {
                     int coordSize = annotation.getArray("coordinates").size();
                     PolygonOptions polygon = new PolygonOptions();
@@ -188,7 +210,7 @@ public class ReactNativeMapboxGLManager extends SimpleViewManager<MapView> {
                         int strokeColor = Color.parseColor(annotation.getString("strokeColor"));
                         polygon.strokeColor(strokeColor);
                     }
-                    view.addPolygon(polygon);
+                    mapboxMap.addPolygon(polygon);
                 }
             }
         }
@@ -196,12 +218,15 @@ public class ReactNativeMapboxGLManager extends SimpleViewManager<MapView> {
 
     @ReactProp(name = PROP_DEBUG_ACTIVE, defaultBoolean = false)
     public void setDebugActive(MapView view, Boolean value) {
-        view.setDebugActive(value);
+        mapboxMap.setDebugActive(value);
     }
 
     @ReactProp(name = PROP_DIRECTION, defaultDouble = 0)
     public void setDirection(MapView view, double value) {
-        view.setDirection(value, true);
+        mapboxMap.moveCamera(CameraUpdateFactory.newCameraPosition(
+                new CameraPosition.Builder()
+                        .bearing(value)
+                        .build()));
     }
 
     @ReactProp(name = PROP_ONREGIONCHANGE, defaultBoolean = true)
@@ -212,9 +237,9 @@ public class ReactNativeMapboxGLManager extends SimpleViewManager<MapView> {
                 if (change == MapView.REGION_DID_CHANGE || change == MapView.REGION_DID_CHANGE_ANIMATED) {
                     WritableMap event = Arguments.createMap();
                     WritableMap location = Arguments.createMap();
-                    location.putDouble("latitude", view.getCenterCoordinate().getLatitude());
-                    location.putDouble("longitude", view.getCenterCoordinate().getLongitude());
-                    location.putDouble("zoom", view.getZoomLevel());
+//                    location.putDouble("latitude", center);
+//                    location.putDouble("longitude", mapboxMap.getCenterCoordinate().getLongitude());
+//                    location.putDouble("zoom", mapboxMap.getZoomLevel());
                     event.putMap("src", location);
                     ReactContext reactContext = (ReactContext) view.getContext();
                     reactContext
@@ -227,7 +252,7 @@ public class ReactNativeMapboxGLManager extends SimpleViewManager<MapView> {
 
     @ReactProp(name = PROP_ONUSER_LOCATION_CHANGE, defaultBoolean = true)
     public void onMyLocationChange(final MapView view, Boolean value) {
-        view.setOnMyLocationChangeListener(new MapView.OnMyLocationChangeListener() {
+        mapboxMap.setOnMyLocationChangeListener(new MapboxMap.OnMyLocationChangeListener() {
             @Override
             public void onMyLocationChange(@Nullable Location location) {
                 WritableMap event = Arguments.createMap();
@@ -250,7 +275,7 @@ public class ReactNativeMapboxGLManager extends SimpleViewManager<MapView> {
 
     @ReactProp(name = PROP_ONOPENANNOTATION, defaultBoolean = true)
     public void onMarkerClick(final MapView view, Boolean value) {
-        view.setOnMarkerClickListener(new MapView.OnMarkerClickListener() {
+        mapboxMap.setOnMarkerClickListener(new MapboxMap.OnMarkerClickListener() {
             @Override
             public boolean onMarkerClick(@Nullable Marker marker) {
                 WritableMap event = Arguments.createMap();
@@ -271,13 +296,13 @@ public class ReactNativeMapboxGLManager extends SimpleViewManager<MapView> {
 
     @ReactProp(name = PROP_ONLONGPRESS, defaultBoolean = true)
     public void onMapLongClick(final MapView view, Boolean value) {
-        view.setOnMapLongClickListener(new MapView.OnMapLongClickListener() {
+        mapboxMap.setOnMapLongClickListener(new MapboxMap.OnMapLongClickListener() {
             @Override
             public void onMapLongClick(@Nullable LatLng location) {
                 WritableMap event = Arguments.createMap();
                 WritableMap loc = Arguments.createMap();
                 loc.putDouble("latitude", location.getLatitude());
-                loc.putDouble("longitude", location.getLongitude());
+                loc.putDouble("longitude", location.getLatitude());
                 event.putMap("src", loc);
                 ReactContext reactContext = (ReactContext) view.getContext();
                 reactContext
@@ -295,7 +320,7 @@ public class ReactNativeMapboxGLManager extends SimpleViewManager<MapView> {
             CameraPosition cameraPosition = new CameraPosition.Builder()
                     .target(new LatLng(latitude, longitude))
                     .build();
-            view.moveCamera(CameraUpdateFactory.newCameraPosition(cameraPosition));
+            mapboxMap.moveCamera(CameraUpdateFactory.newCameraPosition(cameraPosition));
         }else{
             Log.w(REACT_CLASS, "No CenterCoordinate provided");
         }
@@ -303,12 +328,12 @@ public class ReactNativeMapboxGLManager extends SimpleViewManager<MapView> {
 
     @ReactProp(name = PROP_ROTATION_ENABLED, defaultBoolean = true)
     public void setRotateEnabled(MapView view, Boolean value) {
-        view.setRotateEnabled(value);
+        uiSettings.setRotateGesturesEnabled(value);
     }
 
     @ReactProp(name = PROP_USER_LOCATION, defaultBoolean = true)
     public void setMyLocationEnabled(MapView view, Boolean value) {
-        view.setMyLocationEnabled(value);
+        mapboxMap.setMyLocationEnabled(value);
     }
 
     @ReactProp(name = PROP_STYLE_URL)
@@ -322,39 +347,40 @@ public class ReactNativeMapboxGLManager extends SimpleViewManager<MapView> {
 
     @ReactProp(name = PROP_USER_TRACKING_MODE, defaultInt = 0)
     public void setMyLocationTrackingMode(MapView view, @Nullable int mode) {
-        view.setMyLocationTrackingMode(mode);
+        trackingSettings.setMyLocationTrackingMode(mode);
     }
 
     @ReactProp(name = PROP_ZOOM_ENABLED, defaultBoolean = true)
     public void setZoomEnabled(MapView view, Boolean value) {
-        view.setZoomEnabled(value);
+        uiSettings.setZoomControlsEnabled(value);
     }
 
     @ReactProp(name = PROP_ZOOM_LEVEL, defaultFloat = 0f)
     public void setZoomLevel(MapView view, float value) {
-        view.setZoomLevel(value);
+        mapboxMap.moveCamera(CameraUpdateFactory.newCameraPosition(
+                new CameraPosition.Builder()
+                        .zoom(value)
+                        .build()));
     }
 
     @ReactProp(name = PROP_SCROLL_ENABLED, defaultBoolean = true)
     public void setScrollEnabled(MapView view, Boolean value) {
-        view.setScrollEnabled(value);
+        uiSettings.setScrollGesturesEnabled(value);
     }
 
     @ReactProp(name = PROP_COMPASS_IS_HIDDEN)
     public void setCompassIsHidden(MapView view, Boolean value) {
-        view.setCompassEnabled(!value);
+        uiSettings.setCompassEnabled(value);
     }
 
     @ReactProp(name = PROP_LOGO_IS_HIDDEN)
     public void setLogoIsHidden(MapView view, Boolean value) {
-        int visibility = (value ? android.view.View.INVISIBLE : android.view.View.VISIBLE);
-        view.setLogoVisibility(visibility);
+        uiSettings.setLogoEnabled(value);
     }
 
     @ReactProp(name = PROP_ATTRIBUTION_BUTTON_IS_HIDDEN)
     public void setAttributionButtonIsHidden(MapView view, Boolean value) {
-        int visibility = (value ? android.view.View.INVISIBLE : android.view.View.VISIBLE);
-        view.setAttributionVisibility(visibility);
+        uiSettings.setLogoEnabled(value);
     }
 
     public void setCenterCoordinateZoomLevel(MapView view, @Nullable ReadableMap center) {
@@ -366,7 +392,7 @@ public class ReactNativeMapboxGLManager extends SimpleViewManager<MapView> {
                     .target(new LatLng(latitude, longitude))
                     .zoom(zoom)
                     .build();
-            view.moveCamera(CameraUpdateFactory.newCameraPosition(cameraPosition));
+            mapboxMap.moveCamera(CameraUpdateFactory.newCameraPosition(cameraPosition));
         }else{
             Log.w(REACT_CLASS, "No CenterCoordinate provided");
         }
@@ -375,22 +401,27 @@ public class ReactNativeMapboxGLManager extends SimpleViewManager<MapView> {
     public void setVisibleCoordinateBounds(MapView view, @Nullable ReadableMap info) {
         final LatLng sw = new LatLng(info.getDouble("latSW"), info.getDouble("lngSW"));
         final LatLng ne = new LatLng(info.getDouble("latNE"), info.getDouble("lngNE"));
-        view.setVisibleCoordinateBounds(new CoordinateBounds(sw, ne), new RectF((float) info.getDouble("paddingLeft"), (float) info.getDouble("paddingTop"), (float) info.getDouble("paddingRight"), (float) info.getDouble("paddingBottom")), true);
+        LatLngBounds BOUNDS = new LatLngBounds.Builder().include(sw).include(ne).build();
+//        CameraPosition cameraPosition = new CameraPosition.Builder()
+//                .target(BOUNDS)
+//                .build();
+
     }
 
     public void removeAllAnnotations(MapView view, @Nullable Boolean placeHolder) {
-        view.removeAllAnnotations();
+        mapboxMap.removeAnnotations();
     }
 
     public WritableMap getDirection(MapView view) {
         WritableMap callbackDict = Arguments.createMap();
-        callbackDict.putDouble("direction", view.getDirection());
+        CameraPosition center = mapboxMap.getCameraPosition();
+        callbackDict.putDouble("direction", center.bearing);
         return callbackDict;
     }
 
     public WritableMap getCenterCoordinateZoomLevel(MapView view) {
         WritableMap callbackDict = Arguments.createMap();
-        CameraPosition center = view.getCameraPosition();
+        CameraPosition center = mapboxMap.getCameraPosition();
         callbackDict.putDouble("latitude", center.target.getLatitude());
         callbackDict.putDouble("longitude", center.target.getLongitude());
         callbackDict.putDouble("zoomLevel", center.zoom);
