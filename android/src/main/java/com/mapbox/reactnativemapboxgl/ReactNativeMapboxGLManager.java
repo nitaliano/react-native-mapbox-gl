@@ -62,8 +62,8 @@ public class ReactNativeMapboxGLManager extends SimpleViewManager<MapView> {
     public static final String PROP_COMPASS_IS_HIDDEN = "compassIsHidden";
     public static final String PROP_LOGO_IS_HIDDEN = "logoIsHidden";
     public static final String PROP_ATTRIBUTION_BUTTON_IS_HIDDEN = "attributionButtonIsHidden";
+    private static String APPLICATION_ID;
     private MapView mapView;
-
 
     @Override
     public String getName() {
@@ -74,6 +74,7 @@ public class ReactNativeMapboxGLManager extends SimpleViewManager<MapView> {
     public MapView createViewInstance(ThemedReactContext context) {
         mapView = new MapView(context, "pk.foo");
         mapView.onCreate(null);
+        APPLICATION_ID = context.getPackageName();
         StrictMode.ThreadPolicy policy = new StrictMode.ThreadPolicy.Builder().permitAll().build();
         StrictMode.setThreadPolicy(policy);
         return mapView;
@@ -106,7 +107,7 @@ public class ReactNativeMapboxGLManager extends SimpleViewManager<MapView> {
 
     public static Drawable drawableFromDrawableName(MapView view, String drawableName) {
         Bitmap x;
-        int resID = view.getResources().getIdentifier(drawableName, "drawable", view.getPackageName());
+        int resID = view.getResources().getIdentifier(drawableName, "drawable", APPLICATION_ID);
         x = BitmapFactory.decodeResource(view.getResources(), resID);
         return new BitmapDrawable(view.getResources(), x);
     }
