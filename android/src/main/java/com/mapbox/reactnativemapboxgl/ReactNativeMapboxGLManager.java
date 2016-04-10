@@ -147,7 +147,7 @@ public class ReactNativeMapboxGLManager extends SimpleViewManager<MapView> {
                         try {
                             Drawable image;
                             if (annotationURL.startsWith("image!")) {
-                                image = drawableFromDrawableName(mapView, annotationURL.replace("image!", ""))
+                                image = drawableFromDrawableName(mapView, annotationURL.replace("image!", ""));
                             } else {
                                 image = drawableFromUrl(mapView, annotationURL);
                             }
