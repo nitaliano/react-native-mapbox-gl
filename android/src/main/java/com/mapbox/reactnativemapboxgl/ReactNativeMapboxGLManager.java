@@ -104,6 +104,13 @@ public class ReactNativeMapboxGLManager extends SimpleViewManager<MapView> {
         return new BitmapDrawable(view.getResources(), x);
     }
 
+    public static Drawable drawableFromDrawableName(MapView view, String drawableName) {
+        Bitmap x;
+        int resID = view.getResources().getIdentifier(drawableName, "drawable", view.getPackageName());
+        x = BitmapFactory.decodeResource(view.getResources(), resID);
+        return new BitmapDrawable(view.getResources(), x);
+    }
+
     @ReactProp(name = PROP_ANNOTATIONS)
     public void setAnnotationClear(MapView view, @Nullable ReadableArray value) {
         setAnnotations(view, value, true);
@@ -138,7 +145,12 @@ public class ReactNativeMapboxGLManager extends SimpleViewManager<MapView> {
                         ReadableMap annotationImage = annotation.getMap("annotationImage");
                         String annotationURL = annotationImage.getString("url");
                         try {
-                            Drawable image = drawableFromUrl(mapView, annotationURL);
+                            Drawable image;
+                            if (annotationURL.startsWith("image!")) {
+                                image = drawableFromDrawableName(mapView, annotationURL.replace("image!", ""))
+                            } else {
+                                image = drawableFromUrl(mapView, annotationURL);
+                            }
                             IconFactory iconFactory = view.getIconFactory();
                             Icon icon = iconFactory.fromDrawable(image);
                             marker.icon(icon);
