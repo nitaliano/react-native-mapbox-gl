@@ -7,6 +7,8 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		870543BD1C762508006F2253 /* UIImage+Rotate.m in Sources */ = {isa = PBXBuildFile; fileRef = 870543BC1C762508006F2253 /* UIImage+Rotate.m */; };
+		870543BF1C76262F006F2253 /* UIKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 870543BE1C76262F006F2253 /* UIKit.framework */; };
 		C5AF3B8C1C5A8C3D0003BF64 /* Mapbox.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = C5AF3B8B1C5A8C3D0003BF64 /* Mapbox.framework */; };
 		C5DBB3441AF2EF2B00E611A9 /* RCTMapboxGL.h in CopyFiles */ = {isa = PBXBuildFile; fileRef = C5DBB3431AF2EF2B00E611A9 /* RCTMapboxGL.h */; };
 		C5DBB3461AF2EF2B00E611A9 /* RCTMapboxGL.m in Sources */ = {isa = PBXBuildFile; fileRef = C5DBB3451AF2EF2B00E611A9 /* RCTMapboxGL.m */; };
@@ -38,6 +40,9 @@
 /* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
+		870543BB1C762508006F2253 /* UIImage+Rotate.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "UIImage+Rotate.h"; sourceTree = "<group>"; };
+		870543BC1C762508006F2253 /* UIImage+Rotate.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = "UIImage+Rotate.m"; sourceTree = "<group>"; };
+		870543BE1C76262F006F2253 /* UIKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = UIKit.framework; path = System/Library/Frameworks/UIKit.framework; sourceTree = SDKROOT; };
 		C5AF3B8B1C5A8C3D0003BF64 /* Mapbox.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; path = Mapbox.framework; sourceTree = "<group>"; };
 		C5DBB3401AF2EF2B00E611A9 /* libRCTMapboxGL.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = libRCTMapboxGL.a; sourceTree = BUILT_PRODUCTS_DIR; };
 		C5DBB3431AF2EF2B00E611A9 /* RCTMapboxGL.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = RCTMapboxGL.h; sourceTree = "<group>"; };
@@ -53,6 +58,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				870543BF1C76262F006F2253 /* UIKit.framework in Frameworks */,
 				C5AF3B8C1C5A8C3D0003BF64 /* Mapbox.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -71,6 +77,7 @@
 		C5DBB3371AF2EF2B00E611A9 = {
 			isa = PBXGroup;
 			children = (
+				870543BE1C76262F006F2253 /* UIKit.framework */,
 				C5AF3B8B1C5A8C3D0003BF64 /* Mapbox.framework */,
 				C5DBB3421AF2EF2B00E611A9 /* RCTMapboxGL */,
 				C5DBB34F1AF2EF2B00E611A9 /* RCTMapboxGLTests */,
@@ -94,6 +101,8 @@
 				C5DBB3451AF2EF2B00E611A9 /* RCTMapboxGL.m */,
 				C5DBB3641AF2EFB500E611A9 /* RCTMapboxGLManager.h */,
 				C5DBB3651AF2EFB500E611A9 /* RCTMapboxGLManager.m */,
+				870543BB1C762508006F2253 /* UIImage+Rotate.h */,
+				870543BC1C762508006F2253 /* UIImage+Rotate.m */,
 			);
 			path = RCTMapboxGL;
 			sourceTree = "<group>";
@@ -203,6 +212,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				C5DBB3461AF2EF2B00E611A9 /* RCTMapboxGL.m in Sources */,
+				870543BD1C762508006F2253 /* UIImage+Rotate.m in Sources */,
 				C5DBB3661AF2EFB500E611A9 /* RCTMapboxGLManager.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
