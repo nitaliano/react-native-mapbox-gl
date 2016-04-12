@@ -10,6 +10,9 @@ var MapMixins = {
   getPacksWithCompletionHandler(mapRef, callback) {
     NativeModules.MapboxGLManager.getPacksWithCompletionHandler(React.findNodeHandle(this.refs[mapRef]), callback);
   },
+  removePack(mapRef, packName, callback) {
+    NativeModules.MapboxGLManager.removePack(React.findNodeHandle(this.refs[mapRef]), packName, callback);
+  },
   setDirectionAnimated(mapRef, heading) {
     NativeModules.MapboxGLManager.setDirectionAnimated(React.findNodeHandle(this.refs[mapRef]), heading);
   },

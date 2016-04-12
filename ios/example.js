@@ -173,6 +173,12 @@ var MapExample = React.createClass({
           })}>
           Get offline packs
         </Text>
+        <Text onPress={() => this.removePack(mapRef, 'test', (err, info)=> {
+            if (err) console.log(err);
+            console.log('Deleted', info.deleted);
+          })}>
+          Remove pack with name 'test'
+        </Text>
         <Mapbox
           style={styles.container}
           direction={0}

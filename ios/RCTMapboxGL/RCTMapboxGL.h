@@ -11,7 +11,7 @@
 #import "RCTEventDispatcher.h"
 #import "RCTBridgeModule.h"
 
-@interface RCTMapboxGL : RCTView <MGLMapViewDelegate, MGLOfflinePackDelegate, RCTBridgeModule>
+@interface RCTMapboxGL : RCTView <MGLMapViewDelegate, RCTBridgeModule>
 
 - (instancetype)initWithEventDispatcher:(RCTEventDispatcher *)eventDispatcher;
 

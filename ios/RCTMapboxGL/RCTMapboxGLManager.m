@@ -197,24 +197,53 @@ RCT_EXPORT_METHOD(getPacksWithCompletionHandler:(nonnull NSNumber *)reactTag
             RCTMapboxGL *mapView = viewRegistry[reactTag];
             NSMutableArray* callbackArray = [NSMutableArray new];
             
-            [[MGLOfflineStorage sharedOfflineStorage] getPacksWithCompletionHandler:^(NSArray <MGLOfflinePack *> *packs, NSError *error) {
-                if (error != nil) {
-                    callback(@[@("Packs couldn’t be accessed for some reason.")]);
-                } else {
-                    for (MGLOfflinePack *pack in packs) {
-                        NSMutableDictionary *packDict = [NSMutableDictionary new];
-                        NSDictionary *userInfo = [NSKeyedUnarchiver unarchiveObjectWithData:pack.context];
-                        [packDict setObject:userInfo[@"name"] forKey:@"name"];
-                        [packDict setObject:@(pack.progress.countOfBytesCompleted) forKey:@"countOfBytesCompleted"];
-                        [packDict setObject:@(pack.progress.countOfResourcesCompleted) forKey:@"countOfResourcesCompleted"];
-                        [callbackArray addObject:packDict];
-                    }
-                }
-                callback(@[[NSNull null], callbackArray]);
-            }];
+            MGLOfflinePack *packs = [MGLOfflineStorage sharedOfflineStorage].packs;
+            
+            for (MGLOfflinePack *pack in packs) {
+                NSMutableDictionary *packDict = [NSMutableDictionary new];
+                NSDictionary *userInfo = [NSKeyedUnarchiver unarchiveObjectWithData:pack.context];
+                [packDict setObject:userInfo[@"name"] forKey:@"name"];
+                [packDict setObject:@(pack.progress.countOfBytesCompleted) forKey:@"countOfBytesCompleted"];
+                [packDict setObject:@(pack.progress.countOfResourcesCompleted) forKey:@"countOfResourcesCompleted"];
+                [callbackArray addObject:packDict];
+            }
+
+            callback(@[[NSNull null], callbackArray]);
         }
     }];
 }
+
+RCT_EXPORT_METHOD(removePack:(nonnull NSNumber *)reactTag
+                  packName:(NSString*)packName
+                  findEvents:(RCTResponseSenderBlock)callback)
+{
+    [_bridge.uiManager addUIBlock:^(RCTUIManager *uiManager, NSDictionary<NSNumber *, RCTMapboxGL *> *viewRegistry) {
+        RCTMapboxGL *mapView = viewRegistry[reactTag];
+        if ([mapView isKindOfClass:[RCTMapboxGL class]]) {
+            RCTMapboxGL *mapView = viewRegistry[reactTag];
+            
+            MGLOfflinePack *packs = [MGLOfflineStorage sharedOfflineStorage].packs;
+            BOOL hasDeletedAPack = NO;
+            
+            for (MGLOfflinePack *pack in packs) {
+                NSDictionary *userInfo = [NSKeyedUnarchiver unarchiveObjectWithData:pack.context];
+                if (userInfo[@"name"] == packName) {
+                    [[MGLOfflineStorage sharedOfflineStorage] removePack:pack withCompletionHandler:^(NSError * _Nullable error) {
+                        if (error != nil) {
+                            return RCTLogError(@"Error: %@", error.localizedFailureReason);
+                        } else {
+                            BOOL hasDeletedAPack = YES;
+                            NSMutableDictionary *deletedObject = [NSMutableDictionary new];
+                            [deletedObject setObject:userInfo[@"name"] forKey:@"deleted"];
+                            return callback(@[[NSNull null], deletedObject]);
+                        }
+                    }];
+                }
+            }
+        }
+    }];
+}
+
 
 
 RCT_EXPORT_METHOD(setZoomLevelAnimated:(nonnull NSNumber *)reactTag

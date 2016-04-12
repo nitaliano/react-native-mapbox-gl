@@ -109,6 +109,11 @@ RCT_EXPORT_MODULE();
     UITapGestureRecognizer *singleTap = [[UITapGestureRecognizer alloc] initWithTarget:self action:@selector(handleSingleTap:)];
     singleTap.delegate = self;
     [_map addGestureRecognizer:singleTap];
+    
+    // Setup offline pack notification handlers.
+    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(offlinePackProgressDidChange:) name:MGLOfflinePackProgressChangedNotification object:nil];
+    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(offlinePackDidReceiveError:) name:MGLOfflinePackErrorNotification object:nil];
+    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(offlinePackDidReceiveMaximumAllowedMapboxTiles:) name:MGLOfflinePackMaximumMapboxTilesReachedNotification object:nil];
 
     [self updateMap];
     [self addSubview:_map];
@@ -123,18 +128,15 @@ RCT_EXPORT_MODULE();
     NSDictionary *userInfo = @{ @"name": name };
     NSData *context = [NSKeyedArchiver archivedDataWithRootObject:userInfo];
     
-    __weak RCTMapboxGL *weakSelf = self;
     [[MGLOfflineStorage sharedOfflineStorage] addPackForRegion:region withContext:context completionHandler:^(MGLOfflinePack *pack, NSError *error) {
-        RCTMapboxGL *strongSelf = weakSelf;
-        if (error) {
-            RCTLogError(@"Error creating pack.");
+        if (error != nil) {
+            RCTLogError(@"Error: %@", error.localizedFailureReason);
         } else {
-            strongSelf.pack = pack;
-            pack.delegate = strongSelf;
             [pack resume];
         }
     }];
 }
+
 - (BOOL)gestureRecognizer:(UIGestureRecognizer *)gestureRecognizer shouldRecognizeSimultaneouslyWithGestureRecognizer:(UIGestureRecognizer *)otherGestureRecognizer
 {
     return YES;
@@ -527,8 +529,12 @@ RCT_EXPORT_MODULE();
     [_eventDispatcher sendInputEventWithName:@"onStartLoadingMap" body:event];
 }
 
-- (void)offlinePack:(MGLOfflinePack *)pack progressDidChange:(MGLOfflinePackProgress)progress {
+- (void)offlinePackProgressDidChange:(NSNotification *)notification {
+    
+    MGLOfflinePack *pack = notification.object;
     NSDictionary *userInfo = [NSKeyedUnarchiver unarchiveObjectWithData:pack.context];
+    MGLOfflinePackProgress progress = pack.progress;
+    
     NSDictionary *event = @{ @"target": self.reactTag,
                              @"src": @{
                                      @"name": userInfo[@"name"],
@@ -542,18 +548,28 @@ RCT_EXPORT_MODULE();
     [_eventDispatcher sendInputEventWithName:@"onOfflineProgressDidChange" body:event];
 }
 
-- (void)offlinePack:(MGLOfflinePack *)pack didReceiveMaximumAllowedMapboxTiles:(uint64_t)maximumCount {
+- (void)offlinePackDidReceiveMaximumAllowedMapboxTiles:(NSNotification *)notification {
+    MGLOfflinePack *pack = notification.object;
+    NSDictionary *userInfo = [NSKeyedUnarchiver unarchiveObjectWithData:pack.context];
+    uint64_t maximumCount = [notification.userInfo[MGLOfflinePackMaximumCountUserInfoKey] unsignedLongLongValue];
+    
     NSDictionary *event = @{ @"target": self.reactTag,
                              @"src": @{
+                                     @"name": userInfo[@"name"],
                                      @"maximumCount": @(maximumCount)
                                      }
                              };
     [_eventDispatcher sendInputEventWithName:@"onOfflineMaxAllowedMapboxTiles" body:event];
 }
 
-- (void)offlinePack:(MGLOfflinePack *)pack didReceiveError:(nonnull NSError *)error {
+- (void)offlinePackDidReceiveError:(NSNotification *)notification {
+    MGLOfflinePack *pack = notification.object;
+    NSDictionary *userInfo = [NSKeyedUnarchiver unarchiveObjectWithData:pack.context];
+    NSError *error = notification.userInfo[MGLOfflinePackErrorUserInfoKey];
+    
     NSDictionary *event = @{ @"target": self.reactTag,
                              @"src": @{
+                                     @"name": userInfo[@"name"],
                                      @"error": [error localizedDescription]
                                      }
                              };
