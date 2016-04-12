@@ -106,6 +106,10 @@ RCT_EXPORT_MODULE();
     UILongPressGestureRecognizer *longPress = [[UILongPressGestureRecognizer alloc] initWithTarget:self action:@selector(handleLongPress:)];
     [self addGestureRecognizer:longPress];
 
+    UITapGestureRecognizer *singleTap = [[UITapGestureRecognizer alloc] initWithTarget:self action:@selector(handleSingleTap:)];
+    singleTap.delegate = self;
+    [_map addGestureRecognizer:singleTap];
+
     [self updateMap];
     [self addSubview:_map];
     [self layoutSubviews];
@@ -130,6 +134,10 @@ RCT_EXPORT_MODULE();
             [pack resume];
         }
     }];
+}
+- (BOOL)gestureRecognizer:(UIGestureRecognizer *)gestureRecognizer shouldRecognizeSimultaneouslyWithGestureRecognizer:(UIGestureRecognizer *)otherGestureRecognizer
+{
+    return YES;
 }
 
 - (void)layoutSubviews
@@ -380,11 +388,7 @@ RCT_EXPORT_MODULE();
 - (BOOL)mapView:(RCTMapboxGL *)mapView annotationCanShowCallout:(id <MGLAnnotation>)annotation {
     NSString *title = [(RCTMGLAnnotation *) annotation title];
     NSString *subtitle = [(RCTMGLAnnotation *) annotation subtitle];
-    if ([title length] != 0 || [subtitle length] != 0 ) {
-        return YES;
-    } else {
-        return NO;
-    }
+    return ([title length] != 0 || [subtitle length] != 0);
 }
 
 -(CLLocationCoordinate2D)centerCoordinate {
@@ -406,11 +410,8 @@ RCT_EXPORT_MODULE();
 
 - (void)removeAnnotation:(NSString*)selectedIdentifier
 {
-    NSUInteger keyCount = [_annotations count];
-    if (keyCount > 0) {
-        [_map removeAnnotation:[_annotations objectForKey:selectedIdentifier]];
-        [_annotations removeObjectForKey:selectedIdentifier];
-    }
+    [_map removeAnnotation:[_annotations objectForKey:selectedIdentifier]];
+    [_annotations removeObjectForKey:selectedIdentifier];
 }
 
 - (void) setContentInset:(UIEdgeInsets)inset
@@ -421,11 +422,8 @@ RCT_EXPORT_MODULE();
 
 - (void)removeAllAnnotations
 {
-    NSUInteger keyCount = [_annotations count];
-    if (keyCount > 0) {
-        [_map removeAnnotations:_map.annotations];
-        [_annotations removeAllObjects];
-    }
+    [_map removeAnnotations:_map.annotations];
+    [_annotations removeAllObjects];
 }
 
 - (UIButton *)mapView:(MGLMapView *)mapView rightCalloutAccessoryViewForAnnotation:(id <MGLAnnotation>)annotation;
