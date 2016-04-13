@@ -92,7 +92,7 @@ RCT_EXPORT_VIEW_PROPERTY(zoomLevel, double);
 RCT_EXPORT_VIEW_PROPERTY(userLocationVerticalAlignment, int);
 
 RCT_EXPORT_METHOD(getCenterCoordinateZoomLevel:(nonnull NSNumber *)reactTag
-                  findEvents:(RCTResponseSenderBlock)callback)
+                  callback:(RCTResponseSenderBlock)callback)
 {
     [_bridge.uiManager addUIBlock:^(RCTUIManager *uiManager, NSDictionary<NSNumber *, RCTMapboxGL *> *viewRegistry) {
         RCTMapboxGL *mapView = viewRegistry[reactTag];
@@ -110,7 +110,7 @@ RCT_EXPORT_METHOD(getCenterCoordinateZoomLevel:(nonnull NSNumber *)reactTag
 }
 
 RCT_EXPORT_METHOD(getDirection:(nonnull NSNumber *)reactTag
-                  findEvents:(RCTResponseSenderBlock)callback)
+                  callback:(RCTResponseSenderBlock)callback)
 {
     [_bridge.uiManager addUIBlock:^(RCTUIManager *uiManager, NSDictionary<NSNumber *, RCTMapboxGL *> *viewRegistry) {
         RCTMapboxGL *mapView = viewRegistry[reactTag];
@@ -177,19 +177,35 @@ RCT_EXPORT_METHOD(addPackForRegion:(nonnull NSNumber *)reactTag
     [_bridge.uiManager addUIBlock:^(RCTUIManager *uiManager, NSDictionary<NSNumber *, RCTMapboxGL *> *viewRegistry) {
         RCTMapboxGL *mapView = viewRegistry[reactTag];
         if ([mapView isKindOfClass:[RCTMapboxGL class]]) {
-            if ([[options valueForKey:@"type"] isEqualToString:@"bbox"]) {
-                NSArray *b = [options valueForKey:@"bounds"];
-                MGLCoordinateBounds bounds = MGLCoordinateBoundsMake(CLLocationCoordinate2DMake([b[0] floatValue], [b[1] floatValue]), CLLocationCoordinate2DMake([b[2] floatValue], [b[3] floatValue]));
-                [mapView createOfflinePack:bounds style:[NSURL URLWithString:[options valueForKey:@"style"]] fromZoomLevel:[[options valueForKey:@"minZoomLevel"] floatValue] toZoomLevel:[[options valueForKey:@"maxZoomLevel"] floatValue] name:[options valueForKey:@"name"] type:[options valueForKey:@"type"]];
-            } else {
-                RCTLogError(@"Offline type %@ not supported. Only type `bbox` supported.", [options valueForKey:@"type"]);
+            
+            if ([options objectForKey:@"name"] == nil) {
+                return RCTLogError(@"Name is required.");
             }
+            if ([options objectForKey:@"minZoomLevel"] == nil) {
+                return RCTLogError(@"minZoomLevel is required.");
+            }
+            if ([options objectForKey:@"maxZoomLevel"] == nil) {
+                return RCTLogError(@"maxZoomLevel is required.");
+            }
+            if ([options objectForKey:@"bounds"] == nil) {
+                return RCTLogError(@"bounds is required.");
+            }
+            if ([options objectForKey:@"styleURL"] == nil) {
+                return RCTLogError(@"styleURL is required.");
+            }
+            if (!([[options valueForKey:@"type"] isEqualToString:@"bbox"])) {
+                return RCTLogError(@"Offline type %@ not supported. Only type `bbox` supported.", [options valueForKey:@"type"]);
+            }
+            
+            NSArray *b = [options valueForKey:@"bounds"];
+            MGLCoordinateBounds bounds = MGLCoordinateBoundsMake(CLLocationCoordinate2DMake([b[0] floatValue], [b[1] floatValue]), CLLocationCoordinate2DMake([b[2] floatValue], [b[3] floatValue]));
+            [mapView createOfflinePack:bounds styleURL:[NSURL URLWithString:[options valueForKey:@"styleURL"]] fromZoomLevel:[[options valueForKey:@"minZoomLevel"] floatValue] toZoomLevel:[[options valueForKey:@"maxZoomLevel"] floatValue] name:[options valueForKey:@"name"] type:[options valueForKey:@"type"] metadata:[options valueForKey:@"metadata"]];
         }
     }];
 }
 
-RCT_EXPORT_METHOD(getPacksWithCompletionHandler:(nonnull NSNumber *)reactTag
-                  findEvents:(RCTResponseSenderBlock)callback)
+RCT_EXPORT_METHOD(getPacks:(nonnull NSNumber *)reactTag
+                  callback:(RCTResponseSenderBlock)callback)
 {
     [_bridge.uiManager addUIBlock:^(RCTUIManager *uiManager, NSDictionary<NSNumber *, RCTMapboxGL *> *viewRegistry) {
         RCTMapboxGL *mapView = viewRegistry[reactTag];
@@ -201,8 +217,10 @@ RCT_EXPORT_METHOD(getPacksWithCompletionHandler:(nonnull NSNumber *)reactTag
             
             for (MGLOfflinePack *pack in packs) {
                 NSMutableDictionary *packDict = [NSMutableDictionary new];
-                NSDictionary *userInfo = [NSKeyedUnarchiver unarchiveObjectWithData:pack.context];
+                NSMutableDictionary *userInfo = [[NSKeyedUnarchiver unarchiveObjectWithData:pack.context] mutableCopy];
                 [packDict setObject:userInfo[@"name"] forKey:@"name"];
+                [userInfo removeObjectForKey:@"name"];
+                [packDict setObject:userInfo forKey:@"metadata"];
                 [packDict setObject:@(pack.progress.countOfBytesCompleted) forKey:@"countOfBytesCompleted"];
                 [packDict setObject:@(pack.progress.countOfResourcesCompleted) forKey:@"countOfResourcesCompleted"];
                 [callbackArray addObject:packDict];
@@ -215,7 +233,7 @@ RCT_EXPORT_METHOD(getPacksWithCompletionHandler:(nonnull NSNumber *)reactTag
 
 RCT_EXPORT_METHOD(removePack:(nonnull NSNumber *)reactTag
                   packName:(NSString*)packName
-                  findEvents:(RCTResponseSenderBlock)callback)
+                  callback:(RCTResponseSenderBlock)callback)
 {
     [_bridge.uiManager addUIBlock:^(RCTUIManager *uiManager, NSDictionary<NSNumber *, RCTMapboxGL *> *viewRegistry) {
         RCTMapboxGL *mapView = viewRegistry[reactTag];
@@ -230,7 +248,7 @@ RCT_EXPORT_METHOD(removePack:(nonnull NSNumber *)reactTag
                 if (userInfo[@"name"] == packName) {
                     [[MGLOfflineStorage sharedOfflineStorage] removePack:pack withCompletionHandler:^(NSError * _Nullable error) {
                         if (error != nil) {
-                            return RCTLogError(@"Error: %@", error.localizedFailureReason);
+                            RCTLogError(@"Error: %@", error.localizedFailureReason);
                         } else {
                             BOOL hasDeletedAPack = YES;
                             NSMutableDictionary *deletedObject = [NSMutableDictionary new];
@@ -412,7 +430,7 @@ RCT_EXPORT_METHOD(addAnnotations:(nonnull NSNumber *)reactTag
     }];
 }
 
-NSObject *convertToMGLAnnotation (NSObject *annotationObject)
+NSObject *convertToMGLAnnotation (NSDictionary *annotationObject)
 {
     if (![annotationObject valueForKey:@"type"]) {
         RCTLogError(@"type point, polyline or polygon required");

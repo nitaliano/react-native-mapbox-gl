@@ -7,8 +7,8 @@ var MapMixins = {
   addPackForRegion(mapRef, options) {
     NativeModules.MapboxGLManager.addPackForRegion(React.findNodeHandle(this.refs[mapRef]), options);
   },
-  getPacksWithCompletionHandler(mapRef, callback) {
-    NativeModules.MapboxGLManager.getPacksWithCompletionHandler(React.findNodeHandle(this.refs[mapRef]), callback);
+  getPacks(mapRef, callback) {
+    NativeModules.MapboxGLManager.getPacks(React.findNodeHandle(this.refs[mapRef]), callback);
   },
   removePack(mapRef, packName, callback) {
     NativeModules.MapboxGLManager.removePack(React.findNodeHandle(this.refs[mapRef]), packName, callback);

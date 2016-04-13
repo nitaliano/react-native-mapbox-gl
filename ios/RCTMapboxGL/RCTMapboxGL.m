@@ -120,12 +120,13 @@ RCT_EXPORT_MODULE();
     [self layoutSubviews];
 }
 
--(void)createOfflinePack:(MGLCoordinateBounds)bounds style:(NSURL*)style fromZoomLevel:(double)fromZoomLevel toZoomLevel:(double)toZoomLevel name:(NSString*)name type:(NSString*)type
+-(void)createOfflinePack:(MGLCoordinateBounds)bounds styleURL:(NSURL*)styleURL fromZoomLevel:(double)fromZoomLevel toZoomLevel:(double)toZoomLevel name:(NSString*)name type:(NSString*)type metadata:(NSDictionary *)metadata
 {
     
-    id <MGLOfflineRegion> region = [[MGLTilePyramidOfflineRegion alloc] initWithStyleURL:style bounds:bounds fromZoomLevel:fromZoomLevel toZoomLevel:toZoomLevel];
+    id <MGLOfflineRegion> region = [[MGLTilePyramidOfflineRegion alloc] initWithStyleURL:styleURL bounds:bounds fromZoomLevel:fromZoomLevel toZoomLevel:toZoomLevel];
     
-    NSDictionary *userInfo = @{ @"name": name };
+    NSMutableDictionary *userInfo = [metadata mutableCopy];
+    userInfo[@"name"] = name;
     NSData *context = [NSKeyedArchiver archivedDataWithRootObject:userInfo];
     
     [[MGLOfflineStorage sharedOfflineStorage] addPackForRegion:region withContext:context completionHandler:^(MGLOfflinePack *pack, NSError *error) {
@@ -556,7 +557,7 @@ RCT_EXPORT_MODULE();
     NSDictionary *event = @{ @"target": self.reactTag,
                              @"src": @{
                                      @"name": userInfo[@"name"],
-                                     @"maximumCount": @(maximumCount)
+                                     @"maxTiles": @(maximumCount)
                                      }
                              };
     [_eventDispatcher sendInputEventWithName:@"onOfflineMaxAllowedMapboxTiles" body:event];
