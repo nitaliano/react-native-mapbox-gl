@@ -65,11 +65,11 @@ public class ReactNativeMapboxGLManager extends SimpleViewManager<MapView> {
     public static final String PROP_COMPASS_IS_HIDDEN = "compassIsHidden";
     public static final String PROP_LOGO_IS_HIDDEN = "logoIsHidden";
     public static final String PROP_ATTRIBUTION_BUTTON_IS_HIDDEN = "attributionButtonIsHidden";
+    private static String APPLICATION_ID;
     private MapView mapView;
     private MapboxMap mapboxMap;
     private UiSettings uiSettings;
     private TrackingSettings trackingSettings;
-
 
     @Override
     public String getName() {
@@ -81,6 +81,7 @@ public class ReactNativeMapboxGLManager extends SimpleViewManager<MapView> {
         mapView = new MapView(context);
         mapView.setAccessToken("pk.foo");
         mapView.onCreate(null);
+        APPLICATION_ID = context.getPackageName();
         StrictMode.ThreadPolicy policy = new StrictMode.ThreadPolicy.Builder().permitAll().build();
         StrictMode.setThreadPolicy(policy);
         return mapView;
@@ -126,6 +127,13 @@ public class ReactNativeMapboxGLManager extends SimpleViewManager<MapView> {
         return new BitmapDrawable(view.getResources(), x);
     }
 
+    public static Drawable drawableFromDrawableName(MapView view, String drawableName) {
+        Bitmap x;
+        int resID = view.getResources().getIdentifier(drawableName, "drawable", APPLICATION_ID);
+        x = BitmapFactory.decodeResource(view.getResources(), resID);
+        return new BitmapDrawable(view.getResources(), x);
+    }
+
     @ReactProp(name = PROP_ANNOTATIONS)
     public void setAnnotationClear(MapView view, @Nullable ReadableArray value) {
         setAnnotations(view, value, true);
@@ -160,10 +168,15 @@ public class ReactNativeMapboxGLManager extends SimpleViewManager<MapView> {
                         ReadableMap annotationImage = annotation.getMap("annotationImage");
                         String annotationURL = annotationImage.getString("url");
                         try {
-//                            Drawable image = drawableFromUrl(mapView, annotationURL);
-//                            IconFactory iconFactory = mapboxMap.getIconFactory();
-//                            Icon icon = iconFactory.fromDrawable(image);
-//                            marker.icon(icon);
+                            Drawable image;
+                            if (annotationURL.startsWith("image!")) {
+                                image = drawableFromDrawableName(mapView, annotationURL.replace("image!", ""));
+                            } else {
+                                image = drawableFromUrl(mapView, annotationURL);
+                            }
+                            IconFactory iconFactory = view.getIconFactory();
+                            Icon icon = iconFactory.fromDrawable(image);
+                            marker.icon(icon);
                         } catch (Exception e) {
                             e.printStackTrace();
                         }

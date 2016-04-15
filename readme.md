@@ -4,13 +4,17 @@ _An experimental React Native component for building maps with the [Mapbox iOS S
 
 [![npm version](https://badge.fury.io/js/react-native-mapbox-gl.svg)](https://badge.fury.io/js/react-native-mapbox-gl) [![Circle CI](https://circleci.com/gh/mapbox/react-native-mapbox-gl/tree/master.svg?style=svg)](https://circleci.com/gh/mapbox/react-native-mapbox-gl/tree/master)
 
-# Support
+## Support
 
-This project is **experimental**. Mapbox does not officially support React Native Mapbox GL to the same extent as the [iOS](https://www.mapbox.com/ios-sdk/) or [Android](https://www.mapbox.com/android-sdk/) SDKs it depends on; however, bug reports and pull requests are certainly welcome.
+This project is **experimental**. Mapbox does not officially support React Native Mapbox GL to the same extent as the [iOS](https://www.mapbox.com/ios-sdk/) or [Android](https://www.mapbox.com/android-sdk/) SDKs it depends on. Bug reports and pull requests are very welcome.
 
-If you need help, try [the Discord channel](https://discord.gg/0iAWSG9X4zDK8ptn).
+## Installation
 
-# Installation
+**Dependencies**
+
+* node
+* npm
+* [React Native](https://facebook.github.io/react-native/) >= 0.15.0
 
 ```
 npm install react-native-mapbox-gl --save
@@ -20,11 +24,11 @@ npm install react-native-mapbox-gl --save
 * [iOS](/ios/install.md) (manually),
   or with [CocoaPods](/ios/install-cocoapods.md)
 
-# API
+## API
 * [Android](/android/API.md)
 * [iOS](/ios/API.md)
 
-# Example
+## Example
 * [Android](/android/example.js)
 * [iOS](/ios//example.js)
 
