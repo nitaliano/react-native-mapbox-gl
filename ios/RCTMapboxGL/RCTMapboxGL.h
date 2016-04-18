@@ -37,6 +37,7 @@
 - (void)addAnnotation:(NSObject *)annotation;
 - (void)removeAnnotation:(NSString*)selectedIdentifier;
 - (void)removeAllAnnotations;
+- (MGLCoordinateBounds)visibleCoordinateBounds;
 - (void)setVisibleCoordinateBounds:(MGLCoordinateBounds)bounds edgePadding:(UIEdgeInsets)padding animated:(BOOL)animated;
 - (void)setAttributionButtonVisibility:(BOOL)isVisible;
 - (void)setLogoVisibility:(BOOL)isVisible;

@@ -284,6 +284,11 @@ RCT_EXPORT_MODULE();
     [self updateMap];
 }
 
+- (MGLCoordinateBounds) visibleCoordinateBounds
+{
+    return [_map visibleCoordinateBounds];
+}
+
 - (void)setUserTrackingMode:(int)userTrackingMode
 {
     if (userTrackingMode > 3 || userTrackingMode < 0) {

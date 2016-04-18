@@ -7,7 +7,7 @@ var {
   AppRegistry,
   StyleSheet,
   Text,
-  StatusBarIOS,
+  StatusBar,
   View
 } = React;
 
@@ -85,8 +85,11 @@ var MapExample = React.createClass({
   onTap(location) {
     console.log('tapped', location);
   },
-  render: function() {
-    StatusBarIOS.setHidden(true);
+  onOfflineProgressDidChange(progress) {
+    console.log(progress);
+  },
+  render() {
+    StatusBar.setHidden(true);
     return (
       <View style={styles.container}>
         <Text onPress={() => this.setDirectionAnimated(mapRef, 0)}>
@@ -145,17 +148,20 @@ var MapExample = React.createClass({
         <Text onPress={() => this.setUserTrackingMode(mapRef, this.userTrackingMode.follow)}>
           Set userTrackingMode to follow
         </Text>
-        <Text onPress={() => this.getCenterCoordinateZoomLevel(mapRef, (err, location)=> {
-            if (err) console.log(err);
+        <Text onPress={() => this.getCenterCoordinateZoomLevel(mapRef, (location)=> {
             console.log(location);
           })}>
           Get location
         </Text>
-        <Text onPress={() => this.getDirection(mapRef, (err, direction)=> {
-            if (err) console.log(err);
+        <Text onPress={() => this.getDirection(mapRef, (direction)=> {
             console.log(direction);
           })}>
           Get direction
+        </Text>
+        <Text onPress={() => this.getBounds(mapRef, (bounds)=> {
+            console.log(bounds);
+          })}>
+          Get bounds
         </Text>
         <Text onPress={() => this.addPackForRegion(mapRef, {
             name: 'test',
@@ -163,11 +169,11 @@ var MapExample = React.createClass({
             bounds: [0, 0, 0, 0],
             minZoomLevel: 0,
             maxZoomLevel: 0,
-            style: this.mapStyles.emerald
+            styleURL: this.mapStyles.emerald
           })}>
           Create offline pack
         </Text>
-        <Text onPress={() => this.getPacksWithCompletionHandler(mapRef, (err, packs)=> {
+        <Text onPress={() => this.getPacks(mapRef, (err, packs)=> {
             if (err) console.log(err);
             console.log(packs);
           })}>
@@ -175,7 +181,11 @@ var MapExample = React.createClass({
         </Text>
         <Text onPress={() => this.removePack(mapRef, 'test', (err, info)=> {
             if (err) console.log(err);
-            console.log('Deleted', info.deleted);
+            if (info) {
+              console.log('Deleted', info.deleted);
+            } else {
+              console.log('No packs to delete');
+            }
           })}>
           Remove pack with name 'test'
         </Text>

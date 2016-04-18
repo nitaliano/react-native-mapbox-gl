@@ -109,6 +109,23 @@ RCT_EXPORT_METHOD(getCenterCoordinateZoomLevel:(nonnull NSNumber *)reactTag
     }];
 }
 
+RCT_EXPORT_METHOD(getBounds:(nonnull NSNumber *)reactTag
+                  callback:(RCTResponseSenderBlock)callback)
+{
+    [_bridge.uiManager addUIBlock:^(RCTUIManager *uiManager, NSDictionary<NSNumber *, RCTMapboxGL *> *viewRegistry) {
+        RCTMapboxGL *mapView = viewRegistry[reactTag];
+        MGLCoordinateBounds bounds = [mapView visibleCoordinateBounds];
+        NSMutableArray *callbackArray = [[NSMutableArray alloc] init];
+        
+        [callbackArray addObject:@(bounds.sw.latitude)];
+        [callbackArray addObject:@(bounds.sw.longitude)];
+        [callbackArray addObject:@(bounds.ne.latitude)];
+        [callbackArray addObject:@(bounds.ne.longitude)];
+        
+        callback(@[callbackArray]);
+    }];
+}
+
 RCT_EXPORT_METHOD(getDirection:(nonnull NSNumber *)reactTag
                   callback:(RCTResponseSenderBlock)callback)
 {
@@ -193,7 +210,10 @@ RCT_EXPORT_METHOD(addPackForRegion:(nonnull NSNumber *)reactTag
             if ([options objectForKey:@"styleURL"] == nil) {
                 return RCTLogError(@"styleURL is required.");
             }
-            if (!([[options valueForKey:@"type"] isEqualToString:@"bbox"])) {
+            if ([options objectForKey:@"metadata"] == nil) {
+                return RCTLogError(@"metadata is required.");
+            }
+            if (!([[options objectForKey:@"type"] isEqualToString:@"bbox"])) {
                 return RCTLogError(@"Offline type %@ not supported. Only type `bbox` supported.", [options valueForKey:@"type"]);
             }
             
@@ -241,23 +261,31 @@ RCT_EXPORT_METHOD(removePack:(nonnull NSNumber *)reactTag
             RCTMapboxGL *mapView = viewRegistry[reactTag];
             
             MGLOfflinePack *packs = [MGLOfflineStorage sharedOfflineStorage].packs;
-            BOOL hasDeletedAPack = NO;
+            MGLOfflinePack *tempPack;
             
             for (MGLOfflinePack *pack in packs) {
                 NSDictionary *userInfo = [NSKeyedUnarchiver unarchiveObjectWithData:pack.context];
                 if (userInfo[@"name"] == packName) {
-                    [[MGLOfflineStorage sharedOfflineStorage] removePack:pack withCompletionHandler:^(NSError * _Nullable error) {
-                        if (error != nil) {
-                            RCTLogError(@"Error: %@", error.localizedFailureReason);
-                        } else {
-                            BOOL hasDeletedAPack = YES;
-                            NSMutableDictionary *deletedObject = [NSMutableDictionary new];
-                            [deletedObject setObject:userInfo[@"name"] forKey:@"deleted"];
-                            return callback(@[[NSNull null], deletedObject]);
-                        }
-                    }];
+                    tempPack = pack;
+                    break;
                 }
             }
+        
+            if (tempPack == nil) {
+                return callback(@[[NSNull null]]);
+            }
+            
+            NSDictionary *userInfo = [NSKeyedUnarchiver unarchiveObjectWithData:tempPack.context];
+            
+            [[MGLOfflineStorage sharedOfflineStorage] removePack:tempPack withCompletionHandler:^(NSError * _Nullable error) {
+                if (error != nil) {
+                    RCTLogError(@"Error: %@", error.localizedFailureReason);
+                } else {
+                    NSMutableDictionary *deletedObject = [NSMutableDictionary new];
+                    [deletedObject setObject:userInfo[@"name"] forKey:@"deleted"];
+                    callback(@[[NSNull null], deletedObject]);
+                }
+            }];
         }
     }];
 }
