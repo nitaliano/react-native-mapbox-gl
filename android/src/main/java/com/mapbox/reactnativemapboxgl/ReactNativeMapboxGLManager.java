@@ -140,7 +140,7 @@ public class ReactNativeMapboxGLManager extends SimpleViewManager<MapView> {
     }
 
     public void setAnnotations(MapView view, @Nullable ReadableArray value, boolean clearMap) {
-        if (value == null || value.size() < 1) {
+        if (value == null) {
             Log.e(REACT_CLASS, "Error: No annotations");
         } else {
             if (clearMap) {
