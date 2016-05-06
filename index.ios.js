@@ -4,65 +4,67 @@ var React = require('react');
 var ReactNative = require('react-native');
 var { NativeModules, requireNativeComponent, findNodeHandle } = ReactNative;
 
+var { MapboxGLManager } = NativeModules;
+
 var MapMixins = {
   addPackForRegion(mapRef, options) {
-    NativeModules.MapboxGLManager.addPackForRegion(findNodeHandle(this.refs[mapRef]), options);
+    MapboxGLManager.addPackForRegion(findNodeHandle(this.refs[mapRef]), options);
   },
   getPacks(mapRef, callback) {
-    NativeModules.MapboxGLManager.getPacks(findNodeHandle(this.refs[mapRef]), callback);
+    MapboxGLManager.getPacks(findNodeHandle(this.refs[mapRef]), callback);
   },
   removePack(mapRef, packName, callback) {
-    NativeModules.MapboxGLManager.removePack(findNodeHandle(this.refs[mapRef]), packName, callback);
+    MapboxGLManager.removePack(findNodeHandle(this.refs[mapRef]), packName, callback);
   },
   setDirectionAnimated(mapRef, heading) {
-    NativeModules.MapboxGLManager.setDirectionAnimated(findNodeHandle(this.refs[mapRef]), heading);
+    MapboxGLManager.setDirectionAnimated(findNodeHandle(this.refs[mapRef]), heading);
   },
   setZoomLevelAnimated(mapRef, zoomLevel) {
-    NativeModules.MapboxGLManager.setZoomLevelAnimated(findNodeHandle(this.refs[mapRef]), zoomLevel);
+    MapboxGLManager.setZoomLevelAnimated(findNodeHandle(this.refs[mapRef]), zoomLevel);
   },
   setCenterCoordinateAnimated(mapRef, latitude, longitude) {
-    NativeModules.MapboxGLManager.setCenterCoordinateAnimated(findNodeHandle(this.refs[mapRef]), latitude, longitude);
+    MapboxGLManager.setCenterCoordinateAnimated(findNodeHandle(this.refs[mapRef]), latitude, longitude);
   },
   setCenterCoordinateZoomLevelAnimated(mapRef, latitude, longitude, zoomLevel) {
-    NativeModules.MapboxGLManager.setCenterCoordinateZoomLevelAnimated(findNodeHandle(this.refs[mapRef]), latitude, longitude, zoomLevel);
+    MapboxGLManager.setCenterCoordinateZoomLevelAnimated(findNodeHandle(this.refs[mapRef]), latitude, longitude, zoomLevel);
   },
   setCameraAnimated(mapRef, latitude, longitude, fromDistance, pitch, heading, duration) {
-    NativeModules.MapboxGLManager.setCameraAnimated(findNodeHandle(this.refs[mapRef]), latitude, longitude, fromDistance, pitch, heading, duration);
+    MapboxGLManager.setCameraAnimated(findNodeHandle(this.refs[mapRef]), latitude, longitude, fromDistance, pitch, heading, duration);
   },
   addAnnotations(mapRef, annotations) {
-    NativeModules.MapboxGLManager.addAnnotations(findNodeHandle(this.refs[mapRef]), annotations);
+    MapboxGLManager.addAnnotations(findNodeHandle(this.refs[mapRef]), annotations);
   },
   updateAnnotation(mapRef, annotation) {
-    NativeModules.MapboxGLManager.updateAnnotation(findNodeHandle(this.refs[mapRef]), annotation);
+    MapboxGLManager.updateAnnotation(findNodeHandle(this.refs[mapRef]), annotation);
   },
   selectAnnotationAnimated(mapRef, selectedIdentifier) {
-    NativeModules.MapboxGLManager.selectAnnotationAnimated(findNodeHandle(this.refs[mapRef]), selectedIdentifier);
+    MapboxGLManager.selectAnnotationAnimated(findNodeHandle(this.refs[mapRef]), selectedIdentifier);
   },
   removeAnnotation(mapRef, selectedIdentifier) {
-    NativeModules.MapboxGLManager.removeAnnotation(findNodeHandle(this.refs[mapRef]), selectedIdentifier);
+    MapboxGLManager.removeAnnotation(findNodeHandle(this.refs[mapRef]), selectedIdentifier);
   },
   removeAllAnnotations(mapRef) {
-    NativeModules.MapboxGLManager.removeAllAnnotations(findNodeHandle(this.refs[mapRef]));
+    MapboxGLManager.removeAllAnnotations(findNodeHandle(this.refs[mapRef]));
   },
   setVisibleCoordinateBoundsAnimated(mapRef, latitudeSW, longitudeSW, latitudeNE, longitudeNE, paddingTop, paddingRight, paddingBottom, paddingLeft) {
-    NativeModules.MapboxGLManager.setVisibleCoordinateBoundsAnimated(findNodeHandle(this.refs[mapRef]), latitudeSW, longitudeSW, latitudeNE, longitudeNE, paddingTop, paddingRight, paddingBottom, paddingLeft);
+    MapboxGLManager.setVisibleCoordinateBoundsAnimated(findNodeHandle(this.refs[mapRef]), latitudeSW, longitudeSW, latitudeNE, longitudeNE, paddingTop, paddingRight, paddingBottom, paddingLeft);
   },
   setUserTrackingMode(mapRef, userTrackingMode) {
-    NativeModules.MapboxGLManager.setUserTrackingMode(findNodeHandle(this.refs[mapRef]), userTrackingMode);
+    MapboxGLManager.setUserTrackingMode(findNodeHandle(this.refs[mapRef]), userTrackingMode);
   },
   getCenterCoordinateZoomLevel(mapRef, callback) {
-    NativeModules.MapboxGLManager.getCenterCoordinateZoomLevel(findNodeHandle(this.refs[mapRef]), callback);
+    MapboxGLManager.getCenterCoordinateZoomLevel(findNodeHandle(this.refs[mapRef]), callback);
   },
   getDirection(mapRef, callback) {
-    NativeModules.MapboxGLManager.getDirection(findNodeHandle(this.refs[mapRef]), callback);
+    MapboxGLManager.getDirection(findNodeHandle(this.refs[mapRef]), callback);
   },
   getBounds(mapRef, callback) {
-    NativeModules.MapboxGLManager.getBounds(findNodeHandle(this.refs[mapRef]), callback);
+    MapboxGLManager.getBounds(findNodeHandle(this.refs[mapRef]), callback);
   },
-  mapStyles: NativeModules.MapboxGLManager.mapStyles,
-  userTrackingMode: NativeModules.MapboxGLManager.userTrackingMode,
-  userLocationVerticalAlignment: NativeModules.MapboxGLManager.userLocationVerticalAlignment,
-  unknownResourceCount: NativeModules.MapboxGLManager.unknownResourceCount
+  mapStyles: MapboxGLManager.mapStyles,
+  userTrackingMode: MapboxGLManager.userTrackingMode,
+  userLocationVerticalAlignment: MapboxGLManager.userLocationVerticalAlignment,
+  unknownResourceCount: MapboxGLManager.unknownResourceCount
 };
 
 var MapView = React.createClass({
