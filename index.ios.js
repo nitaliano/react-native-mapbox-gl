@@ -1,6 +1,8 @@
 'use strict';
 
 var React = require('react');
+var { PropTypes } = React;
+
 var ReactNative = require('react-native');
 var { NativeModules, requireNativeComponent, findNodeHandle } = ReactNative;
 
@@ -111,62 +113,62 @@ var MapView = React.createClass({
     if (this.props.onOfflineDidRecieveError) this.props.onOfflineDidRecieveError(event.nativeEvent.src);
   },
   propTypes: {
-    showsUserLocation: React.PropTypes.bool,
-    rotateEnabled: React.PropTypes.bool,
-    scrollEnabled: React.PropTypes.bool,
-    zoomEnabled: React.PropTypes.bool,
-    accessToken: React.PropTypes.string.isRequired,
-    zoomLevel: React.PropTypes.number,
-    direction: React.PropTypes.number,
-    styleURL: React.PropTypes.string,
-    clipsToBounds: React.PropTypes.bool,
-    debugActive: React.PropTypes.bool,
-    userTrackingMode: React.PropTypes.number,
-    attributionButton: React.PropTypes.bool,
-    centerCoordinate: React.PropTypes.shape({
-      latitude: React.PropTypes.number.isRequired,
-      longitude: React.PropTypes.number.isRequired
+    showsUserLocation: PropTypes.bool,
+    rotateEnabled: PropTypes.bool,
+    scrollEnabled: PropTypes.bool,
+    zoomEnabled: PropTypes.bool,
+    accessToken: PropTypes.string.isRequired,
+    zoomLevel: PropTypes.number,
+    direction: PropTypes.number,
+    styleURL: PropTypes.string,
+    clipsToBounds: PropTypes.bool,
+    debugActive: PropTypes.bool,
+    userTrackingMode: PropTypes.number,
+    attributionButton: PropTypes.bool,
+    centerCoordinate: PropTypes.shape({
+      latitude: PropTypes.number.isRequired,
+      longitude: PropTypes.number.isRequired
     }),
-    annotations: React.PropTypes.arrayOf(React.PropTypes.shape({
-      coordinates: React.PropTypes.array.isRequired,
-      title: React.PropTypes.string,
-      subtitle: React.PropTypes.string,
-      fillAlpha: React.PropTypes.number,
-      fillColor: React.PropTypes.string,
-      strokeAlpha: React.PropTypes.number,
-      strokeColor: React.PropTypes.string,
-      strokeWidth: React.PropTypes.number,
-      id: React.PropTypes.string,
-      type: React.PropTypes.string.isRequired,
-      rightCalloutAccessory: React.PropTypes.object({
-        height: React.PropTypes.number,
-        width: React.PropTypes.number,
-        url: React.PropTypes.string
+    annotations: PropTypes.arrayOf(PropTypes.shape({
+      coordinates: PropTypes.array.isRequired,
+      title: PropTypes.string,
+      subtitle: PropTypes.string,
+      fillAlpha: PropTypes.number,
+      fillColor: PropTypes.string,
+      strokeAlpha: PropTypes.number,
+      strokeColor: PropTypes.string,
+      strokeWidth: PropTypes.number,
+      id: PropTypes.string,
+      type: PropTypes.string.isRequired,
+      rightCalloutAccessory: PropTypes.object({
+        height: PropTypes.number,
+        width: PropTypes.number,
+        url: PropTypes.string
       }),
-      annotationImage: React.PropTypes.object({
-        height: React.PropTypes.number,
-        width: React.PropTypes.number,
-        url: React.PropTypes.string
+      annotationImage: PropTypes.object({
+        height: PropTypes.number,
+        width: PropTypes.number,
+        url: PropTypes.string
       })
     })),
-    attributionButtonIsHidden: React.PropTypes.bool,
-    logoIsHidden: React.PropTypes.bool,
-    compassIsHidden: React.PropTypes.bool,
-    onRegionChange: React.PropTypes.func,
-    onRegionWillChange: React.PropTypes.func,
-    onOpenAnnotation: React.PropTypes.func,
-    onUpdateUserLocation: React.PropTypes.func,
-    onRightAnnotationTapped: React.PropTypes.func,
-    onFinishLoadingMap: React.PropTypes.func,
-    onStartLoadingMap: React.PropTypes.func,
-    onLocateUserFailed: React.PropTypes.func,
-    onLongPress: React.PropTypes.func,
-    onTap: React.PropTypes.func,
-    contentInset: React.PropTypes.array,
-    userLocationVerticalAlignment: React.PropTypes.number,
-    onOfflineProgressDidChange: React.PropTypes.func,
-    onOfflineMaxAllowedMapboxTiles: React.PropTypes.func,
-    onOfflineDidRecieveError: React.PropTypes.func
+    attributionButtonIsHidden: PropTypes.bool,
+    logoIsHidden: PropTypes.bool,
+    compassIsHidden: PropTypes.bool,
+    onRegionChange: PropTypes.func,
+    onRegionWillChange: PropTypes.func,
+    onOpenAnnotation: PropTypes.func,
+    onUpdateUserLocation: PropTypes.func,
+    onRightAnnotationTapped: PropTypes.func,
+    onFinishLoadingMap: PropTypes.func,
+    onStartLoadingMap: PropTypes.func,
+    onLocateUserFailed: PropTypes.func,
+    onLongPress: PropTypes.func,
+    onTap: PropTypes.func,
+    contentInset: PropTypes.array,
+    userLocationVerticalAlignment: PropTypes.number,
+    onOfflineProgressDidChange: PropTypes.func,
+    onOfflineMaxAllowedMapboxTiles: PropTypes.func,
+    onOfflineDidRecieveError: PropTypes.func
   },
   getDefaultProps() {
     return {
