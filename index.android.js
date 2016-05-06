@@ -2,7 +2,7 @@
 
 var React = require('react-native');
 var { NativeModules, requireNativeComponent, DeviceEventEmitter } = React;
-var Subscribable = require('Subscribable');
+var Subscribable = require('../react-native/Libraries/Components/Subscribable');
 
 var MapMixins = {
   setDirectionAnimated(mapRef, heading) {
