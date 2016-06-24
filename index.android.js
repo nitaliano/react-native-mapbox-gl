@@ -3,7 +3,7 @@
 var React = require('react');
 var { PropTypes } = React;
 var ReactNative = require('react-native');
-var { NativeModules, requireNativeComponent, findNodeHandle } = ReactNative;
+var { NativeModules, requireNativeComponent, findNodeHandle, View } = ReactNative;
 var { MapboxGLManager } = NativeModules;
 
 var MapMixins = {
@@ -53,7 +53,7 @@ var MapMixins = {
   userTrackingMode: MapboxGLManager.userTrackingMode
 };
 
-var ReactMapViewWrapper = React.createClass({
+var MapView = React.createClass({
   statics: {
     Mixin: MapMixins
   },
@@ -108,32 +108,34 @@ var ReactMapViewWrapper = React.createClass({
     onRegionChange: PropTypes.func,
     onOpenAnnotation: PropTypes.func,
     onLongPress: PropTypes.func,
-    onUserLocationChange: PropTypes.func
+    onUserLocationChange: PropTypes.func,
+    ...View.propTypes,
   },
-  handleOnChange(event) {
-    if (this.props.onRegionChange) this.props.onRegionChange(event);
+  _onRegionChange(event: Event) {
+    if (this.props.onRegionChange) this.props.onRegionChange(event.nativeEvent.src);
   },
-  handleUserLocation(event) {
-    if (this.props.onUserLocationChange) this.props.onUserLocationChange(event);
+  _onUserLocationChange(event: Event) {
+    if (this.props.onUserLocationChange) this.props.onUserLocationChange(event.nativeEvent.src);
   },
-  handleOnOpenAnnotation(event) {
-    if (this.props.onOpenAnnotation) this.props.onOpenAnnotation(event);
+  _onOpenAnnotation(event: Event) {
+    if (this.props.onOpenAnnotation) this.props.onOpenAnnotation(event.nativeEvent.src);
   },
-  handleOnLongPress(event) {
-    if (this.props.onLongPress) this.props.onLongPress(event);
+  _onLongPress(event: Event) {
+    if (this.props.onLongPress) this.props.onLongPress(event.nativeEvent.src);
   },
   render() {
     return (
-      <ReactMapView
-        onRegionChange={this.handleOnChange}
-        onUserLocationChange={this.handleUserLocation}
-        onOpenAnnotation={this.handleOnOpenAnnotation}
-        onLongPress={this.handleOnLongPress}
-        {...this.props} />
+      <MapboxGLView
+        {...this.props}
+        onRegionChange={this._onRegionChange}
+        onUserLocationChange={this._onUserLocationChange}
+        onOpenAnnotation={this._onOpenAnnotation}
+        onLongPress={this._onLongPress}
+      />
     );
   }
 });
 
-var ReactMapView = requireNativeComponent('RCTMapbox');
+var MapboxGLView = requireNativeComponent('RCTMapbox', MapView);
 
-module.exports = ReactMapViewWrapper;
+module.exports = MapView;
