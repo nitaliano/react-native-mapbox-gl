@@ -88,13 +88,17 @@ RCT_EXPORT_MODULE();
         _map.userLocationVerticalAlignment = _userLocationVerticalAlignment;
         _map.userTrackingMode = _userTrackingMode;
     } else {
-        /* We need to have a height/width specified in order to render */
-        if (_accessToken && _styleURL && self.bounds.size.height > 0 && self.bounds.size.width > 0) {
-            [self createMap];
-        }
+        [self createMapIfPossible];
     }
 }
 
+- (void)createMapIfPossible
+{
+    /* We need to have a height/width specified in order to render */
+    if (_accessToken && _styleURL && self.bounds.size.height > 0 && self.bounds.size.width > 0) {
+        [self createMap];
+    }
+}
 
 - (void)createMap
 {
@@ -145,7 +149,9 @@ RCT_EXPORT_MODULE();
 
 - (void)layoutSubviews
 {
-    if (_annotations.count == 0) {
+    if (!_map) {
+        [self createMapIfPossible];
+    } else if (_annotations.count == 0) {
         [self updateMap];
     }
     _map.frame = self.bounds;
