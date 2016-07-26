@@ -30,6 +30,8 @@ import com.mapbox.mapboxsdk.maps.MapboxMapOptions;
 import com.mapbox.mapboxsdk.maps.OnMapReadyCallback;
 import com.mapbox.mapboxsdk.maps.UiSettings;
 
+import android.util.Log;
+
 import java.util.HashMap;
 import java.util.Map;
 
@@ -41,8 +43,7 @@ public class ReactNativeMapboxGLView extends RelativeLayout implements
         MapboxMap.OnMyBearingTrackingModeChangeListener, MapboxMap.OnMyLocationTrackingModeChangeListener,
         MapboxMap.OnMyLocationChangeListener,
         MapboxMap.OnMarkerClickListener, MapboxMap.OnInfoWindowClickListener,
-        MapView.OnMapChangedListener
-{
+        MapView.OnMapChangedListener {
 
     private MapboxMap _map = null;
     private MapView _mapView = null;
@@ -56,12 +57,12 @@ public class ReactNativeMapboxGLView extends RelativeLayout implements
     private boolean _trackingModeUpdateScheduled = false;
     private boolean _showsUserLocation;
     private boolean _zoomEnabled = true;
+    private boolean _annotationsPopUpEnabled = true;
     private boolean _scrollEnabled = true;
     private boolean _rotateEnabled = true;
     private boolean _enableOnRegionWillChange = false;
     private boolean _enableOnRegionDidChange = false;
     private int _paddingTop, _paddingRight, _paddingBottom, _paddingLeft;
-
     private boolean _recentlyChanged = false;
     private boolean _willChangeThrottled = false;
     private boolean _didChangeThrottled = false;
@@ -88,7 +89,9 @@ public class ReactNativeMapboxGLView extends RelativeLayout implements
     // Lifecycle methods
 
     public void onAfterUpdateTransaction() {
-        if (_mapView != null) { return; }
+        if (_mapView != null) {
+            return;
+        }
         setupMapView();
         _paused = false;
         _mapView.onResume();
@@ -96,7 +99,9 @@ public class ReactNativeMapboxGLView extends RelativeLayout implements
     }
 
     public void onDrop() {
-        if (_mapView == null) { return; }
+        if (_mapView == null) {
+            return;
+        }
         _manager.getContext().removeLifecycleEventListener(this);
         if (!_paused) {
             _paused = true;
@@ -136,7 +141,9 @@ public class ReactNativeMapboxGLView extends RelativeLayout implements
 
     @Override
     public void onMapReady(MapboxMap mapboxMap) {
-        if (_mapView == null) { return; }
+        if (_mapView == null) {
+            return;
+        }
         _map = mapboxMap;
 
         // Configure map
@@ -223,13 +230,19 @@ public class ReactNativeMapboxGLView extends RelativeLayout implements
     }
 
     public void setShowsUserLocation(boolean value) {
-        if (_showsUserLocation == value) { return; }
+        if (_showsUserLocation == value) {
+            return;
+        }
         _showsUserLocation = value;
-        if (_map != null) { _map.setMyLocationEnabled(value); }
+        if (_map != null) {
+            _map.setMyLocationEnabled(value);
+        }
     }
 
     public void setRotateEnabled(boolean value) {
-        if (_rotateEnabled == value) { return; }
+        if (_rotateEnabled == value) {
+            return;
+        }
         _rotateEnabled = value;
         if (_map != null) {
             _map.getUiSettings().setRotateGesturesEnabled(value);
@@ -237,7 +250,9 @@ public class ReactNativeMapboxGLView extends RelativeLayout implements
     }
 
     public void setScrollEnabled(boolean value) {
-        if (_scrollEnabled == value) { return; }
+        if (_scrollEnabled == value) {
+            return;
+        }
         _scrollEnabled = value;
         if (_map != null) {
             _map.getUiSettings().setScrollGesturesEnabled(value);
@@ -245,39 +260,66 @@ public class ReactNativeMapboxGLView extends RelativeLayout implements
     }
 
     public void setZoomEnabled(boolean value) {
-        if (_zoomEnabled == value) { return; }
+        if (_zoomEnabled == value) {
+            return;
+        }
         _zoomEnabled = value;
         if (_map != null) {
             _map.getUiSettings().setZoomGesturesEnabled(value);
         }
     }
 
+    public void setAnnotationsPopUpEnabled(boolean value) {
+        _annotationsPopUpEnabled = value;
+    }
+
     public void setStyleURL(String styleURL) {
-        if (styleURL.equals(_mapOptions.getStyle())) { return; }
+        if (styleURL.equals(_mapOptions.getStyle())) {
+            return;
+        }
         _mapOptions.styleUrl(styleURL);
-        if (_map != null) { _map.setStyleUrl(styleURL); }
+        if (_map != null) {
+            _map.setStyleUrl(styleURL);
+        }
     }
 
     public void setDebugActive(boolean value) {
-        if (_mapOptions.getDebugActive() == value) { return; }
+        if (_mapOptions.getDebugActive() == value) {
+            return;
+        }
         _mapOptions.debugActive(value);
-        if (_map != null) { _map.setDebugActive(value); };
+        if (_map != null) {
+            _map.setDebugActive(value);
+        }
+        ;
     }
 
     public void setLocationTracking(int value) {
-        if (_locationTrackingMode == value) { return; }
+        if (_locationTrackingMode == value) {
+            return;
+        }
         _locationTrackingMode = value;
-        if (_map != null) { _map.getTrackingSettings().setMyLocationTrackingMode(value); };
+        if (_map != null) {
+            _map.getTrackingSettings().setMyLocationTrackingMode(value);
+        }
+        ;
     }
 
     public void setBearingTracking(int value) {
-        if (_bearingTrackingMode == value) { return; }
+        if (_bearingTrackingMode == value) {
+            return;
+        }
         _bearingTrackingMode = value;
-        if (_map != null) { _map.getTrackingSettings().setMyBearingTrackingMode(value); };
+        if (_map != null) {
+            _map.getTrackingSettings().setMyBearingTrackingMode(value);
+        }
+        ;
     }
 
     public void setAttributionButtonIsHidden(boolean value) {
-        if (_mapOptions.getAttributionEnabled() == !value) { return; }
+        if (_mapOptions.getAttributionEnabled() == !value) {
+            return;
+        }
         _mapOptions.attributionEnabled(!value);
         if (_map != null) {
             _map.getUiSettings().setAttributionEnabled(!value);
@@ -285,7 +327,9 @@ public class ReactNativeMapboxGLView extends RelativeLayout implements
     }
 
     public void setLogoIsHidden(boolean value) {
-        if (_mapOptions.getLogoEnabled() == !value) { return; }
+        if (_mapOptions.getLogoEnabled() == !value) {
+            return;
+        }
         _mapOptions.logoEnabled(!value);
         if (_map != null) {
             _map.getUiSettings().setLogoEnabled(!value);
@@ -293,7 +337,9 @@ public class ReactNativeMapboxGLView extends RelativeLayout implements
     }
 
     public void setCompassIsHidden(boolean value) {
-        if (_mapOptions.getCompassEnabled() == !value) { return; }
+        if (_mapOptions.getCompassEnabled() == !value) {
+            return;
+        }
         _mapOptions.compassEnabled(!value);
         if (_map != null) {
             _map.getUiSettings().setCompassEnabled(!value);
@@ -302,14 +348,18 @@ public class ReactNativeMapboxGLView extends RelativeLayout implements
 
     public void setContentInset(int top, int right, int bottom, int left) {
         if (top == _paddingTop &&
-            bottom == _paddingBottom &&
-            left == _paddingLeft &&
-            right == _paddingRight) { return; }
+                bottom == _paddingBottom &&
+                left == _paddingLeft &&
+                right == _paddingRight) {
+            return;
+        }
         _paddingTop = top;
         _paddingRight = right;
         _paddingBottom = bottom;
         _paddingLeft = left;
-        if (_map != null) { _map.setPadding(left, top, right, bottom); }
+        if (_map != null) {
+            _map.setPadding(left, top, right, bottom);
+        }
     }
 
     // Events
@@ -318,7 +368,7 @@ public class ReactNativeMapboxGLView extends RelativeLayout implements
         if (event == null) {
             event = Arguments.createMap();
         }
-        ((ReactContext)getContext())
+        ((ReactContext) getContext())
                 .getJSModule(RCTEventEmitter.class)
                 .receiveEvent(getId(), name, event);
     }
@@ -367,9 +417,9 @@ public class ReactNativeMapboxGLView extends RelativeLayout implements
         }
 
         GeomagneticField geoField = new GeomagneticField(
-                (float)location.getLatitude(),
-                (float)location.getLongitude(),
-                location.hasAltitude() ? (float)location.getAltitude() : 0.0f,
+                (float) location.getLatitude(),
+                (float) location.getLongitude(),
+                location.hasAltitude() ? (float) location.getAltitude() : 0.0f,
                 System.currentTimeMillis()
         );
 
@@ -382,9 +432,11 @@ public class ReactNativeMapboxGLView extends RelativeLayout implements
 
     class TrackingModeChangeRunnable implements Runnable {
         ReactNativeMapboxGLView target;
+
         TrackingModeChangeRunnable(ReactNativeMapboxGLView target) {
             this.target = target;
         }
+
         @Override
         public void run() {
             target.onTrackingModeChange();
@@ -392,12 +444,14 @@ public class ReactNativeMapboxGLView extends RelativeLayout implements
     }
 
     public void onTrackingModeChange() {
-        if (!_trackingModeUpdateScheduled) { return; }
+        if (!_trackingModeUpdateScheduled) {
+            return;
+        }
         _trackingModeUpdateScheduled = false;
 
         for (int mode = 0; mode < ReactNativeMapboxGLModule.locationTrackingModes.length; mode++) {
             if (_locationTrackingMode == ReactNativeMapboxGLModule.locationTrackingModes[mode] &&
-                _bearingTrackingMode == ReactNativeMapboxGLModule.bearingTrackingModes[mode]) {
+                    _bearingTrackingMode == ReactNativeMapboxGLModule.bearingTrackingModes[mode]) {
                 WritableMap event = Arguments.createMap();
                 event.putInt("src", mode);
                 emitEvent("onChangeUserTrackingMode", event);
@@ -409,7 +463,9 @@ public class ReactNativeMapboxGLView extends RelativeLayout implements
     @Override
     @UiThread
     public void onMyBearingTrackingModeChange(int myBearingTrackingMode) {
-        if (_bearingTrackingMode == myBearingTrackingMode) { return; }
+        if (_bearingTrackingMode == myBearingTrackingMode) {
+            return;
+        }
         _bearingTrackingMode = myBearingTrackingMode;
         _trackingModeUpdateScheduled = true;
         _handler.post(new TrackingModeChangeRunnable(this));
@@ -419,7 +475,9 @@ public class ReactNativeMapboxGLView extends RelativeLayout implements
     @Override
     @UiThread
     public void onMyLocationTrackingModeChange(int myLocationTrackingMode) {
-        if (_locationTrackingMode == myLocationTrackingMode) { return; }
+        if (_locationTrackingMode == myLocationTrackingMode) {
+            return;
+        }
         _locationTrackingMode = myLocationTrackingMode;
         _trackingModeUpdateScheduled = true;
         _handler.post(new TrackingModeChangeRunnable(this));
@@ -444,9 +502,11 @@ public class ReactNativeMapboxGLView extends RelativeLayout implements
 
     class RegionChangedThrottleRunnable implements Runnable {
         ReactNativeMapboxGLView target;
+
         RegionChangedThrottleRunnable(ReactNativeMapboxGLView target) {
             this.target = target;
         }
+
         @Override
         public void run() {
             target.flushRegionChangedThrottle(true);
@@ -546,6 +606,7 @@ public class ReactNativeMapboxGLView extends RelativeLayout implements
     public boolean onMarkerClick(@NonNull Marker marker) {
         emitEvent("onOpenAnnotation", serializeMarker(marker));
 
+        if (_annotationsPopUpEnabled == false) { return true; }
         // Due to a bug, we need to force a relayout on the _mapView
         _handler.post(new Runnable() {
             @Override
@@ -563,12 +624,17 @@ public class ReactNativeMapboxGLView extends RelativeLayout implements
     // Getters
 
     public CameraPosition getCameraPosition() {
-        if (_map == null) { return _initialCamera.build(); }
+        if (_map == null) {
+            return _initialCamera.build();
+        }
         return _map.getCameraPosition();
     }
 
     public LatLngBounds getBounds() {
-        if (_map == null) { return new LatLngBounds.Builder().build(); };
+        if (_map == null) {
+            return new LatLngBounds.Builder().build();
+        }
+        ;
         return _map.getProjection().getVisibleRegion().latLngBounds;
     }
 
@@ -577,7 +643,9 @@ public class ReactNativeMapboxGLView extends RelativeLayout implements
     public void setCameraPosition(CameraPosition position, int duration, @Nullable Runnable callback) {
         if (_map == null) {
             _initialCamera = new CameraPosition.Builder(position);
-            if (callback != null) { callback.run(); }
+            if (callback != null) {
+                callback.run();
+            }
             return;
         }
 
@@ -592,22 +660,30 @@ public class ReactNativeMapboxGLView extends RelativeLayout implements
 
         if (duration == 0) {
             _map.moveCamera(update);
-            if (callback != null) { callback.run(); }
+            if (callback != null) {
+                callback.run();
+            }
         } else {
             // Ugh... Java callbacks suck
             class CameraCallback implements MapboxMap.CancelableCallback {
                 Runnable callback;
+
                 CameraCallback(Runnable callback) {
                     this.callback = callback;
                 }
+
                 @Override
                 public void onCancel() {
-                    if (callback != null) { callback.run(); }
+                    if (callback != null) {
+                        callback.run();
+                    }
                 }
 
                 @Override
                 public void onFinish() {
-                    if (callback != null) { callback.run(); }
+                    if (callback != null) {
+                        callback.run();
+                    }
                 }
             }
 
@@ -617,16 +693,21 @@ public class ReactNativeMapboxGLView extends RelativeLayout implements
 
     // Annotations
 
-    @Nullable Annotation _removeAnnotation(String name, boolean keep) {
+    @Nullable
+    Annotation _removeAnnotation(String name, boolean keep) {
         if (_map == null) {
             _annotationOptions.remove(name);
             return null;
         }
         Annotation annotation = _annotations.remove(name);
-        if (annotation == null) { return null; }
+        if (annotation == null) {
+            return null;
+        }
         _annotationIdsToName.remove(annotation.getId());
 
-        if (keep) { return annotation; }
+        if (keep) {
+            return annotation;
+        }
         _map.removeAnnotation(annotation);
         return null;
     }
@@ -655,15 +736,30 @@ public class ReactNativeMapboxGLView extends RelativeLayout implements
             _annotationIdsToName.put(annotation.getId(), name);
         }
 
-        if (removed != null) { _map.removeAnnotation(removed); }
+        if (removed != null) {
+            _map.removeAnnotation(removed);
+        }
     }
 
     public void selectAnnotation(String name, boolean animated) {
-        if (_map == null) { return; }
+        if (_map == null) {
+            return;
+        }
         Annotation annotation = _annotations.get(name);
-        if (annotation == null) { return; }
-        if (!(annotation instanceof Marker)) { return; }
-        Marker marker = (Marker)annotation;
+        if (annotation == null) {
+            return;
+        }
+        if (!(annotation instanceof Marker)) {
+            return;
+        }
+        Marker marker = (Marker) annotation;
         _map.selectMarker(marker);
+    }
+
+    public void deselectAnnotation() {
+        if (_map == null) {
+            return;
+        }
+        _map.deselectMarkers();
     }
 }
