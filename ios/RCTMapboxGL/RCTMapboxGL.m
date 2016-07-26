@@ -34,12 +34,13 @@
     BOOL _showsUserLocation;
     NSURL *_styleURL;
     int _userTrackingMode;
+    RCTMGLAnnotation *_selectedAnnotation;
     BOOL _attributionButton;
     BOOL _logo;
     BOOL _compass;
     UIEdgeInsets _contentInset;
     MGLAnnotationVerticalAlignment _userLocationVerticalAlignment;
-    
+    BOOL _annotationsPopUpEnabled;
     /* So we don't fire onChangeUserTracking mode when triggered by props */
     BOOL _isChangingUserTracking;
 }
@@ -154,6 +155,11 @@
     [_annotations removeAllObjects];
 }
 
+- (void)deselectAnnotation
+{
+    [_map deselectAnnotation:_selectedAnnotation animated: YES];
+}
+
 - (CGFloat)mapView:(MGLMapView *)mapView alphaForShapeAnnotation:(RCTMGLAnnotationPolyline *)shape
 {
     if ([shape isKindOfClass:[RCTMGLAnnotationPolyline class]]) {
@@ -189,6 +195,7 @@
 - (BOOL)mapView:(RCTMapboxGL *)mapView annotationCanShowCallout:(id <MGLAnnotation>)annotation {
     NSString *title = [(RCTMGLAnnotation *) annotation title];
     NSString *subtitle = [(RCTMGLAnnotation *) annotation subtitle];
+    if (!_annotationsPopUpEnabled) { return NO; }
     return ([title length] != 0 || [subtitle length] != 0);
 }
 
@@ -290,6 +297,11 @@
     if (_zoomEnabled == zoomEnabled) { return; }
     _zoomEnabled = zoomEnabled;
     if (_map) { _map.zoomEnabled; }
+}
+
+- (void)setAnnotationsPopUpEnabled:(BOOL)annotationsPopUpEnabled
+{
+    _annotationsPopUpEnabled = annotationsPopUpEnabled;
 }
 
 - (void)setShowsUserLocation:(BOOL)showsUserLocation
@@ -422,8 +434,12 @@
 - (void)selectAnnotation:(NSString*)selectedId animated:(BOOL)animated;
 {
     RCTMGLAnnotation * annotation = [_annotations objectForKey:selectedId];
-    if (!annotation) { return; }
-    [_map selectAnnotation:annotation animated:animated];
+    if (!annotation) {
+        _selectedAnnotation = nil;
+        return; 
+        }
+   _selectedAnnotation=annotation;
+   [_map selectAnnotation:annotation animated:animated];
 }
 
 
@@ -461,8 +477,12 @@
 
 -(void)mapView:(MGLMapView *)mapView didSelectAnnotation:(id<MGLAnnotation>)annotation
 {
-    if (!annotation.title || !annotation.subtitle) { return; }
+    if (!annotation.title || !annotation.subtitle) { 
+        _selectedAnnotation=nil; 
+        return; 
+        }
     if (!_onOpenAnnotation) { return; }
+    _selectedAnnotation=annotation;
     _onOpenAnnotation(@{ @"target": self.reactTag,
                             @"src": @{ @"title": annotation.title,
                                        @"subtitle": annotation.subtitle,
