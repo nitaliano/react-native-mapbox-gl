@@ -59,7 +59,7 @@ if (Platform.OS === 'android') {
     };
   });
 
-  NativeAppEventEmitter.addListener('MapboxAndroidCallback', ([ callbackId, args ]) => {
+  NativeAppEventEmitter.addListener('MapboxAndroidCallback', ([callbackId, args]) => {
     const callback = callbackMap.get(callbackId);
     if (!callback) {
       throw new Error(`Native is calling a callbackId ${callbackId}, which is not registered`);
@@ -212,7 +212,9 @@ class MapView extends Component {
   selectAnnotation(annotationId, animated = true) {
     MapboxGLManager.selectAnnotation(findNodeHandle(this), annotationId, animated);
   }
-
+  deselectAnnotation() {
+    MapboxGLManager.deselectAnnotation(findNodeHandle(this));
+  }
   // Events
   _onRegionDidChange = (event: Event) => {
     if (this.props.onRegionDidChange) this.props.onRegionDidChange(event.nativeEvent.src);
@@ -262,6 +264,7 @@ class MapView extends Component {
     rotateEnabled: PropTypes.bool,
     scrollEnabled: PropTypes.bool,
     zoomEnabled: PropTypes.bool,
+    annotationsPopUpEnabled: PropTypes.bool,
     showsUserLocation: PropTypes.bool,
     styleURL: PropTypes.string.isRequired,
     userTrackingMode: PropTypes.number,
@@ -322,6 +325,7 @@ class MapView extends Component {
     styleURL: mapStyles.streets,
     userTrackingMode: userTrackingMode.none,
     zoomEnabled: true,
+    annotationsPopUpEnabled: true,
     attributionButtonIsHidden: false,
     logoIsHidden: false,
     compassIsHidden: false,
@@ -401,7 +405,7 @@ class MapView extends Component {
         onStartLoadingMap={this._onStartLoadingMap}
         onLocateUserFailed={this._onLocateUserFailed}
         onChangeUserTrackingMode={this._onChangeUserTrackingMode}
-      />
+        />
     );
   }
 }
