@@ -157,8 +157,7 @@
 
 - (void)deselectAnnotation
 {
-    NSLog(@"in deselect Annotation");
-    [self upsertAnnotation:_selectedAnnotation];
+    [_map deselectAnnotation:_selectedAnnotation animated: YES];
 }
 
 - (CGFloat)mapView:(MGLMapView *)mapView alphaForShapeAnnotation:(RCTMGLAnnotationPolyline *)shape
@@ -196,9 +195,7 @@
 - (BOOL)mapView:(RCTMapboxGL *)mapView annotationCanShowCallout:(id <MGLAnnotation>)annotation {
     NSString *title = [(RCTMGLAnnotation *) annotation title];
     NSString *subtitle = [(RCTMGLAnnotation *) annotation subtitle];
-    if (_annotationsPopUpEnabled == NO)
-        return NO;
-    else
+    if (!_annotationsPopUpEnabled) { return NO; }
     return ([title length] != 0 || [subtitle length] != 0);
 }
 
@@ -304,7 +301,6 @@
 
 - (void)setAnnotationsPopUpEnabled:(BOOL)annotationsPopUpEnabled
 {
-    if (_annotationsPopUpEnabled == annotationsPopUpEnabled) { return; }
     _annotationsPopUpEnabled = annotationsPopUpEnabled;
 }
 
@@ -439,10 +435,11 @@
 {
     RCTMGLAnnotation * annotation = [_annotations objectForKey:selectedId];
     if (!annotation) {
-        _selectedAnnotation=nil;
-        return; }
+        _selectedAnnotation = nil;
+        return; 
+        }
    _selectedAnnotation=annotation;
-    [_map selectAnnotation:annotation animated:animated];
+   [_map selectAnnotation:annotation animated:animated];
 }
 
 
@@ -480,7 +477,10 @@
 
 -(void)mapView:(MGLMapView *)mapView didSelectAnnotation:(id<MGLAnnotation>)annotation
 {
-    if (!annotation.title || !annotation.subtitle) { _selectedAnnotation=nil; return; }
+    if (!annotation.title || !annotation.subtitle) { 
+        _selectedAnnotation=nil; 
+        return; 
+        }
     if (!_onOpenAnnotation) { return; }
     _selectedAnnotation=annotation;
     _onOpenAnnotation(@{ @"target": self.reactTag,
