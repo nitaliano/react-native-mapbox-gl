@@ -220,6 +220,9 @@ class MapView extends Component {
   getBounds(callback) {
     MapboxGLManager.getBounds(findNodeHandle(this), callback);
   }
+  getBoundsForPositions(positions, callback) {
+    MapboxGLManager.getBoundsForPositions(findNodeHandle(this), positions, callback);
+  }
   getPitch(callback) {
     MapboxGLManager.getPitch(findNodeHandle(this), callback);
   }

@@ -182,6 +182,7 @@ public class ReactNativeMapboxGLManager extends SimpleViewManager<ReactNativeMap
     public static final int COMMAND_SET_VISIBLE_COORDINATE_BOUNDS = 6;
     public static final int COMMAND_SELECT_ANNOTATION = 7;
     public static final int COMMAND_SPLICE_ANNOTATIONS = 8;
+    public static final int COMMAND_GET_BOUNDS_FOR_POSITIONS = 9;
 
     @Override
     public
@@ -196,6 +197,7 @@ public class ReactNativeMapboxGLManager extends SimpleViewManager<ReactNativeMap
                 .put("setVisibleCoordinateBounds", COMMAND_SET_VISIBLE_COORDINATE_BOUNDS)
                 .put("selectAnnotation", COMMAND_SELECT_ANNOTATION)
                 .put("spliceAnnotations", COMMAND_SPLICE_ANNOTATIONS)
+                .put("getBoundsForPositions", COMMAND_GET_BOUNDS_FOR_POSITIONS)
                 .build();
     }
 
@@ -239,6 +241,9 @@ public class ReactNativeMapboxGLManager extends SimpleViewManager<ReactNativeMap
                 break;
             case COMMAND_SPLICE_ANNOTATIONS:
                 spliceAnnotations(view, args.getBoolean(0), args.getArray(1), args.getArray(2));
+                break;
+            case COMMAND_GET_BOUNDS_FOR_POSITIONS:
+                getBoundsForPositions(view, args.getArray(0), args.getInt(1));
                 break;
             default:
                 throw new JSApplicationIllegalArgumentException("Invalid commandId " + commandId + " sent to " + getClass().getSimpleName());
@@ -375,5 +380,30 @@ public class ReactNativeMapboxGLManager extends SimpleViewManager<ReactNativeMap
 
     public void selectAnnotation(ReactNativeMapboxGLView view, String annotationId, boolean animated) {
         view.selectAnnotation(annotationId, animated);
+    }
+
+    public void getBoundsForPositions(ReactNativeMapboxGLView view, ReadableArray positions, int callbackId) {
+        final int positionCount = positions.size();
+        if (positionCount < 2) {
+            throw new JSApplicationIllegalArgumentException("getBoundsForPositions requires at least 2 positions.");
+        }
+
+        LatLngBounds.Builder latLngBoundsBuilder = new LatLngBounds.Builder();
+        for (int i = 0; i < positionCount; i++) {
+            ReadableArray position = positions.getArray(i);
+
+            latLngBoundsBuilder.include(new LatLng(position.getDouble(0), position.getDouble(1)));
+        }
+        LatLngBounds bounds = latLngBoundsBuilder.build();
+
+        WritableArray args = Arguments.createArray();
+        WritableArray result = Arguments.createArray();
+        result.pushDouble(bounds.getLatSouth());
+        result.pushDouble(bounds.getLonWest());
+        result.pushDouble(bounds.getLatNorth());
+        result.pushDouble(bounds.getLonEast());
+        args.pushArray(result);
+
+        fireCallback(callbackId, args);
     }
 }
