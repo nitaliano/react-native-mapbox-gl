@@ -185,6 +185,8 @@ public class ReactNativeMapboxGLView extends RelativeLayout implements
             _annotationIdsToName.put(annotation.getId(), entry.getKey());
         }
         _annotationOptions.clear();
+
+        forceRelayoutOnMapView();
     }
 
     private void destroyMapView() {
@@ -200,6 +202,18 @@ public class ReactNativeMapboxGLView extends RelativeLayout implements
             _map = null;
         }
         _mapView.onDestroy();
+    }
+
+    public void forceRelayoutOnMapView() {
+        _handler.post(new Runnable() {
+            @Override
+            public void run() {
+                _mapView.measure(
+                        View.MeasureSpec.makeMeasureSpec(_mapView.getMeasuredWidth(), MeasureSpec.EXACTLY),
+                        View.MeasureSpec.makeMeasureSpec(_mapView.getMeasuredHeight(), MeasureSpec.EXACTLY));
+                _mapView.layout(_mapView.getLeft(), _mapView.getTop(), _mapView.getRight(), _mapView.getBottom());
+            }
+        });
     }
 
     // Props
@@ -562,15 +576,7 @@ public class ReactNativeMapboxGLView extends RelativeLayout implements
 
         if (_annotationsPopUpEnabled == false) { return true; }
         // Due to a bug, we need to force a relayout on the _mapView
-        _handler.post(new Runnable() {
-            @Override
-            public void run() {
-                _mapView.measure(
-                        View.MeasureSpec.makeMeasureSpec(_mapView.getMeasuredWidth(), View.MeasureSpec.EXACTLY),
-                        View.MeasureSpec.makeMeasureSpec(_mapView.getMeasuredHeight(), View.MeasureSpec.EXACTLY));
-                _mapView.layout(_mapView.getLeft(), _mapView.getTop(), _mapView.getRight(), _mapView.getBottom());
-            }
-        });
+        forceRelayoutOnMapView();
 
         return false;
     }

@@ -381,6 +381,8 @@ public class ReactNativeMapboxGLManager extends SimpleViewManager<ReactNativeMap
             String name = annotation.getString("id");
             view.setAnnotation(name, annotationOptions);
         }
+
+        view.forceRelayoutOnMapView();
     }
 
     public void selectAnnotation(ReactNativeMapboxGLView view, String annotationId, boolean animated) {
