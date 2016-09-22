@@ -7,6 +7,8 @@ import android.graphics.Color;
 import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
 import android.support.v4.content.ContextCompat;
+import android.os.AsyncTask;
+import android.util.Log;
 
 import com.facebook.react.bridge.ReadableMap;
 import com.facebook.react.bridge.ReadableArray;
@@ -88,13 +90,29 @@ public class RNMGLAnnotationOptionsFactory {
     }
 
     static Drawable drawableFromUrl(Context context, String url) throws IOException {
-        // This doesn't currently work, as it throws NetworkOnMainThreadException
-        HttpURLConnection connection = (HttpURLConnection) new URL(url).openConnection();
-        connection.connect();
-        InputStream input = connection.getInputStream();
+        try {
+            Bitmap bitmap = new RetrieveDrawableFromUrl().execute(url).get();
 
-        Bitmap bitmap = BitmapFactory.decodeStream(input);
-        return new BitmapDrawable(context.getResources(), bitmap);
+            return new BitmapDrawable(context.getResources(), bitmap);
+        }
+        catch (Exception e) {
+            return null;
+        }
+    }
+
+    private static class RetrieveDrawableFromUrl extends AsyncTask<String, Void, Bitmap> {
+        protected Bitmap doInBackground(String... url) {
+            try {
+                HttpURLConnection connection = (HttpURLConnection) new URL(url[0]).openConnection();
+                connection.connect();
+                InputStream input = connection.getInputStream();
+
+                return BitmapFactory.decodeStream(input);
+            }
+            catch (Exception e) {
+                return null;
+            }
+        }
     }
 
     static Map<String, Icon> iconCache = new HashMap();
