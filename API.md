@@ -256,7 +256,7 @@ mapbox://styles/bobbysud/cigtw1pzy0000aam2346f7ex0
 ```javascript
 [{
   coordinates, // required. For type polyline and polygon must be an array of arrays. For type point, single array with 2 coordinates
-  type, // required. One of 'point', 'polyline' or 'polygon'
+  type, // required. One of 'point', 'view', 'polyline' or 'polygon'
   title, // optional. Title string. Appears when marker pressed
   subtitle, // optional. Subtitle string. Appears when marker pressed
   fillAlpha, // optional. number. Only for type=polygon. Controls the opacity of the polygon
@@ -264,6 +264,10 @@ mapbox://styles/bobbysud/cigtw1pzy0000aam2346f7ex0
   strokeAlpha, // optional. number. Only for type=polygon or type=polyline. Controls the opacity of the line
   strokeColor, // optional. string. Only for type=polygon or type=polyline. CSS color (#rrggbb). Controls line color.
   strokeWidth, // optional. number. Only for type=polygon or type=polyline. Controls line width.
+  alpha, // optional. number. Only for type=view. Sets the marker icon opacity. Defaults 1.0.
+  rotation, // optional. number. Only for type=view. Sets the orientation of the marker clockwise starting from the bottom.
+  visible, // optional. boolean. Only for type=view. Passing false will cause the marker to be invisible
+  flat, // optional. boolean. Only for type=view. When set to true, the marker will always have the same tilt as the map camera. Default is false.
   id, // required. string. Unique identifier used for adding or selecting an annotation.
   annotationImage: { // optional. Marker image for type=point
     source: {
