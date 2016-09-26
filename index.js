@@ -234,12 +234,27 @@ class MapView extends Component {
     MapboxGLManager.deselectAnnotation(findNodeHandle(this));
   }
   queryRenderedFeatures(options, callback) {
-    let promise;
+    // the Android bridge uses a callback, so wrap it in a promise
     if (Platform.OS === 'android') {
-      promise = Promise.reject('queryRenderedFeatures() is not yet implemented on Android');
-    } else {
-      promise = MapboxGLManager.queryRenderedFeatures(findNodeHandle(this), options);
+      const promise = new Promise((resolve, reject) => {
+        MapboxGLManager.queryRenderedFeatures(findNodeHandle(this), options, (err, features) => {
+          // cast error string to Error like on iOS
+          const _err = err && new Error(err)
+          // Android gives us each feature as a GeoJSON string
+          let _features = features && features.map(f => JSON.parse(f));
+          callback && callback(_err, _features);
+          if (_err) {
+            reject(_err);
+          } else {
+            resolve(_features);
+          }
+        });
+      })
+      return promise;
     }
+
+    // the iOS bridge returns a promise, so bind callback to it
+    const promise = MapboxGLManager.queryRenderedFeatures(findNodeHandle(this), options)
     bindCallbackToPromise(callback, promise);
     return promise;
   }

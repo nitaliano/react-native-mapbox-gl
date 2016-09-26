@@ -214,7 +214,7 @@ callback // optional. Alternative to returned promise
 );
 ```
 
-Queries the features in the vector tiles at given `point` or `rect`. (iOS only - Android SDK's `queryRenderedFeatures` is in beta)
+Queries the features in the vector tiles at given `point` or `rect`.
 
 All layers are queried unless you pass an array of layer names into `layers`.
 
