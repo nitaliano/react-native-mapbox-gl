@@ -6,7 +6,7 @@
 * Adds methods `queryRenderedFeatures` and `visibleFeaturesAtPoint` on iOS [#419](https://github.com/mapbox/react-native-mapbox-gl/pull/419)
 * Adds prop `reuseIdentifier` for custom images on iOS [#426](https://github.com/mapbox/react-native-mapbox-gl/pull/426)
 * A few Cocoapod installation fixes [#450](https://github.com/mapbox/react-native-mapbox-gl/commit/abeb8b6bab288a70f8588298668998b31732ab43) [#455](https://github.com/mapbox/react-native-mapbox-gl/commit/728a1ce8f311a76eac6da60ddd32f0997a1c78f7)
-* The module no longer checks for an access toke on iOS since the SDK handles this [#456](https://github.com/mapbox/react-native-mapbox-gl/pull/456)
+* The module no longer checks for an access token on iOS since the SDK handles this [#456](https://github.com/mapbox/react-native-mapbox-gl/pull/456)
 
 #v5.0.0
 
