@@ -284,6 +284,8 @@ mapbox://styles/bobbysud/cigtw1pzy0000aam2346f7ex0
 **For using locally bundled images, on iOS see [adding static resources to your app using Images.xcassets  docs](https://facebook.github.io/react-native/docs/image.html#adding-static-resources-to-your-app-using-images-xcassets)
 and on Android, put images in `android/app/src/main/res/drawable/yourImage.png`**.
 
+APIs from packages like `react-native-fs` or `react-native-fetch-blob` can help to construct a local image file URL.
+
 #### Example
 
 ```javascript
