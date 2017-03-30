@@ -14,6 +14,7 @@ import com.mapbox.mapboxsdk.annotations.Annotation;
 import com.mapbox.mapboxsdk.annotations.Icon;
 import com.mapbox.mapboxsdk.annotations.IconFactory;
 import com.mapbox.mapboxsdk.annotations.MarkerOptions;
+import com.mapbox.mapboxsdk.annotations.MarkerViewOptions;
 import com.mapbox.mapboxsdk.annotations.PolygonOptions;
 import com.mapbox.mapboxsdk.annotations.PolylineOptions;
 import com.mapbox.mapboxsdk.geometry.LatLng;
@@ -31,6 +32,19 @@ class RNMGLMarkerOptions implements RNMGLAnnotationOptions {
     protected MarkerOptions _options;
 
     public RNMGLMarkerOptions(MarkerOptions options) {
+        _options = options;
+    }
+
+    @Override
+    public Annotation addToMap(MapboxMap map) {
+        return map.addMarker(_options);
+    }
+}
+
+class RNMGLMarkerViewOptions implements RNMGLAnnotationOptions {
+    protected MarkerViewOptions _options;
+
+    public RNMGLMarkerViewOptions(MarkerViewOptions options) {
         _options = options;
     }
 
@@ -73,6 +87,8 @@ public class RNMGLAnnotationOptionsFactory {
 
         if (type.equals("point")) {
             return markerOptionsFromJS(annotation, context);
+        } else if (type.equals("view")) {
+            return markerViewOptionsFromJS(annotation, context);
         } else if (type.equals("polyline")) {
             return polylineOptionsFromJS(annotation);
         } else if (type.equals("polygon")) {
@@ -95,6 +111,26 @@ public class RNMGLAnnotationOptionsFactory {
 
         Bitmap bitmap = BitmapFactory.decodeStream(input);
         return new BitmapDrawable(context.getResources(), bitmap);
+    }
+
+    static Icon constructMarkerIcon(ReadableMap annotation, Context context) {
+        ReadableMap annotationImage = annotation.getMap("annotationImage");
+        ReadableMap annotationSource = annotationImage.getMap("source");
+        try {
+            int width = -1;
+            int height = -1;
+
+            if (annotationImage.hasKey("height") && annotationImage.hasKey("width")) {
+                float scale = context.getResources().getDisplayMetrics().density;
+                height = Math.round((float)annotationImage.getInt("height") * scale);
+                width = Math.round((float)annotationImage.getInt("width") * scale);
+            }
+
+            return iconFromSourceAndSize(context, annotationSource, width, height);
+        } catch (Exception e) {
+            e.printStackTrace();
+            return null;
+        }
     }
 
     static Map<String, Icon> iconCache = new HashMap();
@@ -150,24 +186,58 @@ public class RNMGLAnnotationOptionsFactory {
         }
 
         if (annotation.hasKey("annotationImage")) {
-            ReadableMap annotationImage = annotation.getMap("annotationImage");
-            ReadableMap annotationSource = annotationImage.getMap("source");
-            try {
-                int width = -1;
-                int height = -1;
-
-                if (annotationImage.hasKey("height") && annotationImage.hasKey("width")) {
-                    float scale = context.getResources().getDisplayMetrics().density;
-                    height = Math.round((float)annotationImage.getInt("height") * scale);
-                    width = Math.round((float)annotationImage.getInt("width") * scale);
-                }
-
-                marker.icon(iconFromSourceAndSize(context, annotationSource, width, height));
-            } catch (Exception e) {
-                e.printStackTrace();
-            }
+            marker.icon(constructMarkerIcon(annotation, context));
         }
         return new RNMGLMarkerOptions(marker);
+    }
+
+    static RNMGLAnnotationOptions markerViewOptionsFromJS(ReadableMap annotation, Context context) {
+        MarkerViewOptions marker = new MarkerViewOptions();
+
+        double latitude = annotation.getArray("coordinates").getDouble(0);
+        double longitude = annotation.getArray("coordinates").getDouble(1);
+        LatLng markerCenter = new LatLng(latitude, longitude);
+        marker.position(markerCenter);
+
+        if (annotation.hasKey("title")) {
+            String title = annotation.getString("title");
+            marker.title(title);
+        }
+
+        if (annotation.hasKey("subtitle")) {
+            String subtitle = annotation.getString("subtitle");
+            marker.snippet(subtitle);
+        }
+
+        if (annotation.hasKey("annotationImage")) {
+            marker.icon(constructMarkerIcon(annotation, context));
+        }
+
+        if (annotation.hasKey("rotation")) {
+            double rotation = annotation.getDouble("rotation");
+            marker.rotation((float) rotation);
+        }
+
+        if (annotation.hasKey("anchor")) {
+            double anchorLatitude = annotation.getArray("anchor").getDouble(0);
+            double anchorLongitude = annotation.getArray("anchor").getDouble(1);
+            marker.anchor((float) anchorLatitude, (float) anchorLongitude);
+        }
+
+        if (annotation.hasKey("alpha")) {
+            double alpha = annotation.getDouble("alpha");
+            marker.alpha((float) alpha);
+        }
+
+        if (annotation.hasKey("visible")) {
+            marker.visible(annotation.getBoolean("visible"));
+        }
+
+        if (annotation.hasKey("flat")) {
+            marker.flat(annotation.getBoolean("flat"));
+        }
+
+        return new RNMGLMarkerViewOptions(marker);
     }
 
     static RNMGLAnnotationOptions polylineOptionsFromJS(ReadableMap annotation) {
