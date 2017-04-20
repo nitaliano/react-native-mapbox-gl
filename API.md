@@ -267,7 +267,7 @@ mapbox://styles/bobbysud/cigtw1pzy0000aam2346f7ex0
   id, // required. string. Unique identifier used for adding or selecting an annotation.
   annotationImage: { // optional. Marker image for type=point
     source: {
-      uri // required. string. Either remote image URL, a Base64-encoded data URI, or the name (without extension) of a bundled image
+      uri // required. string. Either remote image URL, a base64-encoded data URI (Android only), or the name (without extension) of a bundled image
     },
     height, // required. number. Image height
     width, // required. number. Image width
