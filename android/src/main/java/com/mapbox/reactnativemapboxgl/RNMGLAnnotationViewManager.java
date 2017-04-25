@@ -46,4 +46,14 @@ public class RNMGLAnnotationViewManager extends ViewGroupManager<RNMGLAnnotation
         coordinate.setLongitude(map.getDouble("longitude"));
         view.setCoordinate(coordinate);
     }
+
+    @ReactProp(name = "anchorV")
+    public void setAnchorV(RNMGLAnnotationView view, float value) {
+        view.setAnchorV(value);
+    }
+
+    @ReactProp(name = "anchorU")
+    public void setAnchorU(RNMGLAnnotationView view, float value) {
+        view.setAnchorU(value);
+    }
 }

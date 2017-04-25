@@ -12,6 +12,8 @@ public class RNMGLAnnotationView extends ReactViewGroup {
     private final RNMGLAnnotationViewManager _manager;
     private String annotationId;
     private LatLng coordinate;
+    private float anchorV;
+    private float anchorU;
 
     public RNMGLAnnotationView(Context context, RNMGLAnnotationViewManager manager) {
         super(context);
@@ -40,5 +42,21 @@ public class RNMGLAnnotationView extends ReactViewGroup {
 
     public void setCoordinate(LatLng coordinate) {
         this.coordinate = coordinate;
+    }
+
+    public void setAnchorV(float anchorV) {
+        this.anchorV = anchorV;
+    }
+
+    public float getAnchorV() {
+        return anchorV;
+    }
+
+    public float getAnchorU() {
+        return anchorU;
+    }
+
+    public void setAnchorU(float anchorU) {
+        this.anchorU = anchorU;
     }
 }

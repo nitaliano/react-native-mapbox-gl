@@ -270,7 +270,8 @@ public class ReactNativeMapboxGLView extends RelativeLayout implements
             RNMGLCustomMarkerViewOptions options = new RNMGLCustomMarkerViewOptions()
                     .annotationId(annotationView.getAnnotationId())
                     .position(annotationView.getCoordinate())
-                    .flat(true);
+                    .flat(true)
+                    .anchor(annotationView.getAnchorU(), annotationView.getAnchorV());
             MarkerView markerView = _map.addMarker(options);
             _customAnnodationIds.put(annotationView.getAnnotationId(), markerView);
         }
