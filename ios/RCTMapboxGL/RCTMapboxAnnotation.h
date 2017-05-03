@@ -3,8 +3,8 @@
 #import <Mapbox/Mapbox.h>
 #import <UIKit/UIKit.h>
 
-#import <React/RCTConvert+MapKit.h>
 #import <React/RCTComponent.h>
+#import "RCTConvert+MapKit.h"
 #import "RCTMapboxGL.h"
 
 @class RCTBridge;
