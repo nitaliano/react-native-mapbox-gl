@@ -8,7 +8,7 @@
  */
 
 #import "RCTConvert+MapKit.h"
-#import "RCTConvert+CoreLocation.h"
+#import <React/RCTConvert+CoreLocation.h>
 #import "RCTMapAnnotation.h"
 #import "RCTMapOverlay.h"
 
