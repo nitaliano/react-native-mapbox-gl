@@ -16,6 +16,9 @@
 		C5DBB3661AF2EFB500E611A9 /* RCTMapboxGLManager.m in Sources */ = {isa = PBXBuildFile; fileRef = C5DBB3651AF2EFB500E611A9 /* RCTMapboxGLManager.m */; };
 		CB7CB11F1F5092CD30562E07 /* MGLPolyline+RCTAdditions.m in Sources */ = {isa = PBXBuildFile; fileRef = CB7CBE434C8597B1509C3FCA /* MGLPolyline+RCTAdditions.m */; };
 		CB7CB49F42C4A55593F71A37 /* MGLPolygon+RCTAdditions.m in Sources */ = {isa = PBXBuildFile; fileRef = CB7CBC07803C0F5C28ECB201 /* MGLPolygon+RCTAdditions.m */; };
+		EDFBF2F31EB9D4CE002C5EA0 /* RCTConvert+MapKit.m in Sources */ = {isa = PBXBuildFile; fileRef = EDFBF2F21EB9D4CE002C5EA0 /* RCTConvert+MapKit.m */; };
+		EDFBF2F61EB9D530002C5EA0 /* RCTMapAnnotation.m in Sources */ = {isa = PBXBuildFile; fileRef = EDFBF2F51EB9D530002C5EA0 /* RCTMapAnnotation.m */; };
+		EDFBF2F91EB9D583002C5EA0 /* RCTMapOverlay.m in Sources */ = {isa = PBXBuildFile; fileRef = EDFBF2F81EB9D583002C5EA0 /* RCTMapOverlay.m */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -59,6 +62,12 @@
 		CB7CBC07803C0F5C28ECB201 /* MGLPolygon+RCTAdditions.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = "MGLPolygon+RCTAdditions.m"; sourceTree = "<group>"; };
 		CB7CBC3A586F235841D94946 /* MGLPolyline+RCTAdditions.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "MGLPolyline+RCTAdditions.h"; sourceTree = "<group>"; };
 		CB7CBE434C8597B1509C3FCA /* MGLPolyline+RCTAdditions.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = "MGLPolyline+RCTAdditions.m"; sourceTree = "<group>"; };
+		EDFBF2F11EB9D4CE002C5EA0 /* RCTConvert+MapKit.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "RCTConvert+MapKit.h"; sourceTree = "<group>"; };
+		EDFBF2F21EB9D4CE002C5EA0 /* RCTConvert+MapKit.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = "RCTConvert+MapKit.m"; sourceTree = "<group>"; };
+		EDFBF2F41EB9D530002C5EA0 /* RCTMapAnnotation.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = RCTMapAnnotation.h; sourceTree = "<group>"; };
+		EDFBF2F51EB9D530002C5EA0 /* RCTMapAnnotation.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = RCTMapAnnotation.m; sourceTree = "<group>"; };
+		EDFBF2F71EB9D583002C5EA0 /* RCTMapOverlay.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = RCTMapOverlay.h; sourceTree = "<group>"; };
+		EDFBF2F81EB9D583002C5EA0 /* RCTMapOverlay.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = RCTMapOverlay.m; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -115,6 +124,12 @@
 				CB7CBC3A586F235841D94946 /* MGLPolyline+RCTAdditions.h */,
 				CB7CBC07803C0F5C28ECB201 /* MGLPolygon+RCTAdditions.m */,
 				CB7CB655DADBFA72D7B5EB33 /* MGLPolygon+RCTAdditions.h */,
+				EDFBF2F11EB9D4CE002C5EA0 /* RCTConvert+MapKit.h */,
+				EDFBF2F21EB9D4CE002C5EA0 /* RCTConvert+MapKit.m */,
+				EDFBF2F41EB9D530002C5EA0 /* RCTMapAnnotation.h */,
+				EDFBF2F51EB9D530002C5EA0 /* RCTMapAnnotation.m */,
+				EDFBF2F71EB9D583002C5EA0 /* RCTMapOverlay.h */,
+				EDFBF2F81EB9D583002C5EA0 /* RCTMapOverlay.m */,
 			);
 			path = RCTMapboxGL;
 			sourceTree = "<group>";
@@ -224,6 +239,9 @@
 			buildActionMask = 2147483647;
 			files = (
 				C5DBB3461AF2EF2B00E611A9 /* RCTMapboxGL.m in Sources */,
+				EDFBF2F91EB9D583002C5EA0 /* RCTMapOverlay.m in Sources */,
+				EDFBF2F61EB9D530002C5EA0 /* RCTMapAnnotation.m in Sources */,
+				EDFBF2F31EB9D4CE002C5EA0 /* RCTConvert+MapKit.m in Sources */,
 				C5DBB3661AF2EFB500E611A9 /* RCTMapboxGLManager.m in Sources */,
 				C167F89C1D18112B007C7A42 /* RCTMapboxGLConversions.m in Sources */,
 				874C0C451D9436D80034AF3F /* RCTMapboxAnnotationManager.m in Sources */,
