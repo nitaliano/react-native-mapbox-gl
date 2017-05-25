@@ -247,11 +247,6 @@ public class ReactNativeMapboxGLManager extends ViewGroupManager<ReactNativeMapb
         view.setStyleURL(styleURL);
     }
 
-    @ReactProp(name = "id")
-    public void setStyleUrl(ReactNativeMapboxGLView view, @Nonnull int id) {
-        view.setId(id);
-    }
-
     @ReactProp(name = "userTrackingMode")
     public void setUserTrackingMode(ReactNativeMapboxGLView view, int mode) {
         view.setLocationTracking(ReactNativeMapboxGLModule.locationTrackingModes[mode]);
