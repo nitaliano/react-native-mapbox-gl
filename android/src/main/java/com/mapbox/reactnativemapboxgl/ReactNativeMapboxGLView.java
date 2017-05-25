@@ -464,7 +464,7 @@ public class ReactNativeMapboxGLView extends RelativeLayout implements
 
     @Override
     public void onMapLongClick(@NonNull LatLng point) {
-        emitEvent(ReactNativeMapboxGLEventTypes.ON_LONG_PRESS, serializePoint(point));
+        emitEvent(ReactNativeMapboxGLEventTypes.ON_LONG_CLICK, serializePoint(point));
     }
 
     @Override
