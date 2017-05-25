@@ -319,6 +319,7 @@ class MapView extends Component {
     annotationsPopUpEnabled: PropTypes.bool,
     showsUserLocation: PropTypes.bool,
     styleURL: PropTypes.string.isRequired,
+    id: PropTypes.string.isRequired,
     userTrackingMode: PropTypes.number,
     attributionButtonIsHidden: PropTypes.bool,
     logoIsHidden: PropTypes.bool,
