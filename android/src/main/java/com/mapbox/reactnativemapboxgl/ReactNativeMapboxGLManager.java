@@ -248,7 +248,7 @@ public class ReactNativeMapboxGLManager extends ViewGroupManager<ReactNativeMapb
     }
 
     @ReactProp(name = "id")
-    public void setStyleUrl(ReactNativeMapboxGLView view, @Nonnull String id) {
+    public void setStyleUrl(ReactNativeMapboxGLView view, @Nonnull int id) {
         view.setId(id);
     }
 
