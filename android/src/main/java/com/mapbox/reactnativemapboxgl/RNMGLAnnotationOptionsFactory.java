@@ -224,8 +224,8 @@ public class RNMGLAnnotationOptionsFactory {
             polygon.add(new LatLng(latitude, longitude));
         }
 
-        if (annotation.hasKey("alpha")) {
-            double fillAlpha = annotation.getDouble("alpha");
+        if (annotation.hasKey("fillAlpha")) {
+            double fillAlpha = annotation.getDouble("fillAlpha");
             polygon.alpha((float) fillAlpha);
         }
 
