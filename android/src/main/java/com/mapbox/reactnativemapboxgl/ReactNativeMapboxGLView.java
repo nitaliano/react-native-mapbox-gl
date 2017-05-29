@@ -35,8 +35,10 @@ import com.mapbox.mapboxsdk.maps.OnMapReadyCallback;
 import com.mapbox.mapboxsdk.maps.UiSettings;
 
 import java.util.Collection;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
@@ -48,7 +50,7 @@ public class ReactNativeMapboxGLView extends RelativeLayout implements
         MapboxMap.OnMyBearingTrackingModeChangeListener, MapboxMap.OnMyLocationTrackingModeChangeListener,
         MapboxMap.OnMyLocationChangeListener,
         MapboxMap.OnMarkerClickListener, MapboxMap.OnInfoWindowClickListener,
-        MapView.OnMapChangedListener, ReactNativeMapboxGLManager.ChildListener
+        MapView.OnMapChangedListener
 {
 
     private MapboxMap _map = null;
@@ -77,6 +79,8 @@ public class ReactNativeMapboxGLView extends RelativeLayout implements
     private boolean _didChangeThrottled = false;
     private boolean _changeWasAnimated = false;
 
+    private Set<RNMGLAnnotationView> _annotationViews = new HashSet<>();
+    private List<View> _childViews = new ArrayList<View>();
     private Map<String, Annotation> _annotations = new HashMap<>();
     private Map<Long, String> _annotationIdsToName = new HashMap<>();
     private Map<String, RNMGLAnnotationOptions> _annotationOptions = new HashMap<>();
@@ -85,7 +89,7 @@ public class ReactNativeMapboxGLView extends RelativeLayout implements
     private Map<RNMGLAnnotationView, RNMGLAnnotationView.PropertyListener> _propertyListeners = new HashMap<>();
 
     private Handler _handler;
-
+    private boolean _mapIsLoading = false;
 
     @UiThread
     public ReactNativeMapboxGLView(Context context, ReactNativeMapboxGLManager manager) {
@@ -112,7 +116,7 @@ public class ReactNativeMapboxGLView extends RelativeLayout implements
     public void onDrop() {
         if (_mapView == null) { return; }
         _manager.getContext().removeLifecycleEventListener(this);
-        _manager.removeChildListener(this);
+        _mapIsLoading = false;
         if (!_paused) {
             _paused = true;
             _mapView.onPause();
@@ -226,21 +230,61 @@ public class ReactNativeMapboxGLView extends RelativeLayout implements
     // Children
 
     @Override
-    public void childAdded(View child) {
-        if (child instanceof RNMGLAnnotationView) {
+    public void addView(View child, int index) {
+        _childViews.add(index, child);
+        if (RNMGLAnnotationView.class.equals(child.getClass())) {
+            _annotationViews.add((RNMGLAnnotationView)child);
             updateMarkerAnnotations();
+        } else {
+            super.addView(child, getRealIndex(index));
         }
+    }
+
+    public int getChildCountReactInternal() {
+        return _childViews.size();
+    }
+
+    public View getChildAtReactInternal(int index) {
+        return _childViews.get(index);
     }
 
     @Override
-    public void childRemoved(View child) {
-        if (child instanceof RNMGLAnnotationView) {
+    public void removeViewAt(int index) {
+        int realIndex = getRealIndex(index);
+        View child = _childViews.remove(index);
+        if (RNMGLAnnotationView.class.equals(child.getClass())) {
+            _annotationViews.remove(child);
             updateMarkerAnnotations();
+        } else {
+            super.removeViewAt(realIndex);
         }
     }
 
+    private int getRealIndex(int index) {
+        int annotationViews = 0;
+        for (int i = 0; i < index; i++) {
+            if (RNMGLAnnotationView.class.equals(getChildAtReactInternal(i).getClass())) {
+                annotationViews++;
+            }
+        }
+        return index - annotationViews;
+    }
+
+    public Set<RNMGLAnnotationView> getAnnotationViews() {
+        return _annotationViews;
+    }
+
     private void updateMarkerAnnotations() {
-        Set<RNMGLAnnotationView> newAnnotationViews = new HashSet<>(_manager.getAnnotationViews(this));
+        /*
+            _map obviously must be present, but this method might be called while
+            map is currently in the process of loading, which result in loss of
+            custom marker annotations that should be displayed on map.
+         */
+        if (_mapIsLoading || _map == null) {
+            return;
+        }
+
+        Set<RNMGLAnnotationView> newAnnotationViews = getAnnotationViews();
         Set<RNMGLAnnotationView> currentViews = new HashSet<>(_customAnnotationViewMap.values());
         Collection<RNMGLAnnotationView> addedChildren = Sets.difference(newAnnotationViews, currentViews);
         Collection<RNMGLAnnotationView> removedChildren = Sets.difference(currentViews, newAnnotationViews);
@@ -632,11 +676,11 @@ public class ReactNativeMapboxGLView extends RelativeLayout implements
                 }
                 break;
             case MapView.WILL_START_LOADING_MAP:
-                _manager.removeChildListener(this);
+                _mapIsLoading = true;
                 emitEvent(ReactNativeMapboxGLEventTypes.ON_START_LOADING_MAP, null);
                 break;
             case MapView.DID_FINISH_LOADING_MAP:
-                _manager.addChildListener(this);
+                _mapIsLoading = false;
                 updateMarkerAnnotations();
                 emitEvent(ReactNativeMapboxGLEventTypes.ON_FINISH_LOADING_MAP, null);
                 break;
