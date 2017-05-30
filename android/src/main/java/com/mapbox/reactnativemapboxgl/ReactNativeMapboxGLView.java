@@ -726,7 +726,13 @@ public class ReactNativeMapboxGLView extends RelativeLayout implements
     }
 
     public LatLngBounds getBounds() {
-        if (_map == null) { return new LatLngBounds.Builder().build(); }
+        if (_map == null) {
+            LatLng center = _initialCamera.build().target;
+            return new LatLngBounds.Builder()
+                    .include(center)
+                    .include(center)
+                    .build();
+        }
         return _map.getProjection().getVisibleRegion().latLngBounds;
     }
 
