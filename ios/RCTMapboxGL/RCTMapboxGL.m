@@ -45,7 +45,7 @@
     MGLAnnotationVerticalAlignment _userLocationVerticalAlignment;
     /* So we don't fire onChangeUserTracking mode when triggered by props */
     BOOL _isChangingUserTracking;
-    NSMutableArray<UIView *> *_reactSubviews;
+    NSMutableDictionary<NSString *, UIView *> *_reactSubviews;
 }
 
 // View creation
@@ -57,7 +57,7 @@
         _clipsToBounds = YES;
         _finishedLoading = NO;
         _annotations = [NSMutableDictionary dictionary];
-        _reactSubviews = [NSMutableArray new];
+        _reactSubviews = [NSMutableDictionary dictionary];
     }
 
     return self;
@@ -110,10 +110,10 @@
     }
 
     [self addSubview:_map];
-    for (UIView *annotation in _reactSubviews) {
-        [_map addAnnotation:(RCTMapboxAnnotation *)annotation];
+    for (NSString *key in [_reactSubviews allKeys]) {
+        [_map addAnnotation:_reactSubviews[key]];
     }
-
+    
     [self layoutSubviews];
 }
 
@@ -139,7 +139,8 @@
         RCTMapboxAnnotation * annotation = (RCTMapboxAnnotation *) subview;
         annotation.map = self;
         [_map addAnnotation:annotation];
-        [_reactSubviews insertObject:annotation atIndex:atIndex];
+        NSString *key = annotation.reuseIdentifier;
+        _reactSubviews[key] = annotation;
     }
 }
 
@@ -148,13 +149,12 @@
     // underlying mapview action here.
     if ([subview isKindOfClass:[RCTMapboxAnnotation class]]) {
         RCTMapboxAnnotation * annotation = (RCTMapboxAnnotation *) subview;
-        [_map removeAnnotation:annotation];
-        [_reactSubviews removeObject:annotation];
+        [_reactSubviews removeObjectForKey:annotation.reuseIdentifier];
     }
 }
 
 - (NSArray<id<RCTComponent>> *)reactSubviews {
-    return _reactSubviews;
+    return nil;
 }
 
 
@@ -200,12 +200,10 @@
 }
 
 - (void)restoreAnnotationPosition:(NSString *)annotationId {
-    for (UIView *annotation in _reactSubviews) {
-        if ([annotation isKindOfClass:[RCTMapboxAnnotation class]] && ((RCTMapboxAnnotation *) annotation).reuseIdentifier == annotationId) {
-            CGPoint point = [_map convertCoordinate:((RCTMapboxAnnotation *) annotation).coordinate toPointToView:_map];
-            annotation.center = point;
-            return;
-        }
+    if (_reactSubviews[annotationId] && [_reactSubviews[annotationId] isKindOfClass:[RCTMapboxAnnotation class]]){
+        RCTMapboxAnnotation *annotation = (RCTMapboxAnnotation *)_reactSubviews[annotationId];
+        CGPoint point = [_map convertCoordinate:annotation.coordinate toPointToView:_map];
+        annotation.center = point;
     }
 }
 - (CGFloat)mapView:(MGLMapView *)mapView alphaForShapeAnnotation:(RCTMGLAnnotationPolyline *)shape
@@ -252,11 +250,10 @@
         RCTMapboxAnnotation *customAnnotation = (RCTMapboxAnnotation *)annotation;
         MGLAnnotationView *annotationView = [mapView dequeueReusableAnnotationViewWithIdentifier:customAnnotation.reuseIdentifier];
         if (!annotationView){
-            annotationView = customAnnotation;
+            annotationView = _reactSubviews[customAnnotation.reuseIdentifier];
         }
         return annotationView;
     }
-
     return nil;
 }
 
