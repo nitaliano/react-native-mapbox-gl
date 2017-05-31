@@ -58,6 +58,11 @@ public class RNMGLAnnotationViewManager extends ViewGroupManager<RNMGLAnnotation
         view.setAnchorU(value);
     }
 
+    @ReactProp(name = "passThroughTouchEvents")
+    public void passThroughTouchEvents(RNMGLAnnotationView view, boolean value) {
+        view.passThroughTouchEvents(value);
+    }
+
     @Override
     public void updateExtraData(RNMGLAnnotationView view, Object extraData) {
         // This is called from the {@link SizeReportingShadowNode}. We cache

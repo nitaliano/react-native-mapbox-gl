@@ -374,6 +374,14 @@ class MapView extends Component {
   };
 
   componentWillReceiveProps(newProps) {
+    if (this.props.centerCoordinate && newProps.centerCoordinate &&
+      (this.props.centerCoordinate.latitude !== newProps.centerCoordinate.latitude ||
+      this.props.centerCoordinate.longitude !== newProps.centerCoordinate.longitude)) {
+      this.setCenterCoordinate(newProps.centerCoordinate.latitude,
+        newProps.centerCoordinate.longitude,
+        newProps.animatedCoordinateChange)
+    }
+
     const oldKeys = clone(this._annotations);
     const itemsToAdd = [];
     const itemsToRemove = [];
