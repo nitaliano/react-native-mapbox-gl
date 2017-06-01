@@ -201,7 +201,7 @@
 
 - (void)restoreAnnotationPosition:(NSString *)annotationId {
     for (UIView *annotation in _reactSubviews) {
-        if ([annotation isKindOfClass:[RCTMapboxAnnotation class]] && ((RCTMapboxAnnotation *) annotation).reuseIdentifier == annotationId) {
+        if ([annotation isKindOfClass:[RCTMapboxAnnotation class]] && ((RCTMapboxAnnotation *) annotation).id == annotationId) {
             CGPoint point = [_map convertCoordinate:((RCTMapboxAnnotation *) annotation).coordinate toPointToView:_map];
             annotation.center = point;
             return;
@@ -249,12 +249,7 @@
 
 - (nullable MGLAnnotationView *)mapView:(MGLMapView *)mapView viewForAnnotation:(id <MGLAnnotation>)annotation {
     if ([annotation isKindOfClass:[RCTMapboxAnnotation class]] ){
-        RCTMapboxAnnotation *customAnnotation = (RCTMapboxAnnotation *)annotation;
-        MGLAnnotationView *annotationView = [mapView dequeueReusableAnnotationViewWithIdentifier:customAnnotation.reuseIdentifier];
-        if (!annotationView){
-            annotationView = customAnnotation;
-        }
-        return annotationView;
+        return (RCTMapboxAnnotation *)annotation;
     }
 
     return nil;
