@@ -356,6 +356,8 @@ The `Annotation` view has the following required props:
 | `id` | `string` | Unique identifier for the annotation. |
 | `coordinate` | `{latitude: number, longitude: number}` | Location of the annotation. |
 
+Handling taps on the custom annotations could be done through the [`onOpenAnnotation` callback prop of the `MapView`](#callback-props).
+
 ###### Known Bugs
 
 1. `Annotation` views do not position correctly unless they have the following style props:
