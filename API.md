@@ -267,7 +267,7 @@ mapbox://styles/bobbysud/cigtw1pzy0000aam2346f7ex0
   id, // required. string. Unique identifier used for adding or selecting an annotation.
   annotationImage: { // optional. Marker image for type=point
     source: {
-      uri // required. string. Either remote image URL or the name (without extension) of a bundled image
+      uri // required. string. Either remote image URL, local image file URL or the name (without extension) of a bundled image
     },
     height, // required. number. Image height
     width, // required. number. Image width
@@ -283,6 +283,8 @@ mapbox://styles/bobbysud/cigtw1pzy0000aam2346f7ex0
 ```
 **For using locally bundled images, on iOS see [adding static resources to your app using Images.xcassets  docs](https://facebook.github.io/react-native/docs/image.html#adding-static-resources-to-your-app-using-images-xcassets)
 and on Android, put images in `android/app/src/main/res/drawable/yourImage.png`**.
+
+APIs from packages like `react-native-fs` or `react-native-fetch-blob` can help to construct a local image file URL.
 
 #### Example
 
@@ -309,7 +311,7 @@ annotations: [{
   title: 'Important',
   subtitle: 'Neat, this is a custom annotation image',
   annotationImage: {
-    source: { uri: 'https://cldup.com/7NLZklp8zS.png' },
+    source: { uri: 'file:///var/mobile/Containers/Data/Application/8821CE3F-C0DA-4B86-B4F7-85DE1E158943/Documents/custom-annotation.png' },
     height: 25,
     width: 25
   },

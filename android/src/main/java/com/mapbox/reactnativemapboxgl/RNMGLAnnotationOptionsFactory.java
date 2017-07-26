@@ -19,10 +19,15 @@ import com.mapbox.mapboxsdk.annotations.PolylineOptions;
 import com.mapbox.mapboxsdk.geometry.LatLng;
 import com.mapbox.mapboxsdk.maps.MapboxMap;
 
+import java.io.File;
+import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.lang.ClassCastException;
 import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.net.URL;
 import java.util.HashMap;
 import java.util.Map;
@@ -87,6 +92,17 @@ public class RNMGLAnnotationOptionsFactory {
         return ContextCompat.getDrawable(context, resID);
     }
 
+    static Drawable drawableFromFileUrl(Context context, String fileUrl) throws IOException {
+        try {
+            InputStream input = new FileInputStream(new File(new URI(fileUrl)));
+
+            Bitmap bitmap = BitmapFactory.decodeStream(input);
+            return new BitmapDrawable(context.getResources(), bitmap);
+        } catch (URISyntaxException ex) {
+            throw new MalformedURLException();
+        }
+    }
+
     static Drawable drawableFromUrl(Context context, String url) throws IOException {
         // This doesn't currently work, as it throws NetworkOnMainThreadException
         HttpURLConnection connection = (HttpURLConnection) new URL(url).openConnection();
@@ -108,6 +124,8 @@ public class RNMGLAnnotationOptionsFactory {
         Drawable drawable;
         try {
             drawable = drawableFromUrl(context, path);
+        } catch (ClassCastException ex) {
+            drawable = drawableFromFileUrl(context, path);
         } catch (MalformedURLException ex) {
             drawable = drawableFromDrawableName(context, path);
         }
