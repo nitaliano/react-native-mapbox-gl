@@ -728,6 +728,11 @@ public class ReactNativeMapboxGLView extends RelativeLayout implements
     public LatLngBounds getBounds() {
         if (_map == null) {
             LatLng center = _initialCamera.build().target;
+            // We must return some bounds,
+            // and LatLngBounds.Builder requires at least two points,
+            // or it will throw Exception.
+            // These two points can be same point actually,
+            // but then at least it must be repeated two times.
             return new LatLngBounds.Builder()
                     .include(center)
                     .include(center)
