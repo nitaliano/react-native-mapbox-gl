@@ -1,6 +1,7 @@
 "use strict";
 
-import React, { Component, PropTypes } from "react";
+import React, { Component } from "react";
+import PropTypes from "prop-types";
 import { View, NativeModules, NativeAppEventEmitter, requireNativeComponent, findNodeHandle, Platform } from "react-native";
 
 import cloneDeep from "lodash/cloneDeep";
@@ -193,7 +194,7 @@ class MapView extends Component {
   }
   easeTo(options, animated = true, callback) {
     let _resolve;
-    const promise = new Promise(resolve => _resolve = resolve);
+    const promise = new Promise(resolve => (_resolve = resolve));
     MapboxGLManager.easeTo(findNodeHandle(this), options, animated, () => {
       callback && callback();
       _resolve();
@@ -201,29 +202,8 @@ class MapView extends Component {
     return promise;
   }
 
-  setVisibleCoordinateBounds(
-    latitudeSW,
-    longitudeSW,
-    latitudeNE,
-    longitudeNE,
-    paddingTop = 0,
-    paddingRight = 0,
-    paddingBottom = 0,
-    paddingLeft = 0,
-    animated = true
-  ) {
-    MapboxGLManager.setVisibleCoordinateBounds(
-      findNodeHandle(this),
-      latitudeSW,
-      longitudeSW,
-      latitudeNE,
-      longitudeNE,
-      paddingTop,
-      paddingRight,
-      paddingBottom,
-      paddingLeft,
-      animated
-    );
+  setVisibleCoordinateBounds(latitudeSW, longitudeSW, latitudeNE, longitudeNE, paddingTop = 0, paddingRight = 0, paddingBottom = 0, paddingLeft = 0, animated = true) {
+    MapboxGLManager.setVisibleCoordinateBounds(findNodeHandle(this), latitudeSW, longitudeSW, latitudeNE, longitudeNE, paddingTop, paddingRight, paddingBottom, paddingLeft, animated);
   }
 
   // Getters
