@@ -37,3 +37,6 @@ android/gradle/
 android/gradlew
 android/gradlew.bat
 android/local.properties
+
+# Vendor iOS Mapbox.framework
+!ios/Mapbox.framework
