@@ -1,21 +1,15 @@
-import React, { PropTypes } from 'react';
-import {
-  View,
-  requireNativeComponent,
-  StyleSheet,
-  Platform,
-  NativeModules,
-  Animated,
-  findNodeHandle,
-} from 'react-native';
+import React from "react";
+import PropTypes from "prop-types";
 
-import resolveAssetSource from 'react-native/Libraries/Image/resolveAssetSource';
+import { View, requireNativeComponent, StyleSheet, Platform, NativeModules, Animated, findNodeHandle } from "react-native";
+
+import resolveAssetSource from "react-native/Libraries/Image/resolveAssetSource";
 
 const viewConfig = {
-  uiViewClassName: 'RCTMapboxAnnotation',
+  uiViewClassName: "RCTMapboxAnnotation",
   validAttributes: {
-    coordinate: true,
-  },
+    coordinate: true
+  }
 };
 
 const propTypes = {
@@ -25,20 +19,21 @@ const propTypes = {
   subtitle: PropTypes.string,
   coordinate: PropTypes.shape({
     latitude: PropTypes.number.isRequired,
-    longitude: PropTypes.number.isRequired,
-  }).isRequired,
-  
+    longitude: PropTypes.number.isRequired
+  }).isRequired
 };
 
 class MapboxAnnotation extends React.Component {
   setNativeProps(nativeProps) {
     this.marker.setNativeProps(nativeProps);
   }
-  
+
   render() {
     return (
       <RCTMapboxAnnotation
-        ref={ref => { this.marker = ref; }}
+        ref={ref => {
+          this.marker = ref;
+        }}
         {...this.props}
       />
     );
@@ -48,5 +43,5 @@ class MapboxAnnotation extends React.Component {
 MapboxAnnotation.propTypes = propTypes;
 MapboxAnnotation.viewConfig = viewConfig;
 
-const RCTMapboxAnnotation = requireNativeComponent('RCTMapboxAnnotation', MapboxAnnotation);
+const RCTMapboxAnnotation = requireNativeComponent("RCTMapboxAnnotation", MapboxAnnotation);
 module.exports = MapboxAnnotation;

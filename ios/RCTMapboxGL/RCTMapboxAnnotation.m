@@ -18,7 +18,7 @@
 }
 
 -(NSString *)reuseIdentifier {
-    return self.id;
+    return nil;
 }
 
 -(void)layoutSubviews {

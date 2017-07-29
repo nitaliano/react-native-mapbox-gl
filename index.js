@@ -1,19 +1,13 @@
-'use strict';
+"use strict";
 
-import React, { Component, PropTypes } from 'react';
-import {
-  View,
-  NativeModules,
-  NativeAppEventEmitter,
-  requireNativeComponent,
-  findNodeHandle,
-  Platform
-} from 'react-native';
+import React, { Component } from "react";
+import PropTypes from "prop-types";
+import { View, NativeModules, NativeAppEventEmitter, requireNativeComponent, findNodeHandle, Platform } from "react-native";
 
-import cloneDeep from 'lodash/cloneDeep';
-import clone from 'lodash/clone';
-import isEqual from 'lodash/isEqual';
-import Annotation from './Annotation';
+import cloneDeep from "lodash/cloneDeep";
+import clone from "lodash/clone";
+import isEqual from "lodash/isEqual";
+import Annotation from "./Annotation";
 
 const { MapboxGLManager } = NativeModules;
 const { mapStyles, userTrackingMode, userLocationVerticalAlignment, unknownResourceCount } = MapboxGLManager;
@@ -34,11 +28,11 @@ function deprecated(obj, key) {
   });
 }
 
-deprecated(mapStyles, 'emerald');
+deprecated(mapStyles, "emerald");
 
 // Monkeypatch Android commands
 
-if (Platform.OS === 'android') {
+if (Platform.OS === "android") {
   const RCTUIManager = NativeModules.UIManager;
   const commands = RCTUIManager.RCTMapboxGL.Commands;
 
@@ -50,7 +44,7 @@ if (Platform.OS === 'android') {
   Object.keys(commands).forEach(command => {
     MapboxGLManager[command] = (handle, ...rawArgs) => {
       const args = rawArgs.map(arg => {
-        if (typeof arg === 'function') {
+        if (typeof arg === "function") {
           callbackMap.set(nextCallbackId, arg);
           return nextCallbackId++;
         }
@@ -60,7 +54,7 @@ if (Platform.OS === 'android') {
     };
   });
 
-  NativeAppEventEmitter.addListener('MapboxAndroidCallback', ([ callbackId, args ]) => {
+  NativeAppEventEmitter.addListener("MapboxAndroidCallback", ([callbackId, args]) => {
     const callback = callbackMap.get(callbackId);
     if (!callback) {
       throw new Error(`Native is calling a callbackId ${callbackId}, which is not registered`);
@@ -72,15 +66,12 @@ if (Platform.OS === 'android') {
 
 // Metrics
 
-let _metricsEnabled = MapboxGLManager.metricsEnabled;
-
 function setMetricsEnabled(enabled: boolean) {
-  _metricsEnabled = enabled;
   MapboxGLManager.setMetricsEnabled(enabled);
 }
 
 function getMetricsEnabled() {
-  return _metricsEnabled;
+  return MapboxGLManager.getMetricsEnabled();
 }
 
 // Access token
@@ -91,18 +82,20 @@ function setAccessToken(token: string) {
 // Offline
 function bindCallbackToPromise(callback, promise) {
   if (callback) {
-    promise.then(value => {
-      callback(null, value);
-    }).catch(err => {
-      callback(err);
-    })
+    promise
+      .then(value => {
+        callback(null, value);
+      })
+      .catch(err => {
+        callback(err);
+      });
   }
 }
 
 function addOfflinePack(options, callback) {
   let _options = options;
   // Workaround the fact that RN Android can't serialize JSON correctly
-  if (Platform.OS === 'android') {
+  if (Platform.OS === "android") {
     _options = {
       ...options,
       metadata: JSON.stringify({ v: options.metadata })
@@ -115,7 +108,7 @@ function addOfflinePack(options, callback) {
 
 function getOfflinePacks(callback) {
   let promise = MapboxGLManager.getOfflinePacks();
-  if (Platform.OS === 'android') {
+  if (Platform.OS === "android") {
     promise = promise.then(packs => {
       packs.forEach(progress => {
         if (progress.metadata) {
@@ -141,23 +134,23 @@ function setOfflinePackProgressThrottleInterval(milis) {
 
 function addOfflinePackProgressListener(handler) {
   let _handler = handler;
-  if (Platform.OS === 'android') {
-    _handler = (progress) => {
+  if (Platform.OS === "android") {
+    _handler = progress => {
       if (progress.metadata) {
         progress.metadata = JSON.parse(progress.metadata).v;
       }
       handler(progress);
     };
   }
-  return NativeAppEventEmitter.addListener('MapboxOfflineProgressDidChange', _handler);
+  return NativeAppEventEmitter.addListener("MapboxOfflineProgressDidChange", _handler);
 }
 
 function addOfflineMaxAllowedTilesListener(handler) {
-  return NativeAppEventEmitter.addListener('MapboxOfflineMaxAllowedTiles', handler);
+  return NativeAppEventEmitter.addListener("MapboxOfflineMaxAllowedTiles", handler);
 }
 
 function addOfflineErrorListener(handler) {
-  return NativeAppEventEmitter.addListener('MapboxOfflineError', handler);
+  return NativeAppEventEmitter.addListener("MapboxOfflineError", handler);
 }
 
 class MapView extends Component {
@@ -172,6 +165,7 @@ class MapView extends Component {
     this._onChangeUserTrackingMode = this._onChangeUserTrackingMode.bind(this);
     this._onUpdateUserLocation = this._onUpdateUserLocation.bind(this);
     this._onLongPress = this._onLongPress.bind(this);
+    this._onLongClick = this._onLongClick.bind(this);
     this._onTap = this._onTap.bind(this);
     this._onFinishLoadingMap = this._onFinishLoadingMap.bind(this);
     this._onStartLoadingMap = this._onStartLoadingMap.bind(this);
@@ -200,7 +194,7 @@ class MapView extends Component {
   }
   easeTo(options, animated = true, callback) {
     let _resolve;
-    const promise = new Promise(resolve => _resolve = resolve);
+    const promise = new Promise(resolve => (_resolve = resolve));
     MapboxGLManager.easeTo(findNodeHandle(this), options, animated, () => {
       callback && callback();
       _resolve();
@@ -235,8 +229,8 @@ class MapView extends Component {
   }
   queryRenderedFeatures(options, callback) {
     let promise;
-    if (Platform.OS === 'android') {
-      promise = Promise.reject('queryRenderedFeatures() is not yet implemented on Android');
+    if (Platform.OS === "android") {
+      promise = Promise.reject("queryRenderedFeatures() is not yet implemented on Android");
     } else {
       promise = MapboxGLManager.queryRenderedFeatures(findNodeHandle(this), options);
     }
@@ -268,6 +262,9 @@ class MapView extends Component {
   }
   _onLongPress(event: Event) {
     if (this.props.onLongPress) this.props.onLongPress(event.nativeEvent.src);
+  }
+  _onLongClick(event: Event) {
+    if (this.props.onLongClick) this.props.onLongClick(event.nativeEvent.src);
   }
   _onTap(event: Event) {
     if (this.props.onTap) this.props.onTap(event.nativeEvent.src);
@@ -309,28 +306,30 @@ class MapView extends Component {
     userLocationVerticalAlignment: PropTypes.number,
     contentInset: PropTypes.arrayOf(PropTypes.number),
 
-    annotations: PropTypes.arrayOf(PropTypes.shape({
-      coordinates: PropTypes.array.isRequired,
-      title: PropTypes.string,
-      subtitle: PropTypes.string,
-      fillAlpha: PropTypes.number,
-      fillColor: PropTypes.string,
-      strokeAlpha: PropTypes.number,
-      strokeColor: PropTypes.string,
-      strokeWidth: PropTypes.number,
-      id: PropTypes.string,
-      type: PropTypes.string.isRequired,
-      rightCalloutAccessory: PropTypes.shape({
-        height: PropTypes.number,
-        width: PropTypes.number,
-        url: PropTypes.string
-      }),
-      annotationImage: PropTypes.shape({
-        height: PropTypes.number,
-        width: PropTypes.number,
-        url: PropTypes.string
+    annotations: PropTypes.arrayOf(
+      PropTypes.shape({
+        coordinates: PropTypes.array.isRequired,
+        title: PropTypes.string,
+        subtitle: PropTypes.string,
+        fillAlpha: PropTypes.number,
+        fillColor: PropTypes.string,
+        strokeAlpha: PropTypes.number,
+        strokeColor: PropTypes.string,
+        strokeWidth: PropTypes.number,
+        id: PropTypes.string,
+        type: PropTypes.string.isRequired,
+        rightCalloutAccessory: PropTypes.shape({
+          height: PropTypes.number,
+          width: PropTypes.number,
+          url: PropTypes.string
+        }),
+        annotationImage: PropTypes.shape({
+          height: PropTypes.number,
+          width: PropTypes.number,
+          url: PropTypes.string
+        })
       })
-    })),
+    ),
     annotationsAreImmutable: PropTypes.bool,
 
     onRegionDidChange: PropTypes.func,
@@ -344,7 +343,7 @@ class MapView extends Component {
     onLocateUserFailed: PropTypes.func,
     onLongPress: PropTypes.func,
     onTap: PropTypes.func,
-    onChangeUserTrackingMode: PropTypes.func,
+    onChangeUserTrackingMode: PropTypes.func
   };
 
   static defaultProps = {
@@ -405,7 +404,9 @@ class MapView extends Component {
   _native = null;
 
   _onNativeComponentMount(ref) {
-    if (this._native === ref) { return; }
+    if (this._native === ref) {
+      return;
+    }
     this._native = ref;
 
     MapboxGLManager.spliceAnnotations(findNodeHandle(this), true, [], this.props.annotations);
@@ -439,7 +440,7 @@ class MapView extends Component {
         onCloseAnnotation={this._onCloseAnnotation}
         onRightAnnotationTapped={this._onRightAnnotationTapped}
         onUpdateUserLocation={this._onUpdateUserLocation}
-        onLongPress={this._onLongPress}
+        onLongPress={Platform.OS == "ios" ? this._onLongPress : this._onLongClick}
         onTap={this._onTap}
         onFinishLoadingMap={this._onFinishLoadingMap}
         onStartLoadingMap={this._onStartLoadingMap}
@@ -450,7 +451,7 @@ class MapView extends Component {
   }
 }
 
-const MapboxGLView = requireNativeComponent('RCTMapboxGL', MapView, {
+const MapboxGLView = requireNativeComponent("RCTMapboxGL", MapView, {
   nativeOnly: {
     onChange: true,
     enableOnRegionDidChange: true,
@@ -461,10 +462,16 @@ const MapboxGLView = requireNativeComponent('RCTMapboxGL', MapView, {
 const Mapbox = {
   MapView,
   Annotation,
-  mapStyles, userTrackingMode, userLocationVerticalAlignment, unknownResourceCount,
-  getMetricsEnabled, setMetricsEnabled,
+  mapStyles,
+  userTrackingMode,
+  userLocationVerticalAlignment,
+  unknownResourceCount,
+  getMetricsEnabled,
+  setMetricsEnabled,
   setAccessToken,
-  addOfflinePack, getOfflinePacks, removeOfflinePack,
+  addOfflinePack,
+  getOfflinePacks,
+  removeOfflinePack,
   addOfflinePackProgressListener,
   addOfflineMaxAllowedTilesListener,
   addOfflineErrorListener,

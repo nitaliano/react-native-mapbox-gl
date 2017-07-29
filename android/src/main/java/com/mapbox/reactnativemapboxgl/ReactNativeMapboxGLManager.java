@@ -96,7 +96,7 @@ public class ReactNativeMapboxGLManager extends ViewGroupManager<ReactNativeMapb
                 .put(ReactNativeMapboxGLEventTypes.ON_RIGHT_ANNOTATION_TAPPED, MapBuilder.of("registrationName", "onRightAnnotationTapped"))
                 .put(ReactNativeMapboxGLEventTypes.ON_CHANGE_USER_TRACKING_MODE, MapBuilder.of("registrationName", "onChangeUserTrackingMode"))
                 .put(ReactNativeMapboxGLEventTypes.ON_UPDATE_USER_LOCATION, MapBuilder.of("registrationName", "onUpdateUserLocation"))
-                .put(ReactNativeMapboxGLEventTypes.ON_LONG_PRESS, MapBuilder.of("registrationName", "onLongPress"))
+                .put(ReactNativeMapboxGLEventTypes.ON_LONG_CLICK, MapBuilder.of("registrationName", "onLongClick"))
                 .put(ReactNativeMapboxGLEventTypes.ON_TAP, MapBuilder.of("registrationName", "onTap"))
                 .put(ReactNativeMapboxGLEventTypes.ON_FINISH_LOADING_MAP, MapBuilder.of("registrationName", "onFinishLoadingMap"))
                 .put(ReactNativeMapboxGLEventTypes.ON_START_LOADING_MAP, MapBuilder.of("registrationName", "onStartLoadingMap"))
