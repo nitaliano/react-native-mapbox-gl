@@ -59,7 +59,8 @@ import { MapView } from 'react-native-mapbox-gl';
 | `onRegionWillChange` | `{latitude: 0, longitude: 0, zoomLevel: 0, direction: 0, pitch: 0, animated: false}` | Fired when the map begins panning or zooming. `animated` indicates whether the action is user-driven or animation-driven.
 | `onRegionDidChange` | `{latitude: 0, longitude: 0, zoomLevel: 0, direction: 0, pitch: 0, animated: false}` | Fired when the map ends panning or zooming.
 | `onOpenAnnotation` | `{id: 'marker_id', title: null, subtitle: null, latitude: 0, longitude: 0}` | Fired when tapping an annotation.
-| `onRightAnnotationTapped` | `{id: 'marker_id', title: null, subtitle: null, latitude: 0, longitude: 0}` | Fired when user taps the `rightCalloutAccessory` of an annotation.
+| `onRightAnnotationTapped` | `{id: 'marker_id', title: null, subtitle: null, latitude: 0, longitude: 0}` | Fired when user taps the `rightCalloutAccessory` of an annotation.  iOS only.  Android does not support the right callout accessory.
+| `onAnnotationTapped` | `{id: 'marker_id', title: null, subtitle: null, latitude: 0, longitude: 0}` | Fired when user taps the annotation.
 | `onChangeUserTrackingMode` | `Mapbox.userTrackingMode.none` | Fired when the user tracking mode gets changed by an user pan or rotate.
 | `onUpdateUserLocation` | `{latitude: 0, longitude: 0, verticalAccuracy: 0, horizontalAccuracy: 0, headingAccuracy: 0, magneticHeading: 0, trueHeading: 0, isUpdating: false}` | Fired when the user's location updates. `headingAccuracy` and `isUpdating` are only supported on iOS. `verticalAccuracy` and `horizontalAccuracy` will be the same on Android, or might not exist in some circumstances.
 | `onLocateUserFailed` | `{message: 'Error message'}` | Fired when there is an error getting the user's location. Do not rely on the string that is returned for determining what kind of error it is.

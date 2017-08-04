@@ -113,7 +113,7 @@
     for (NSString *key in [_reactSubviews allKeys]) {
         [_map addAnnotation:_reactSubviews[key]];
     }
-    
+
     [self layoutSubviews];
 }
 
@@ -280,6 +280,23 @@
                                             @"longitude": @(annotation.coordinate.longitude)} };
 
         [_eventDispatcher sendInputEventWithName:@"onRightAnnotationTapped" body:event];
+    }
+}
+
+- (void)mapView:(MGLMapView *)mapView tapOnCalloutForAnnotation:(id<MGLAnnotation>)annotation
+{
+    if (annotation.title && annotation.subtitle) {
+
+        NSString *id = [(RCTMGLAnnotation *) annotation id];
+
+        NSDictionary *event = @{ @"target": self.reactTag,
+                                 @"src": @{ @"title": annotation.title,
+                                            @"subtitle": annotation.subtitle,
+                                            @"id": id,
+                                            @"latitude": @(annotation.coordinate.latitude),
+                                            @"longitude": @(annotation.coordinate.longitude)} };
+
+        [_eventDispatcher sendInputEventWithName:@"onAnnotationTapped" body:event];
     }
 }
 
