@@ -169,6 +169,7 @@ class MapView extends Component {
     this._onOpenAnnotation = this._onOpenAnnotation.bind(this);
     this._onCloseAnnotation = this._onCloseAnnotation.bind(this);
     this._onRightAnnotationTapped = this._onRightAnnotationTapped.bind(this);
+    this._onAnnotationTapped = this._onAnnotationTapped.bind(this);
     this._onChangeUserTrackingMode = this._onChangeUserTrackingMode.bind(this);
     this._onUpdateUserLocation = this._onUpdateUserLocation.bind(this);
     this._onLongPress = this._onLongPress.bind(this);
@@ -260,6 +261,9 @@ class MapView extends Component {
   _onRightAnnotationTapped(event: Event) {
     if (this.props.onRightAnnotationTapped) this.props.onRightAnnotationTapped(event.nativeEvent.src);
   }
+  _onAnnotationTapped(event: Event) {
+    if (this.props.onAnnotationTapped) this.props.onAnnotationTapped(event.nativeEvent.src);
+  }
   _onChangeUserTrackingMode(event: Event) {
     if (this.props.onChangeUserTrackingMode) this.props.onChangeUserTrackingMode(event.nativeEvent.src);
   }
@@ -339,6 +343,7 @@ class MapView extends Component {
     onCloseAnnotation: PropTypes.func,
     onUpdateUserLocation: PropTypes.func,
     onRightAnnotationTapped: PropTypes.func,
+    onAnnotationTapped: PropTypes.func,
     onFinishLoadingMap: PropTypes.func,
     onStartLoadingMap: PropTypes.func,
     onLocateUserFailed: PropTypes.func,
@@ -438,6 +443,7 @@ class MapView extends Component {
         onOpenAnnotation={this._onOpenAnnotation}
         onCloseAnnotation={this._onCloseAnnotation}
         onRightAnnotationTapped={this._onRightAnnotationTapped}
+        onAnnotationTapped={this._onAnnotationTapped}
         onUpdateUserLocation={this._onUpdateUserLocation}
         onLongPress={this._onLongPress}
         onTap={this._onTap}

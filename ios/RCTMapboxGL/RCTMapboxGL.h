@@ -64,6 +64,7 @@
 @property (nonatomic, copy) RCTDirectEventBlock onOpenAnnotation;
 @property (nonatomic, copy) RCTDirectEventBlock onCloseAnnotation;
 @property (nonatomic, copy) RCTDirectEventBlock onRightAnnotationTapped;
+@property (nonatomic, copy) RCTDirectEventBlock onAnnotationTapped;
 @property (nonatomic, copy) RCTDirectEventBlock onUpdateUserLocation;
 @property (nonatomic, copy) RCTDirectEventBlock onTap;
 @property (nonatomic, copy) RCTDirectEventBlock onLongPress;

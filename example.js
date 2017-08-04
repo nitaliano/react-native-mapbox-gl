@@ -83,6 +83,9 @@ class MapExample extends Component {
   onRightAnnotationTapped = (e) => {
     console.log('onRightAnnotationTapped', e);
   };
+  onAnnotationTapped = (e) => {
+    console.log('onAnnotationTapped', e);
+  };
   onLongPress = (location) => {
     console.log('onLongPress', location);
   };
@@ -181,6 +184,7 @@ class MapExample extends Component {
           onRegionWillChange={this.onRegionWillChange}
           onOpenAnnotation={this.onOpenAnnotation}
           onRightAnnotationTapped={this.onRightAnnotationTapped}
+          onAnnotationTapped={this.onAnnotationTapped}
           onUpdateUserLocation={this.onUpdateUserLocation}
           onLongPress={this.onLongPress}
           onTap={this.onTap}

@@ -659,7 +659,7 @@ public class ReactNativeMapboxGLView extends RelativeLayout implements
 
     @Override
     public boolean onInfoWindowClick(@NonNull Marker marker) {
-        emitEvent(ReactNativeMapboxGLEventTypes.ON_RIGHT_ANNOTATION_TAPPED, serializeMarker(marker));
+        emitEvent(ReactNativeMapboxGLEventTypes.ON_ANNOTATION_TAPPED, serializeMarker(marker));
         return false;
     }
 
