@@ -48,6 +48,21 @@ public class RNMGLAnnotationViewManager extends ViewGroupManager<RNMGLAnnotation
         view.setCoordinate(coordinate);
     }
 
+    @ReactProp(name = "anchorV")
+    public void setAnchorV(RNMGLAnnotationView view, float value) {
+        view.setAnchorV(value);
+    }
+
+    @ReactProp(name = "anchorU")
+    public void setAnchorU(RNMGLAnnotationView view, float value) {
+        view.setAnchorU(value);
+    }
+
+    @ReactProp(name = "passThroughTouchEvents")
+    public void passThroughTouchEvents(RNMGLAnnotationView view, boolean value) {
+        view.passThroughTouchEvents(value);
+    }
+
     @Override
     public void updateExtraData(RNMGLAnnotationView view, Object extraData) {
         // This is called from the {@link SizeReportingShadowNode}. We cache
@@ -57,5 +72,6 @@ public class RNMGLAnnotationViewManager extends ViewGroupManager<RNMGLAnnotation
         float width = data.get("width");
         float height = data.get("height");
         view.setLayoutDimensions(width, height);
+
     }
 }

@@ -9,7 +9,6 @@
 
 #import "RCTMapboxAnnotationManager.h"
 
-#import <React/RCTUIManager.h>
 #import <React/RCTConvert+CoreLocation.h>
 #import <React/UIView+React.h>
 #import "RCTMapboxAnnotation.h"

@@ -29,7 +29,9 @@ const propTypes = {
     latitude: PropTypes.number.isRequired,
     longitude: PropTypes.number.isRequired,
   }).isRequired,
-  
+  anchorV: PropTypes.number,
+  anchorU: PropTypes.number,
+  passThroughTouchEvents: PropTypes.bool
 };
 
 class MapboxAnnotation extends React.Component {
@@ -49,6 +51,10 @@ class MapboxAnnotation extends React.Component {
 
 MapboxAnnotation.propTypes = propTypes;
 MapboxAnnotation.viewConfig = viewConfig;
-
+MapboxAnnotation.defaultProps = {
+  anchorV: 1,
+  anchorU: 0.5,
+  passThroughTouchEvents: false
+}
 const RCTMapboxAnnotation = requireNativeComponent('RCTMapboxAnnotation', MapboxAnnotation);
 module.exports = MapboxAnnotation;

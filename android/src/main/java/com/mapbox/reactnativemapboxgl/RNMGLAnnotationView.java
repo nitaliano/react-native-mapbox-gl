@@ -1,6 +1,7 @@
 package com.mapbox.reactnativemapboxgl;
 
 import android.content.Context;
+import android.view.MotionEvent;
 
 import com.facebook.react.views.view.ReactViewGroup;
 import com.mapbox.mapboxsdk.geometry.LatLng;
@@ -13,8 +14,11 @@ public class RNMGLAnnotationView extends ReactViewGroup {
     private Set<PropertyListener> propertyListeners;
     private String annotationId;
     private LatLng coordinate;
+    private float anchorV;
+    private float anchorU;
     private float layoutWidth;
     private float layoutHeight;
+    private boolean passThroughTouchEvents;
 
     public RNMGLAnnotationView(Context context) {
         super(context);
@@ -73,5 +77,28 @@ public class RNMGLAnnotationView extends ReactViewGroup {
 
     public interface PropertyListener {
         void propertiesUpdated(RNMGLAnnotationView view);
+    }
+
+    public void setAnchorV(float anchorV) {
+        this.anchorV = anchorV;
+    }
+
+    public float getAnchorV() {
+        return anchorV;
+    }
+
+    public float getAnchorU() {
+        return anchorU;
+    }
+
+    public void setAnchorU(float anchorU) {
+        this.anchorU = anchorU;
+    }
+    public void passThroughTouchEvents(boolean value) { passThroughTouchEvents = value; }
+
+    @Override
+    public boolean onTouchEvent(MotionEvent ev) {
+        boolean result = super.onTouchEvent(ev);
+        return passThroughTouchEvents ? false : result;
     }
 }
