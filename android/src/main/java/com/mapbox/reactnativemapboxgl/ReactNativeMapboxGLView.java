@@ -128,13 +128,25 @@ public class ReactNativeMapboxGLView extends RelativeLayout implements
     @Override
     public void onHostResume() {
         _paused = false;
-        _mapView.onResume();
+        /*
+            Although we have removed ourselves as event listener,
+            when we set _mapView = null,
+            sometimes event gets stuck in the event queue and onHostResume
+            is called even if removeEventListener is called before it.
+            It happens when we add and remove event listener quickly.
+            That is why we need to check if _mapView is null here.
+         */
+        if (_mapView != null) {
+            _mapView.onResume();
+        }
     }
 
     @Override
     public void onHostPause() {
         _paused = true;
-        _mapView.onPause();
+        if (_mapView != null) {
+            _mapView.onPause();
+        }
     }
 
     @Override
@@ -728,6 +740,11 @@ public class ReactNativeMapboxGLView extends RelativeLayout implements
     public LatLngBounds getBounds() {
         if (_map == null) {
             LatLng center = _initialCamera.build().target;
+            // We must return some bounds,
+            // and LatLngBounds.Builder requires at least two points,
+            // or it will throw Exception.
+            // These two points can be same point actually,
+            // but then at least it must be repeated two times.
             return new LatLngBounds.Builder()
                     .include(center)
                     .include(center)
