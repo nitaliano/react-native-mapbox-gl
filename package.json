@@ -91,7 +91,8 @@
   "optionalDependencies": {},
   "peerDependencies": {
     "react": ">=15.4.0",
-    "react-native": ">=0.40"
+    "react-native": ">=0.40",
+    "prop-types": ">=15.5.8"
   },
   "readme": "# React Native Mapbox GL\n\n_An experimental React Native component for building maps with the [Mapbox iOS SDK](https://www.mapbox.com/ios-sdk/) and [Mapbox Android SDK](https://www.mapbox.com/android-sdk/)_\n\n[![npm version](https://badge.fury.io/js/react-native-mapbox-gl.svg)](https://badge.fury.io/js/react-native-mapbox-gl) [![Circle CI](https://circleci.com/gh/mapbox/react-native-mapbox-gl/tree/master.svg?style=svg)](https://circleci.com/gh/mapbox/react-native-mapbox-gl/tree/master)\n\n## Support\n\nThis project is **experimental**. Mapbox does not officially support React Native Mapbox GL to the same extent as the [iOS](https://www.mapbox.com/ios-sdk/) or [Android](https://www.mapbox.com/android-sdk/) SDKs it depends on. Bug reports and pull requests are very welcome.\n\n## Installation\n\n**Dependencies**\n\n* node\n* npm\n* [React Native](https://facebook.github.io/react-native/) >= 0.19.0\n\n```\nnpm install react-native-mapbox-gl --save\n```\n\n* [Android](/android/install.md)\n* [iOS](/ios/install.md) (manually),\n  or with [CocoaPods](/ios/install-cocoapods.md)\n\n## API\n* [API Documentation](/API.md)\n\n## Example\n* [See example](/example.js)\n\n![](http://i.imgur.com/I8XkXcS.jpg)\n![](https://cldup.com/A8S_7rLg1L.png)\n",
   "readmeFilename": "readme.md",
@@ -104,20 +105,5 @@
     "preinstall": "node ./scripts/download-mapbox-gl-native-ios-if-on-mac.js 3.3.1",
     "test": "npm run lint"
   },
-  "devDependencies": {
-    "babel-eslint": "^6.1.2",
-    "eslint": "^3.1.1",
-    "eslint-config-strict-react": "^8.0.1",
-    "eslint-plugin-react": "^5.2.2",
-    "eslint-plugin-react-native": "1.1.0"
-  },
-  "dependencies": {
-    "babel-eslint": "^6.1.2",
-    "lodash": "^4.13.1"
-  },
-  "peerDependencies": {
-    "react": ">=15.4.0",
-    "react-native": ">=0.44.3",
-    "prop-types": ">=15.5.8"
-  }
+   "version": "5.2.0"
 }
