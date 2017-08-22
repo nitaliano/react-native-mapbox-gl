@@ -255,7 +255,7 @@ mapbox://styles/bobbysud/cigtw1pzy0000aam2346f7ex0
 
 ```javascript
 [{
-  coordinates, // required. For type polyline and polygon must be an array of arrays. For type point, single array with 2 coordinates
+  coordinates, // required. For type polyline and polygon must be an array of arrays. For type point, array as [latitude longitude]
   type, // required. One of 'point', 'polyline' or 'polygon'
   title, // optional. Title string. Appears when marker pressed
   subtitle, // optional. Subtitle string. Appears when marker pressed
@@ -348,13 +348,13 @@ See [the example](./example.js#L116) for an illustration of this.
 If the default annotations do not offer enough options, you can embed react native
 view directly onto the map as a custom marker view.
 
-The children of the `MapView` must be `Annotation` views: `import {Annotation} from 'mapbox-react-native-gl'`.
+The children of the `MapView` must be `Annotation` views: `import {Annotation} from 'react-native-mapbox-gl'`.
 The `Annotation` view has the following required props:
 
 | Prop | Type | Description |
-|---|---|---|---|---|
-| `id`| `string` | Unique identifier for the annotation. |
-| `coordinate` | ```{latitude: number, longitude: number}``` | Location of the annotation. |
+| --- | --- | --- |
+| `id` | `string` | Unique identifier for the annotation. |
+| `coordinate` | `{latitude: number, longitude: number}` | Location of the annotation. |
 
 ###### Known Bugs
 
@@ -404,12 +404,13 @@ To enable or disable metrics, use `Mapbox.setMetricsEnabled(enabled: boolean)`.
 
 ## Offline
 
-There are 3 main methods for interacting with the offline API:
-* `Mapbox.addOfflinePackForRegion`: Creates an offline pack
+There are 4 main methods for interacting with the offline API:
+* `Mapbox.initializeOfflinePacks()`: Initializes the offline packs handlers.
+* `Mapbox.addOfflinePack`: Creates an offline pack
 * `Mapbox.getOfflinePacks`: Returns an array of all offline packs on the device
 * `Mapbox.removeOfflinePack`: Removes a single pack
 
-Before using them, don't forget to set an access token with `Mapbox.setAccessToken(accessToken)`
+Before using offline packs, you must call `Mapbox.initializeOfflinePacks()`.
 
 These methods return a promise, but they also accept a callback as the last
 argument with the signature `(err, value) => {}`.

@@ -104,5 +104,20 @@
     "preinstall": "node ./scripts/download-mapbox-gl-native-ios-if-on-mac.js 3.3.1",
     "test": "npm run lint"
   },
-  "version": "5.2.0"
+  "devDependencies": {
+    "babel-eslint": "^6.1.2",
+    "eslint": "^3.1.1",
+    "eslint-config-strict-react": "^8.0.1",
+    "eslint-plugin-react": "^5.2.2",
+    "eslint-plugin-react-native": "1.1.0"
+  },
+  "dependencies": {
+    "babel-eslint": "^6.1.2",
+    "lodash": "^4.13.1"
+  },
+  "peerDependencies": {
+    "react": ">=15.4.0",
+    "react-native": ">=0.44.3",
+    "prop-types": ">=15.5.8"
+  }
 }
