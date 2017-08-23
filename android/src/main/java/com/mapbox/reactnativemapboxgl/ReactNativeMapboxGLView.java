@@ -14,6 +14,7 @@ import android.widget.FrameLayout;
 import android.widget.RelativeLayout;
 
 import com.facebook.react.bridge.Arguments;
+import com.facebook.react.bridge.JSApplicationIllegalArgumentException;
 import com.facebook.react.bridge.LifecycleEventListener;
 import com.facebook.react.bridge.ReactContext;
 import com.facebook.react.bridge.WritableMap;
@@ -90,6 +91,7 @@ public class ReactNativeMapboxGLView extends RelativeLayout implements
 
     private Handler _handler;
     private boolean _mapIsLoading = false;
+    private boolean _mapLoaded = false;
 
     @UiThread
     public ReactNativeMapboxGLView(Context context, ReactNativeMapboxGLManager manager) {
@@ -169,6 +171,11 @@ public class ReactNativeMapboxGLView extends RelativeLayout implements
     public void onMapReady(MapboxMap mapboxMap) {
         if (_mapView == null) { return; }
         _map = mapboxMap;
+        // when DID_FINISH_LOADING change was triggered map could not emit this event,
+        // becase _map was null, now we can emit it.
+        if (_mapLoaded) {
+            emitEvent(ReactNativeMapboxGLEventTypes.ON_FINISH_LOADING_MAP, null);
+        }
 
         // Configure map
         _map.setMyLocationEnabled(_showsUserLocation);
@@ -226,6 +233,7 @@ public class ReactNativeMapboxGLView extends RelativeLayout implements
 
     private void destroyMapView() {
         _mapView.removeOnMapChangedListener(this);
+        _mapLoaded = false;
         if (_map != null) {
             _map.setOnMapClickListener(null);
             _map.setOnMapLongClickListener(null);
@@ -693,8 +701,14 @@ public class ReactNativeMapboxGLView extends RelativeLayout implements
                 break;
             case MapView.DID_FINISH_LOADING_MAP:
                 _mapIsLoading = false;
+                _mapLoaded = true;
                 updateMarkerAnnotations();
-                emitEvent(ReactNativeMapboxGLEventTypes.ON_FINISH_LOADING_MAP, null);
+                // We should not inform user about map finished loading,
+                // if we are not ready internally (we didn't get _map reference).
+                // User will be informed when onMapReady is called.
+                if (_map != null) {
+                    emitEvent(ReactNativeMapboxGLEventTypes.ON_FINISH_LOADING_MAP, null);
+                }
                 break;
         }
     }
@@ -739,16 +753,10 @@ public class ReactNativeMapboxGLView extends RelativeLayout implements
 
     public LatLngBounds getBounds() {
         if (_map == null) {
-            LatLng center = _initialCamera.build().target;
-            // We must return some bounds,
-            // and LatLngBounds.Builder requires at least two points,
-            // or it will throw Exception.
-            // These two points can be same point actually,
-            // but then at least it must be repeated two times.
-            return new LatLngBounds.Builder()
-                    .include(center)
-                    .include(center)
-                    .build();
+            throw new JSApplicationIllegalArgumentException(
+                    "Calling getBounds is not allowed until map is ready. " +
+                    "Pass function as onFinishLoadingMap prop to get notified " +
+                    "when map is ready.");
         }
         return _map.getProjection().getVisibleRegion().latLngBounds;
     }
