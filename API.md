@@ -115,7 +115,17 @@ animation has ended.
 ---
 
 ```javascript
-this._map.setVisibleCoordinateBounds(latitudeSW, longitudeSW, latitudeNE, longitudeNE, paddingTop = 0, paddingRight = 0, paddingBottom = 0, paddingLeft = 0, animated = true);
+this._map.setVisibleCoordinateBounds({
+  latitudeSW,
+  longitudeSW,
+  latitudeNE,
+  longitudeNE,
+  paddingTop = 0,
+  paddingRight = 0,
+  paddingBottom = 0,
+  paddingLeft = 0,
+  animated = true
+});
 ```
 
 This method adjusts the center location and the zoomLevel of the map so that
