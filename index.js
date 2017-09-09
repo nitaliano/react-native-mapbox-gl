@@ -237,8 +237,29 @@ class MapView extends Component {
     return promise;
   }
 
-  setVisibleCoordinateBounds(latitudeSW, longitudeSW, latitudeNE, longitudeNE, paddingTop = 0, paddingRight = 0, paddingBottom = 0, paddingLeft = 0, animated = true) {
-    MapboxGLManager.setVisibleCoordinateBounds(findNodeHandle(this), latitudeSW, longitudeSW, latitudeNE, longitudeNE, paddingTop, paddingRight, paddingBottom, paddingLeft, animated);
+  setVisibleCoordinateBounds({
+    latitudeSW,
+    longitudeSW,
+    latitudeNE,
+    longitudeNE,
+    paddingTop = 0,
+    paddingRight = 0,
+    paddingBottom = 0,
+    paddingLeft = 0,
+    animated = true,
+  }) {
+    MapboxGLManager.setVisibleCoordinateBounds(
+      findNodeHandle(this),
+      latitudeSW,
+      longitudeSW,
+      latitudeNE,
+      longitudeNE,
+      paddingTop,
+      paddingRight,
+      paddingBottom,
+      paddingLeft,
+      animated,
+    );
   }
 
   // Getters
