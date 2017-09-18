@@ -196,8 +196,8 @@ public class RNMGLAnnotationOptionsFactory {
             polyline.add(points);
         }
 
-        if (annotation.hasKey("alpha")) {
-            double strokeAlpha = annotation.getDouble("alpha");
+        if (annotation.hasKey("strokeAlpha")) {
+            double strokeAlpha = annotation.getDouble("strokeAlpha");
             polyline.alpha((float) strokeAlpha);
         }
 
@@ -224,8 +224,8 @@ public class RNMGLAnnotationOptionsFactory {
             polygon.add(new LatLng(latitude, longitude));
         }
 
-        if (annotation.hasKey("alpha")) {
-            double fillAlpha = annotation.getDouble("alpha");
+        if (annotation.hasKey("fillAlpha")) {
+            double fillAlpha = annotation.getDouble("fillAlpha");
             polygon.alpha((float) fillAlpha);
         }
 
