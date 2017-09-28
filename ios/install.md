@@ -50,7 +50,7 @@ Open the newly added `Run Script` and paste:
 
 ### 4: Link Binaries with Libraries
 
-In `Build Phases` tab, click `Link Binaries With Libraries` and add `libRCTMapboxGL.a`
+In `Build Phases` tab, click `Link Binaries With Libraries` and add `libRCTMGL.a`
 
 ![](https://cldup.com/FuOlGOwAli.png)
 
