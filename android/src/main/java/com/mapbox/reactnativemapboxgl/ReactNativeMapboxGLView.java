@@ -32,6 +32,7 @@ import com.mapbox.mapboxsdk.maps.MapboxMap;
 import com.mapbox.mapboxsdk.maps.MapboxMapOptions;
 import com.mapbox.mapboxsdk.maps.OnMapReadyCallback;
 import com.mapbox.mapboxsdk.maps.UiSettings;
+import com.mapbox.services.commons.geojson.Feature;
 
 import java.util.Collection;
 import java.util.HashMap;
@@ -786,6 +787,18 @@ public class ReactNativeMapboxGLView extends RelativeLayout implements
     public void deselectAnnotation() {
         if (_map == null) { return; }
         _map.deselectMarkers();
+    }
+
+    // Feature querying
+
+    public java.util.List<Feature> queryRenderedFeatures(android.graphics.PointF point, java.lang.String... layerIds) {
+      if (_map == null) { return new ArrayList(); }
+      return _map.queryRenderedFeatures(point, layerIds);
+    }
+
+    public java.util.List<Feature> queryRenderedFeatures(android.graphics.RectF rect, java.lang.String... layerIds) {
+      if (_map == null) { return new ArrayList(); }
+      return _map.queryRenderedFeatures(rect, layerIds);
     }
 
     // Custom Marker View Adapter - Adapts a MarkerView to display an custom react native view.

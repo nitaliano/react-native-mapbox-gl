@@ -4,6 +4,9 @@ package com.mapbox.reactnativemapboxgl;
 import android.util.Log;
 import android.view.View;
 
+import android.graphics.PointF;
+import android.graphics.RectF;
+
 import com.facebook.infer.annotation.Assertions;
 import com.facebook.react.bridge.Arguments;
 import com.facebook.react.bridge.JSApplicationIllegalArgumentException;
@@ -23,6 +26,7 @@ import com.mapbox.mapboxsdk.camera.CameraUpdateFactory;
 import com.mapbox.mapboxsdk.constants.MapboxConstants;
 import com.mapbox.mapboxsdk.geometry.LatLng;
 import com.mapbox.mapboxsdk.geometry.LatLngBounds;
+import com.mapbox.services.commons.geojson.Feature;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -284,6 +288,7 @@ public class ReactNativeMapboxGLManager extends ViewGroupManager<ReactNativeMapb
     public static final int COMMAND_SELECT_ANNOTATION = 7;
     public static final int COMMAND_SPLICE_ANNOTATIONS = 8;
     public static final int COMMAND_DESELECT_ANNOTATION = 9;
+    public static final int COMMAND_QUERY_RENDERED_FEATURES = 10;
 
     @Override
     public
@@ -299,6 +304,7 @@ public class ReactNativeMapboxGLManager extends ViewGroupManager<ReactNativeMapb
                 .put("selectAnnotation", COMMAND_SELECT_ANNOTATION)
                 .put("spliceAnnotations", COMMAND_SPLICE_ANNOTATIONS)
                 .put("deselectAnnotation", COMMAND_DESELECT_ANNOTATION)
+                .put("queryRenderedFeatures", COMMAND_QUERY_RENDERED_FEATURES)
                 .build();
     }
 
@@ -345,6 +351,9 @@ public class ReactNativeMapboxGLManager extends ViewGroupManager<ReactNativeMapb
                 break;
             case COMMAND_DESELECT_ANNOTATION:
                 deselectAnnotation(view);
+                break;
+            case COMMAND_QUERY_RENDERED_FEATURES:
+                queryRenderedFeatures(view, args.getMap(0), args.getInt(1));
                 break;
             default:
                 throw new JSApplicationIllegalArgumentException("Invalid commandId " + commandId + " sent to " + getClass().getSimpleName());
@@ -485,5 +494,53 @@ public class ReactNativeMapboxGLManager extends ViewGroupManager<ReactNativeMapb
 
     public void deselectAnnotation(ReactNativeMapboxGLView view) {
         view.deselectAnnotation();
+    }
+
+    // Feature querying
+
+    public void queryRenderedFeatures(ReactNativeMapboxGLView view, ReadableMap options, int callbackId) {
+      WritableArray callbackArgs = Arguments.createArray();
+      if ((!options.hasKey("point") && !options.hasKey("rect")) || (options.hasKey("point") && options.hasKey("rect"))) {
+          callbackArgs.pushString("queryRenderedFeatures(): one of 'point' or 'rect' is required.");
+          fireCallback(callbackId, callbackArgs);
+          return;
+      }
+
+      String[]layers = null;
+      if (options.hasKey("layers")) {
+        ReadableArray layersArray = options.getArray("layers");
+        layers = new String[layersArray.size()];
+        for (int i = 0; i < layersArray.size(); i++) {
+          String layerName = layersArray.getString(i);
+          layers[i] = layerName;
+        }
+      }
+
+      List<Feature> featuresList = null;
+      if (options.hasKey("point")) {
+        ReadableMap pointMap = options.getMap("point");
+        float screenCoordX = (float)pointMap.getDouble("screenCoordX");
+        float screenCoordY = (float)pointMap.getDouble("screenCoordY");
+        PointF point = new PointF(screenCoordX, screenCoordY);
+        featuresList = view.queryRenderedFeatures(point, layers);
+      } else {
+        ReadableMap rectMap = options.getMap("rect");
+        float left = (float)rectMap.getDouble("left");
+        float top = (float)rectMap.getDouble("top");
+        float right = (float)rectMap.getDouble("right");
+        float bottom = (float)rectMap.getDouble("bottom");
+        RectF rect = new RectF(left, top, right, bottom);
+        featuresList = view.queryRenderedFeatures(rect, layers);
+      }
+
+      WritableArray jsonFeatures = Arguments.createArray();
+      for (int i = 0; i < featuresList.size(); i++) {
+        Feature feature = featuresList.get(i);
+        jsonFeatures.pushString(feature.toJson());
+      }
+
+      callbackArgs.pushString(null); // push null error message
+      callbackArgs.pushArray(jsonFeatures); // second arg is features GeoJSON
+      fireCallback(callbackId, callbackArgs);
     }
 }
