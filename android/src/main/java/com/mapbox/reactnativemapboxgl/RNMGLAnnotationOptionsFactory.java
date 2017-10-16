@@ -8,6 +8,7 @@ import android.graphics.Color;
 import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
 import android.support.v4.content.ContextCompat;
+import android.util.Base64;
 
 import com.facebook.react.bridge.ReadableMap;
 import com.facebook.react.bridge.ReadableArray;
@@ -89,6 +90,12 @@ public class RNMGLAnnotationOptionsFactory {
     }
 
     static Drawable drawableFromUrl(Context context, String url) throws IOException {
+        if (url.startsWith("data:")) {
+            byte[] decoded = Base64.decode(url.substring(url.indexOf(",")), Base64.DEFAULT);
+            Bitmap bitmap = BitmapFactory.decodeByteArray(decoded, 0, decoded.length);
+            return new BitmapDrawable(context.getResources(), bitmap);
+        }
+
         // This doesn't currently work, as it throws NetworkOnMainThreadException
         HttpURLConnection connection = (HttpURLConnection) new URL(url).openConnection();
         connection.connect();
