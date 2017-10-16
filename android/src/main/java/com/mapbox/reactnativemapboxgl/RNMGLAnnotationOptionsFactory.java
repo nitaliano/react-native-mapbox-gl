@@ -126,8 +126,7 @@ public class RNMGLAnnotationOptionsFactory {
             icon = iconFactory.fromBitmap(((BitmapDrawable)drawable).getBitmap());
         } else {
             // Conversion taken from mapbox-gl-native/issues/7897#issuecomment-277302450
-            Bitmap bitmap = Bitmap.createBitmap(drawable.getIntrinsicWidth(),
-                    drawable.getIntrinsicHeight(), Bitmap.Config.ARGB_8888);
+            Bitmap bitmap = Bitmap.createBitmap(width, height, Bitmap.Config.ARGB_8888);
             Canvas canvas = new Canvas(bitmap);
             drawable.setBounds(0, 0, canvas.getWidth(), canvas.getHeight());
             //DrawableCompat.setTint(drawable, colorRes);
