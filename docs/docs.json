@@ -780,33 +780,31 @@
     "methods": [
       {
         "name": "queryRenderedFeaturesAtPoint",
-        "docblock": "Returns an array of rendered map features that intersect with a given point.\n\n@example\nthis._map.queryRenderedFeaturesAtPoint([30, 40], ['==', 'type', 'Point'], ['id1', 'id2'])\n\n@param  {Array<Number>} coordinate - A point expressed in the map view’s coordinate system.\n@param  {Array=} filter - A set of strings that correspond to the names of layers defined in the current style. Only the features contained in these layers are included in the returned array.\n@param  {Array=} layerIDs - A array of layer id's to filter the features by\n@return {FeatureCollection}",
+        "docblock": "[queryRenderedFeaturesAtPoint description]\n@param  {Array<Number>} coordinate - coordinate\n@param  {Array<String>} filter - filter\n@param  {Array<String>} layerIDs - layerIDs\n@return {FeatureCollection}",
         "modifiers": [
           "async"
         ],
         "params": [
           {
             "name": "coordinate",
-            "description": "A point expressed in the map view’s coordinate system.",
+            "description": "coordinate",
             "type": {
               "name": "Array"
             }
           },
           {
             "name": "filter",
-            "description": "A set of strings that correspond to the names of layers defined in the current style. Only the features contained in these layers are included in the returned array.",
+            "description": "filter",
             "type": {
               "name": "Array"
-            },
-            "optional": true
+            }
           },
           {
             "name": "layerIDs",
-            "description": "A array of layer id's to filter the features by",
+            "description": "layerIDs",
             "type": {
               "name": "Array"
-            },
-            "optional": true
+            }
           }
         ],
         "returns": {
@@ -815,40 +813,32 @@
             "name": "FeatureCollection"
           }
         },
-        "description": "Returns an array of rendered map features that intersect with a given point.",
-        "examples": [
-          "\nthis._map.queryRenderedFeaturesAtPoint([30, 40], ['==', 'type', 'Point'], ['id1', 'id2'])\n\n"
-        ]
+        "description": "[queryRenderedFeaturesAtPoint description]",
+        "examples": []
       },
       {
         "name": "queryRenderedFeaturesInRect",
-        "docblock": "Returns an array of rendered map features that intersect with the given rectangle,\nrestricted to the given style layers and filtered by the given predicate.\n\n@example\nthis._map.queryRenderedFeaturesInRect([30, 40, 20, 10], ['==', 'type', 'Point'], ['id1', 'id2'])\n\n@param  {Array<Number>} bbox - A rectangle expressed in the map view’s coordinate system.\n@param  {Array=} filter - A set of strings that correspond to the names of layers defined in the current style. Only the features contained in these layers are included in the returned array.\n@param  {Array=} layerIDs -  A array of layer id's to filter the features by\n@return {FeatureCollection}",
+        "docblock": "[queryRenderedFeaturesInRect description]\n@param  {Array<Number>} bbox     [description]\n@param  {Array<String>} filters  [description]\n@param  {Array<String>} layerIDs [description]\n@return {FeatureCollection}",
         "modifiers": [
           "async"
         ],
         "params": [
           {
             "name": "bbox",
-            "description": "A rectangle expressed in the map view’s coordinate system.",
+            "description": "[description]",
             "type": {
               "name": "Array"
             }
           },
           {
-            "name": "filter",
-            "description": "A set of strings that correspond to the names of layers defined in the current style. Only the features contained in these layers are included in the returned array.",
-            "type": {
-              "name": "Array"
-            },
-            "optional": true
+            "name": "filter"
           },
           {
             "name": "layerIDs",
-            "description": " A array of layer id's to filter the features by",
+            "description": "[description]",
             "type": {
               "name": "Array"
-            },
-            "optional": true
+            }
           }
         ],
         "returns": {
@@ -857,14 +847,12 @@
             "name": "FeatureCollection"
           }
         },
-        "description": "Returns an array of rendered map features that intersect with the given rectangle,\nrestricted to the given style layers and filtered by the given predicate.",
-        "examples": [
-          "\nthis._map.queryRenderedFeaturesInRect([30, 40, 20, 10], ['==', 'type', 'Point'], ['id1', 'id2'])\n\n"
-        ]
+        "description": "[queryRenderedFeaturesInRect description]",
+        "examples": []
       },
       {
         "name": "fitBounds",
-        "docblock": "Map camera transitions to fit provided bounds\n\n@example\nthis.map.fitBounds([lng, lat], [lng, lat])\nthis.map.fitBounds([lng, lat], [lng, lat], 20, 1000) // padding for all sides\nthis.map.fitBounds([lng, lat], [lng, lat], [verticalPadding, horizontalPadding], 1000)\nthis.map.fitBounds([lng, lat], [lng, lat], [top, right, bottom, left], 1000)\n\n@param {Array<Number>} northEastCoordinates - North east coordinate of bound\n@param {Array<Number>} southWestCoordinates - South west coordinate of bound\n@param {Number=} padding - Camera padding for bound\n@param {Number=} duration - Duration of camera animation\n@return {void}",
+        "docblock": "Map camera transitions to fit provided bounds\n\n@example\nthis.map.fitBounds([lng, lat], [lng, lat])\nthis.map.fitBounds([lng, lat], [lng, lat], 20, 1000)\n\n@param {Array<Number>} northEastCoordinates - North east coordinate of bound\n@param {Array<Number>} southWestCoordinates - South west coordinate of bound\n@param {(Number|Array<Number>)=} padding - Camera padding for bound\n@param {Number=} duration - Duration of camera animation\n@return {void}",
         "modifiers": [],
         "params": [
           {
@@ -884,9 +872,7 @@
           {
             "name": "padding",
             "description": "Camera padding for bound",
-            "type": {
-              "name": "Number"
-            },
+            "type": {},
             "optional": true
           },
           {
@@ -906,7 +892,7 @@
         },
         "description": "Map camera transitions to fit provided bounds",
         "examples": [
-          "\nthis.map.fitBounds([lng, lat], [lng, lat])\nthis.map.fitBounds([lng, lat], [lng, lat], 20, 1000) // padding for all sides\nthis.map.fitBounds([lng, lat], [lng, lat], [verticalPadding, horizontalPadding], 1000)\nthis.map.fitBounds([lng, lat], [lng, lat], [top, right, bottom, left], 1000)\n\n"
+          "\nthis.map.fitBounds([lng, lat], [lng, lat])\nthis.map.fitBounds([lng, lat], [lng, lat], 20, 1000)\n\n"
         ]
       },
       {
@@ -1485,6 +1471,13 @@
         "type": "number",
         "default": "none",
         "description": "Specifies the Douglas-Peucker simplification tolerance.\nA greater value produces simpler geometries and improves performance.\nThe default value is 0.375."
+      },
+      {
+        "name": "images",
+        "required": false,
+        "type": "object",
+        "default": "none",
+        "description": "Specifies the external images in key-value pairs required for the shape source."
       }
     ],
     "name": "ShapeSource"
