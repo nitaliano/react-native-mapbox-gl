@@ -1,13 +1,26 @@
 package com.mapbox.rctmgl.components.styles.sources;
 
+import android.content.Context;
+import android.graphics.drawable.BitmapDrawable;
+import android.graphics.drawable.Drawable;
 import android.util.Log;
 
+import com.facebook.react.bridge.ReactApplicationContext;
+import com.facebook.react.bridge.ReadableArray;
+import com.facebook.react.bridge.ReadableMap;
+import com.facebook.react.bridge.ReadableMapKeySetIterator;
 import com.facebook.react.uimanager.ThemedReactContext;
 import com.facebook.react.uimanager.ViewGroupManager;
 import com.facebook.react.uimanager.annotations.ReactProp;
+import com.mapbox.rctmgl.components.mapview.RCTMGLMapView;
+import com.mapbox.rctmgl.utils.ResourceUtils;
 
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.util.AbstractMap;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
 
 /**
  * Created by nickitaliano on 9/19/17.
@@ -16,6 +29,12 @@ import java.net.URL;
 public class RCTMGLShapeSourceManager extends ViewGroupManager<RCTMGLShapeSource> {
     public static final String LOG_TAG = RCTMGLShapeSourceManager.class.getSimpleName();
     public static final String REACT_CLASS = RCTMGLShapeSource.class.getSimpleName();
+
+    private ReactApplicationContext mContext;
+
+    public RCTMGLShapeSourceManager(ReactApplicationContext context) {
+        mContext = context;
+    }
 
     @Override
     public String getName() {
@@ -74,5 +93,34 @@ public class RCTMGLShapeSourceManager extends ViewGroupManager<RCTMGLShapeSource
     @ReactProp(name="tolerance")
     public void setTolerance(RCTMGLShapeSource source, double tolerance) {
         source.setTolerance(tolerance);
+    }
+
+    @ReactProp(name="images")
+    public void setImages(RCTMGLShapeSource source, ReadableMap map) {
+        List<Map.Entry<String, String>> images = new ArrayList<>();
+
+        ReadableMapKeySetIterator iterator = map.keySetIterator();
+        while (iterator.hasNextKey()) {
+            String imageName = iterator.nextKey();
+            images.add(new AbstractMap.SimpleEntry<String, String>(imageName, map.getString(imageName)));
+        }
+
+        source.setImages(images);
+    }
+
+    @ReactProp(name="nativeImages")
+    public void setNativeImages(RCTMGLShapeSource source, ReadableArray arr) {
+        List<Map.Entry<String, BitmapDrawable>> resources = new ArrayList<>();
+
+        for (int i = 0; i < arr.size(); i++) {
+            String resourceName = arr.getString(i);
+            BitmapDrawable drawable = (BitmapDrawable) ResourceUtils.getDrawableByName(mContext, resourceName);
+
+            if (drawable != null) {
+                resources.add(new AbstractMap.SimpleEntry<String, BitmapDrawable>(resourceName, drawable));
+            }
+        }
+
+        source.setNativeImages(resources);
     }
 }

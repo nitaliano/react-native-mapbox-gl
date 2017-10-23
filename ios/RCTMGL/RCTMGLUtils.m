@@ -7,6 +7,7 @@
 //
 
 #import "RCTMGLUtils.h"
+#import "RCTMGLImageQueue.h"
 
 @import Mapbox;
 
@@ -60,7 +61,45 @@ static double const MS_TO_S = 0.001;
 
 + (void)fetchImage:(RCTBridge*)bridge url:(NSString *)url callback:(RCTImageLoaderCompletionBlock)callback
 {
-    [bridge.imageLoader loadImageWithURLRequest:[RCTConvert NSURLRequest:url] callback:callback];
+    [RCTMGLImageQueue.sharedInstance addImage:url bridge:bridge completionHandler:callback];
+}
+
++ (void)fetchImages:(RCTBridge *)bridge style:(MGLStyle *)style objects:(NSDictionary<NSString *, NSString *>*)objects callback:(void (^)())callback
+{
+    if (objects == nil) {
+        callback();
+        return;
+    }
+    
+    NSArray<NSString *> *imageNames = objects.allKeys;
+    if (imageNames.count == 0) {
+        callback();
+        return;
+    }
+    
+
+    __block NSUInteger imagesLeftToLoad = imageNames.count;
+    
+    void (^imageLoadedBlock)() = ^{
+        imagesLeftToLoad--;
+        
+        if (imagesLeftToLoad == 0) {
+            callback();
+        }
+    };
+    
+    for (NSString *imageName in imageNames) {
+        UIImage *foundImage = [style imageForName:imageName];
+        
+        if (foundImage == nil) {
+            [RCTMGLImageQueue.sharedInstance addImage:objects[imageName] bridge:bridge completionHandler:^(NSError *error, UIImage *image) {
+                [style setImage:image forName:imageName];
+                imageLoadedBlock();
+            }];
+        } else {
+            imageLoadedBlock();
+        }
+    }
 }
 
 @end

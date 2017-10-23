@@ -2,18 +2,23 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import { NativeModules, requireNativeComponent } from 'react-native';
 import { toJSONString, cloneReactChildrenWithProps } from '../utils';
+import resolveAssetSource from 'react-native/Libraries/Image/resolveAssetSource';
 
 const MapboxGL = NativeModules.MGLModule;
 
 export const NATIVE_MODULE_NAME = 'RCTMGLShapeSource';
 
-const RCTMGLShapeSource = requireNativeComponent(NATIVE_MODULE_NAME, ShapeSource);
+const RCTMGLShapeSource = requireNativeComponent(NATIVE_MODULE_NAME, ShapeSource, {
+  nativeOnly: { nativeImages: true },
+});
 
 /**
  * ShapeSource is a map content source that supplies vector shapes to be shown on the map.
  * The shape may be a url or a GeoJSON object
  */
 class ShapeSource extends React.Component {
+  static NATIVE_ASSETS_KEY = 'assets';
+
   static propTypes = {
     /**
      * A string that uniquely identifies the source.
@@ -70,6 +75,13 @@ class ShapeSource extends React.Component {
      * The default value is 0.375.
      */
     tolerance: PropTypes.number,
+
+    /**
+     * Specifies the external images in key-value pairs required for the shape source.
+     * If you have an asset under Image.xcassets on iOS and the drawables directory on android
+     * you can specify an array of string names with assets as the key `{ assets: ['pin'] }`.
+    */
+    images: PropTypes.object,
   };
 
   static defaultProps = {
@@ -84,6 +96,33 @@ class ShapeSource extends React.Component {
     return toJSONString(this.props.shape);
   }
 
+  _getImages () {
+    if (!this.props.images) {
+      return;
+    }
+
+    let images = {};
+    let nativeImages = [];
+
+    const imageNames = Object.keys(this.props.images);
+    for (let imageName of imageNames) {
+      if (imageName === ShapeSource.NATIVE_ASSETS_KEY && Array.isArray(this.props.images[ShapeSource.NATIVE_ASSETS_KEY])) {
+        nativeImages = this.props.images[ShapeSource.NATIVE_ASSETS_KEY];
+        continue;
+      }
+
+      const res = resolveAssetSource(this.props.images[imageName]);
+      if (res && res.uri) {
+        images[imageName] = res.uri;
+      }
+    }
+
+    return {
+      images: images,
+      nativeImages: nativeImages,
+    };
+  }
+
   render () {
     const props = {
       id: this.props.id,
@@ -95,6 +134,7 @@ class ShapeSource extends React.Component {
       maxZoomLevel: this.props.maxZoomLevel,
       buffer: this.props.buffer,
       tolerance: this.props.tolerance,
+      ...this._getImages(),
     };
     return (
       <RCTMGLShapeSource {...props}>

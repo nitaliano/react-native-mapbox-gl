@@ -17,7 +17,7 @@
 
 - (void)fillLayer:(MGLFillStyleLayer *)layer withReactStyle:(NSDictionary *)reactStyle
 {
-  if (reactStyle == nil) {
+  if (![self _hasReactStyle:reactStyle]) {
     // TODO throw exception
     return;
   }
@@ -53,12 +53,16 @@
     } else if ([prop isEqualToString:@"fillTranslateAnchor"]) {
       [self setFillTranslateAnchor:layer withReactStyleValue:styleValue];
     } else if ([prop isEqualToString:@"fillPattern"]) {
-      [RCTMGLUtils fetchImage:_bridge url:styleValue.payload[@"value"] callback:^(NSError *error, UIImage *image) {
-        if (image != nil) {
-          [_style setImage:image forName:styleValue.payload[@"value"]];
-          [self setFillPattern:layer withReactStyleValue:styleValue];
-        }
-      }];
+      if ([self _isTokenString:styleValue.payload[@"value"]]) {
+        [self setFillPattern:layer withReactStyleValue:styleValue];
+      } else {
+        [RCTMGLUtils fetchImage:_bridge url:styleValue.payload[@"value"] callback:^(NSError *error, UIImage *image) {
+          if (image != nil) {
+            [_style setImage:image forName:styleValue.payload[@"value"]];
+            [self setFillPattern:layer withReactStyleValue:styleValue];
+          }
+        }];
+      }
     } else if ([prop isEqualToString:@"fillPatternTransition"]) {
       [self setFillPatternTransition:layer withReactStyleValue:styleValue];
     } else {
@@ -69,7 +73,7 @@
 
 - (void)lineLayer:(MGLLineStyleLayer *)layer withReactStyle:(NSDictionary *)reactStyle
 {
-  if (reactStyle == nil) {
+  if (![self _hasReactStyle:reactStyle]) {
     // TODO throw exception
     return;
   }
@@ -127,12 +131,16 @@
     } else if ([prop isEqualToString:@"lineDasharrayTransition"]) {
       [self setLineDasharrayTransition:layer withReactStyleValue:styleValue];
     } else if ([prop isEqualToString:@"linePattern"]) {
-      [RCTMGLUtils fetchImage:_bridge url:styleValue.payload[@"value"] callback:^(NSError *error, UIImage *image) {
-        if (image != nil) {
-          [_style setImage:image forName:styleValue.payload[@"value"]];
-          [self setLinePattern:layer withReactStyleValue:styleValue];
-        }
-      }];
+      if ([self _isTokenString:styleValue.payload[@"value"]]) {
+        [self setLinePattern:layer withReactStyleValue:styleValue];
+      } else {
+        [RCTMGLUtils fetchImage:_bridge url:styleValue.payload[@"value"] callback:^(NSError *error, UIImage *image) {
+          if (image != nil) {
+            [_style setImage:image forName:styleValue.payload[@"value"]];
+            [self setLinePattern:layer withReactStyleValue:styleValue];
+          }
+        }];
+      }
     } else if ([prop isEqualToString:@"linePatternTransition"]) {
       [self setLinePatternTransition:layer withReactStyleValue:styleValue];
     } else {
@@ -143,7 +151,7 @@
 
 - (void)symbolLayer:(MGLSymbolStyleLayer *)layer withReactStyle:(NSDictionary *)reactStyle
 {
-  if (reactStyle == nil) {
+  if (![self _hasReactStyle:reactStyle]) {
     // TODO throw exception
     return;
   }
@@ -177,12 +185,16 @@
     } else if ([prop isEqualToString:@"iconTextFitPadding"]) {
       [self setIconTextFitPadding:layer withReactStyleValue:styleValue];
     } else if ([prop isEqualToString:@"iconImage"]) {
-      [RCTMGLUtils fetchImage:_bridge url:styleValue.payload[@"value"] callback:^(NSError *error, UIImage *image) {
-        if (image != nil) {
-          [_style setImage:image forName:styleValue.payload[@"value"]];
-          [self setIconImage:layer withReactStyleValue:styleValue];
-        }
-      }];
+      if ([self _isTokenString:styleValue.payload[@"value"]]) {
+        [self setIconImage:layer withReactStyleValue:styleValue];
+      } else {
+        [RCTMGLUtils fetchImage:_bridge url:styleValue.payload[@"value"] callback:^(NSError *error, UIImage *image) {
+          if (image != nil) {
+            [_style setImage:image forName:styleValue.payload[@"value"]];
+            [self setIconImage:layer withReactStyleValue:styleValue];
+          }
+        }];
+      }
     } else if ([prop isEqualToString:@"iconRotate"]) {
       [self setIconRotate:layer withReactStyleValue:styleValue];
     } else if ([prop isEqualToString:@"iconPadding"]) {
@@ -291,7 +303,7 @@
 
 - (void)circleLayer:(MGLCircleStyleLayer *)layer withReactStyle:(NSDictionary *)reactStyle
 {
-  if (reactStyle == nil) {
+  if (![self _hasReactStyle:reactStyle]) {
     // TODO throw exception
     return;
   }
@@ -350,7 +362,7 @@
 
 - (void)fillExtrusionLayer:(MGLFillExtrusionStyleLayer *)layer withReactStyle:(NSDictionary *)reactStyle
 {
-  if (reactStyle == nil) {
+  if (![self _hasReactStyle:reactStyle]) {
     // TODO throw exception
     return;
   }
@@ -380,12 +392,16 @@
     } else if ([prop isEqualToString:@"fillExtrusionTranslateAnchor"]) {
       [self setFillExtrusionTranslateAnchor:layer withReactStyleValue:styleValue];
     } else if ([prop isEqualToString:@"fillExtrusionPattern"]) {
-      [RCTMGLUtils fetchImage:_bridge url:styleValue.payload[@"value"] callback:^(NSError *error, UIImage *image) {
-        if (image != nil) {
-          [_style setImage:image forName:styleValue.payload[@"value"]];
-          [self setFillExtrusionPattern:layer withReactStyleValue:styleValue];
-        }
-      }];
+      if ([self _isTokenString:styleValue.payload[@"value"]]) {
+        [self setFillExtrusionPattern:layer withReactStyleValue:styleValue];
+      } else {
+        [RCTMGLUtils fetchImage:_bridge url:styleValue.payload[@"value"] callback:^(NSError *error, UIImage *image) {
+          if (image != nil) {
+            [_style setImage:image forName:styleValue.payload[@"value"]];
+            [self setFillExtrusionPattern:layer withReactStyleValue:styleValue];
+          }
+        }];
+      }
     } else if ([prop isEqualToString:@"fillExtrusionPatternTransition"]) {
       [self setFillExtrusionPatternTransition:layer withReactStyleValue:styleValue];
     } else if ([prop isEqualToString:@"fillExtrusionHeight"]) {
@@ -404,7 +420,7 @@
 
 - (void)rasterLayer:(MGLRasterStyleLayer *)layer withReactStyle:(NSDictionary *)reactStyle
 {
-  if (reactStyle == nil) {
+  if (![self _hasReactStyle:reactStyle]) {
     // TODO throw exception
     return;
   }
@@ -455,7 +471,7 @@
 
 - (void)backgroundLayer:(MGLBackgroundStyleLayer *)layer withReactStyle:(NSDictionary *)reactStyle
 {
-  if (reactStyle == nil) {
+  if (![self _hasReactStyle:reactStyle]) {
     // TODO throw exception
     return;
   }
@@ -475,12 +491,16 @@
     } else if ([prop isEqualToString:@"backgroundColorTransition"]) {
       [self setBackgroundColorTransition:layer withReactStyleValue:styleValue];
     } else if ([prop isEqualToString:@"backgroundPattern"]) {
-      [RCTMGLUtils fetchImage:_bridge url:styleValue.payload[@"value"] callback:^(NSError *error, UIImage *image) {
-        if (image != nil) {
-          [_style setImage:image forName:styleValue.payload[@"value"]];
-          [self setBackgroundPattern:layer withReactStyleValue:styleValue];
-        }
-      }];
+      if ([self _isTokenString:styleValue.payload[@"value"]]) {
+        [self setBackgroundPattern:layer withReactStyleValue:styleValue];
+      } else {
+        [RCTMGLUtils fetchImage:_bridge url:styleValue.payload[@"value"] callback:^(NSError *error, UIImage *image) {
+          if (image != nil) {
+            [_style setImage:image forName:styleValue.payload[@"value"]];
+            [self setBackgroundPattern:layer withReactStyleValue:styleValue];
+          }
+        }];
+      }
     } else if ([prop isEqualToString:@"backgroundPatternTransition"]) {
       [self setBackgroundPatternTransition:layer withReactStyleValue:styleValue];
     } else if ([prop isEqualToString:@"backgroundOpacity"]) {
@@ -495,7 +515,7 @@
 
 - (void)lightLayer:(MGLLight *)layer withReactStyle:(NSDictionary *)reactStyle
 {
-  if (reactStyle == nil) {
+  if (![self _hasReactStyle:reactStyle]) {
     // TODO throw exception
     return;
   }
@@ -1826,5 +1846,18 @@
 }
 
 
+
+- (BOOL)_isTokenString:(NSString *)str
+{
+    if (str == nil) {
+        return false;
+    }
+    return [str hasPrefix:@"{"] && [str hasSuffix:@"}"];
+}
+
+- (BOOL)_hasReactStyle:(NSDictionary *)reactStyle
+{
+  return reactStyle != nil && reactStyle.allKeys.count > 0;
+}
 
 @end

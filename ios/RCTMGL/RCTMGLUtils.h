@@ -22,6 +22,7 @@
 + (NSNumber*)clamp:(NSNumber*)value min:(NSNumber*)min max:(NSNumber*)max;
 + (UIColor*)toColor:(id)value;
 + (void)fetchImage:(RCTBridge*)bridge url:(NSString*)url callback:(RCTImageLoaderCompletionBlock)callback;
++ (void)fetchImages:(RCTBridge *)bridge style:(MGLStyle *)style objects:(NSDictionary<NSString *, NSString *>*)objects callback:(void (^)())callback;
 + (CGVector)toCGVector:(NSArray<NSNumber*>*)arr;
 
 @end
