@@ -174,8 +174,8 @@ public class ReactNativeMapboxGLView extends RelativeLayout implements
     public void onMapReady(MapboxMap mapboxMap) {
         if (_mapView == null) { return; }
         _map = mapboxMap;
-        // when DID_FINISH_LOADING change was triggered map could not emit this event,
-        // becase _map was null, now we can emit it.
+        // when MapView.DID_FINISH_LOADING_MAP change was triggered map could not emit this event,
+        // because _map was null, now we can emit it.
         if (_mapLoaded) {
             emitEvent(ReactNativeMapboxGLEventTypes.ON_FINISH_LOADING_MAP, null);
         }
@@ -299,11 +299,11 @@ public class ReactNativeMapboxGLView extends RelativeLayout implements
 
     private void updateMarkerAnnotations() {
         /*
-            _map obviously must be present, but this method might be called while
-            map is currently in the process of loading, which result in loss of
+            _map obviously must be present, but this method might be called before
+            MapView.DID_FINISH_LOADING_MAP event is received, which results in loss of
             custom marker annotations that should be displayed on map.
          */
-        if (_mapIsLoading || _map == null) {
+        if (!_mapLoaded || _map == null) {
             return;
         }
 
