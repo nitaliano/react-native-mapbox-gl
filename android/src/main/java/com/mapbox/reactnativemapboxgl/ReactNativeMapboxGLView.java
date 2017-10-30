@@ -20,7 +20,6 @@ import com.facebook.react.bridge.ReactContext;
 import com.facebook.react.bridge.WritableMap;
 import com.facebook.react.touch.OnInterceptTouchEventListener;
 import com.facebook.react.uimanager.events.RCTEventEmitter;
-import com.google.common.collect.Sets;
 import com.mapbox.mapboxsdk.annotations.Annotation;
 import com.mapbox.mapboxsdk.annotations.Marker;
 import com.mapbox.mapboxsdk.annotations.MarkerView;
@@ -111,6 +110,7 @@ public class ReactNativeMapboxGLView extends RelativeLayout implements
         if (_mapView != null) { return; }
         setupMapView();
         _paused = false;
+        _mapView.onStart();
         _mapView.onResume();
         _manager.getContext().addLifecycleEventListener(this);
     }
@@ -122,6 +122,7 @@ public class ReactNativeMapboxGLView extends RelativeLayout implements
         if (!_paused) {
             _paused = true;
             _mapView.onPause();
+            _mapView.onStop();
         }
         destroyMapView();
         _mapView = null;
@@ -139,6 +140,7 @@ public class ReactNativeMapboxGLView extends RelativeLayout implements
             That is why we need to check if _mapView is null here.
          */
         if (_mapView != null) {
+            _mapView.onStart();
             _mapView.onResume();
         }
     }
@@ -148,6 +150,7 @@ public class ReactNativeMapboxGLView extends RelativeLayout implements
         _paused = true;
         if (_mapView != null) {
             _mapView.onPause();
+            _mapView.onStop();
         }
     }
 
@@ -182,8 +185,8 @@ public class ReactNativeMapboxGLView extends RelativeLayout implements
         _map.getTrackingSettings().setMyLocationTrackingMode(_locationTrackingMode);
         _map.getTrackingSettings().setMyBearingTrackingMode(_bearingTrackingMode);
         _map.setPadding(_paddingLeft, _paddingTop, _paddingRight, _paddingBottom);
-        _map.setMinZoom(_minimumZoomLevel);
-        _map.setMaxZoom(_maximumZoomLevel);
+        _map.setMinZoomPreference(_minimumZoomLevel);
+        _map.setMaxZoomPreference(_maximumZoomLevel);
 
         UiSettings uiSettings = _map.getUiSettings();
         uiSettings.setZoomGesturesEnabled(_zoomEnabled);
@@ -306,8 +309,8 @@ public class ReactNativeMapboxGLView extends RelativeLayout implements
 
         Set<RNMGLAnnotationView> newAnnotationViews = getAnnotationViews();
         Set<RNMGLAnnotationView> currentViews = new HashSet<>(_customAnnotationViewMap.values());
-        Collection<RNMGLAnnotationView> addedChildren = Sets.difference(newAnnotationViews, currentViews);
-        Collection<RNMGLAnnotationView> removedChildren = Sets.difference(currentViews, newAnnotationViews);
+        Collection<RNMGLAnnotationView> addedChildren = Utils.difference(newAnnotationViews, currentViews);
+        Collection<RNMGLAnnotationView> removedChildren = Utils.difference(currentViews, newAnnotationViews);
 
         for (RNMGLAnnotationView annotationView : removedChildren) {
             annotationView.removePropertyListener(_propertyListeners.get(annotationView));
@@ -410,7 +413,7 @@ public class ReactNativeMapboxGLView extends RelativeLayout implements
         if (_minimumZoomLevel == value) { return; }
         _minimumZoomLevel = value;
         if (_map != null) {
-            _map.setMinZoom(value);
+            _map.setMinZoomPreference(value);
         }
     }
 
@@ -418,7 +421,7 @@ public class ReactNativeMapboxGLView extends RelativeLayout implements
         if (_maximumZoomLevel == value) { return; }
         _maximumZoomLevel = value;
         if (_map != null) {
-            _map.setMaxZoom(value);
+            _map.setMaxZoomPreference(value);
         }
     }
 

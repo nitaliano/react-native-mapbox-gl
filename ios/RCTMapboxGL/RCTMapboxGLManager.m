@@ -20,6 +20,9 @@
 #import "MGLPolyline+RCTAdditions.h"
 
 @implementation RCTMapboxGLManager
+{
+    BOOL isOfflineObserverSet;
+}
 
 - (UIView *)view
 {
@@ -104,21 +107,30 @@ RCT_CUSTOM_VIEW_PROPERTY(contentInset, UIEdgeInsetsMake, RCTMapboxGL)
                      @"center": @(MGLAnnotationVerticalAlignmentCenter),
                      @"bottom": @(MGLAnnotationVerticalAlignmentBottom)
                      },
-             @"unknownResourceCount": @(UINT64_MAX),
-             @"metricsEnabled": @([RCTMapboxGLManager metricsEnabled])
+             @"offlinePackState": @{
+                     @"unknown": [NSNumber numberWithUnsignedInt:MGLOfflinePackStateUnknown],
+                     @"inactive": [NSNumber numberWithUnsignedInt:MGLOfflinePackStateInactive],
+                     @"active": [NSNumber numberWithUnsignedInt:MGLOfflinePackStateActive],
+                     @"complete": [NSNumber numberWithUnsignedInt:MGLOfflinePackStateComplete],
+                     @"invalid": [NSNumber numberWithUnsignedInt:MGLOfflinePackStateInvalid]
+                     },
+             @"unknownResourceCount": @(UINT64_MAX)
              };
 };
 
 // Metrics
 
-+ (BOOL)metricsEnabled
+RCT_EXPORT_METHOD(getMetricsEnabled:(RCTPromiseResolveBlock)resolve
+                  rejecter:(RCTPromiseRejectBlock)reject)
 {
     NSUserDefaults * ud = [NSUserDefaults standardUserDefaults];
     NSNumber * nr = [ud valueForKey:@"MGLMapboxMetricsEnabled"];
     if (!nr || ![nr isKindOfClass:[NSNumber class]]) {
-        return YES;
+        resolve(@YES);
+        return;
     }
-    return nr.boolValue;
+
+    resolve([NSNumber numberWithBool:nr.boolValue]);
 }
 
 RCT_EXPORT_METHOD(setMetricsEnabled:(BOOL)enabled)
@@ -147,22 +159,24 @@ RCT_EXPORT_METHOD(setAccessToken:(nonnull NSString *)accessToken
 - (id)init
 {
     if (!(self = [super init])) { return nil; }
-    
+
     return self;
 }
 
 - (void)dealloc
 {
-    [[MGLOfflineStorage sharedOfflineStorage] removeObserver:self forKeyPath:@"packs"];
+    if (isOfflineObserverSet) {
+      [[MGLOfflineStorage sharedOfflineStorage] removeObserver:self forKeyPath:@"packs"];
+    }
     [[NSNotificationCenter defaultCenter] removeObserver:self];
 }
 
 - (void)offlinePacksDidFinishLoading
 {
     _loadedPacks = YES;
-    
+
     NSArray * packs = [MGLOfflineStorage sharedOfflineStorage].packs;
-    
+
     if ([_packRequests count]) {
         NSArray * callbackArray = [self serializePacksArray:packs];
         for (RCTPromiseResolveBlock callback in _packRequests) {
@@ -170,7 +184,7 @@ RCT_EXPORT_METHOD(setAccessToken:(nonnull NSString *)accessToken
         }
         [_packRequests removeAllObjects];
     }
-    
+
     for (MGLOfflinePack * pack in packs) {
         if (pack.state != MGLOfflinePackStateComplete) {
             [pack resume];
@@ -187,18 +201,18 @@ RCT_EXPORT_METHOD(setAccessToken:(nonnull NSString *)accessToken
     NSNumber * changeKind = change[NSKeyValueChangeKindKey];
     if (changeKind == [NSNull null]) { return; }
     if ([changeKind integerValue] != NSKeyValueChangeSetting) { return; }
-    
+
     NSArray * packs = [[MGLOfflineStorage sharedOfflineStorage] packs];
-    
+
     if (!packs) { return; }
     if (_loadedPacks) { return; }
-    
+
     [_loadingPacks addObjectsFromArray:packs];
-    
+
     for (MGLOfflinePack * pack in packs) {
         [pack requestProgress];
     }
-    
+
     if (!packs.count) {
         [self offlinePacksDidFinishLoading];
     }
@@ -210,18 +224,19 @@ RCT_EXPORT_METHOD(setAccessToken:(nonnull NSString *)accessToken
     }
     NSDictionary *userInfo = [NSKeyedUnarchiver unarchiveObjectWithData:pack.context];
     MGLOfflinePackProgress progress = pack.progress;
-    
+
     NSDictionary *event = @{ @"name": userInfo[@"name"],
                              @"metadata": userInfo[@"metadata"],
+                             @"state": @(pack.state),
                              @"countOfResourcesCompleted": @(progress.countOfResourcesCompleted),
                              @"countOfResourcesExpected": @(progress.countOfResourcesExpected),
                              @"countOfBytesCompleted": @(progress.countOfBytesCompleted),
                              @"maximumResourcesExpected": @(progress.maximumResourcesExpected) };
-    
+
     [_bridge.eventDispatcher sendAppEventWithName:@"MapboxOfflineProgressDidChange" body:event];
-    
+
     [_recentPacks addObject:pack];
-    
+
     dispatch_after(dispatch_time(DISPATCH_TIME_NOW, _throttleInterval * NSEC_PER_MSEC), dispatch_get_main_queue(), ^{
         [_recentPacks removeObject:pack];
         if ([_throttledPacks containsObject:pack]) {
@@ -246,23 +261,23 @@ RCT_EXPORT_METHOD(setAccessToken:(nonnull NSString *)accessToken
 
 - (void)offlinePackProgressDidChange:(NSNotification *)notification {
     MGLOfflinePack *pack = notification.object;
-    
+
     if (!_loadedPacks && [_loadingPacks containsObject:pack]) {
         [_loadingPacks removeObject:pack];
         if ([_loadingPacks count] == 0) {
             [self offlinePacksDidFinishLoading];
         }
     }
-    
+
     if ([_removedPacks containsObject:pack]) {
         return;
     }
-    
+
     if ([_recentPacks containsObject:pack]) {
         [_throttledPacks addObject:pack];
         return;
     }
-    
+
     [self firePackProgress:pack];
 }
 
@@ -271,10 +286,10 @@ RCT_EXPORT_METHOD(setAccessToken:(nonnull NSString *)accessToken
     [self flushThrottleForPack:pack];
     NSDictionary *userInfo = [NSKeyedUnarchiver unarchiveObjectWithData:pack.context];
     uint64_t maximumCount = [notification.userInfo[MGLOfflinePackMaximumCountUserInfoKey] unsignedLongLongValue];
-    
+
     NSDictionary *event = @{ @"name": userInfo[@"name"],
                              @"maxTiles": @(maximumCount) };
-    
+
     [_bridge.eventDispatcher sendAppEventWithName:@"MapboxOfflineMaxAllowedTiles" body:event];
 }
 
@@ -283,10 +298,10 @@ RCT_EXPORT_METHOD(setAccessToken:(nonnull NSString *)accessToken
     [self flushThrottleForPack:pack];
     NSDictionary *userInfo = [NSKeyedUnarchiver unarchiveObjectWithData:pack.context];
     NSError *error = notification.userInfo[MGLOfflinePackErrorUserInfoKey];
-    
+
     NSDictionary *event = @{ @"name": userInfo[@"name"],
                              @"error": [error localizedDescription] };
-    
+
     [_bridge.eventDispatcher sendAppEventWithName:@"MapboxOfflineError" body:event];
 }
 
@@ -302,6 +317,7 @@ RCT_EXPORT_METHOD(initializeOfflinePacks)
 
     // Setup pack array loading notifications
     [[MGLOfflineStorage sharedOfflineStorage] addObserver:self forKeyPath:@"packs" options:NSKeyValueObservingOptionInitial context:NULL];
+    isOfflineObserverSet = YES;
     _packRequests = [NSMutableArray new];
 
     // Setup offline pack notification handlers.
@@ -341,24 +357,24 @@ RCT_REMAP_METHOD(addOfflinePack,
                , nil);
         return;
     }
-    
+
     NSArray *b = [options valueForKey:@"bounds"];
     MGLCoordinateBounds bounds = MGLCoordinateBoundsMake(CLLocationCoordinate2DMake([b[0] floatValue], [b[1] floatValue]), CLLocationCoordinate2DMake([b[2] floatValue], [b[3] floatValue]));
-    
+
     NSURL * styleURL = [NSURL URLWithString:[options valueForKey:@"styleURL"]];
     float fromZoomLevel = [[options valueForKey:@"minZoomLevel"] floatValue];
     float toZoomLevel = [[options valueForKey:@"maxZoomLevel"] floatValue];
     NSString * name = [options valueForKey:@"name"];
     NSString * type = [options valueForKey:@"type"];
     NSDictionary * metadata = [options valueForKey:@"metadata"];
-    
+
     dispatch_async(dispatch_get_main_queue(), ^{
         id <MGLOfflineRegion> region = [[MGLTilePyramidOfflineRegion alloc] initWithStyleURL:styleURL bounds:bounds fromZoomLevel:fromZoomLevel toZoomLevel:toZoomLevel];
-        
+
         NSMutableDictionary *userInfo = @{ @"name": name,
                                            @"metadata": metadata ? metadata : [NSNull null] };
         NSData *context = [NSKeyedArchiver archivedDataWithRootObject:userInfo];
-        
+
         [[MGLOfflineStorage sharedOfflineStorage] addPackForRegion:region withContext:context completionHandler:^(MGLOfflinePack *pack, NSError *error) {
             if (error != nil) {
                 reject(@"add_pack_failed", error.localizedFailureReason, error);
@@ -373,18 +389,75 @@ RCT_REMAP_METHOD(addOfflinePack,
 - (NSArray*)serializePacksArray:(NSArray<MGLOfflinePack*>*)packs
 {
     NSMutableArray* callbackArray = [NSMutableArray new];
-    
+
     for (MGLOfflinePack *pack in packs) {
         NSMutableDictionary *userInfo = [NSKeyedUnarchiver unarchiveObjectWithData:pack.context];
         [callbackArray addObject:@{ @"name": userInfo[@"name"],
                                     @"metadata": userInfo[@"metadata"],
+                                    @"state": @(pack.state),
                                     @"countOfBytesCompleted": @(pack.progress.countOfBytesCompleted),
                                     @"countOfResourcesCompleted": @(pack.progress.countOfResourcesCompleted),
                                     @"countOfResourcesExpected": @(pack.progress.countOfResourcesExpected),
                                     @"maximumResourcesExpected": @(pack.progress.maximumResourcesExpected) }];
     }
-    
+
     return callbackArray;
+}
+
+RCT_REMAP_METHOD(suspendOfflinePack,
+                 suspendName:(NSString*)packName
+                 resolver:(RCTPromiseResolveBlock)resolve
+                 rejecter:(RCTPromiseRejectBlock)reject)
+{
+    dispatch_async(dispatch_get_main_queue(), ^{
+        MGLOfflinePack *packs = [MGLOfflineStorage sharedOfflineStorage].packs;
+        MGLOfflinePack *tempPack;
+
+        for (MGLOfflinePack *pack in packs) {
+            NSDictionary *userInfo = [NSKeyedUnarchiver unarchiveObjectWithData:pack.context];
+            if ([packName isEqualToString:userInfo[@"name"]]) {
+                tempPack = pack;
+                break;
+            }
+        }
+
+        if (tempPack == nil) {
+            return resolve(@{});
+        }
+
+        NSDictionary *userInfo = [NSKeyedUnarchiver unarchiveObjectWithData:tempPack.context];
+        [tempPack suspend];
+
+        resolve(@{ @"suspended": userInfo[@"name"] });
+    });
+}
+
+RCT_REMAP_METHOD(resumeOfflinePack,
+                 resumeName:(NSString*)packName
+                 resolver:(RCTPromiseResolveBlock)resolve
+                 rejecter:(RCTPromiseRejectBlock)reject)
+{
+    dispatch_async(dispatch_get_main_queue(), ^{
+        MGLOfflinePack *packs = [MGLOfflineStorage sharedOfflineStorage].packs;
+        MGLOfflinePack *tempPack;
+
+        for (MGLOfflinePack *pack in packs) {
+            NSDictionary *userInfo = [NSKeyedUnarchiver unarchiveObjectWithData:pack.context];
+            if ([packName isEqualToString:userInfo[@"name"]]) {
+                tempPack = pack;
+                break;
+            }
+        }
+
+        if (tempPack == nil) {
+            return resolve(@{});
+        }
+
+        NSDictionary *userInfo = [NSKeyedUnarchiver unarchiveObjectWithData:tempPack.context];
+        [tempPack resume];
+
+        resolve(@{ @"resumed": userInfo[@"name"] });
+    });
 }
 
 RCT_REMAP_METHOD(getOfflinePacks,
@@ -393,7 +466,7 @@ RCT_REMAP_METHOD(getOfflinePacks,
 {
     dispatch_async(dispatch_get_main_queue(), ^{
         NSMutableArray* callbackArray = [NSMutableArray new];
-        
+
         if (!_loadedPacks) {
             [_packRequests addObject:resolve];
         } else {
@@ -411,7 +484,7 @@ RCT_REMAP_METHOD(removeOfflinePack,
     dispatch_async(dispatch_get_main_queue(), ^{
         MGLOfflinePack *packs = [MGLOfflineStorage sharedOfflineStorage].packs;
         MGLOfflinePack *tempPack;
-        
+
         for (MGLOfflinePack *pack in packs) {
             NSDictionary *userInfo = [NSKeyedUnarchiver unarchiveObjectWithData:pack.context];
             if ([packName isEqualToString:userInfo[@"name"]]) {
@@ -419,20 +492,20 @@ RCT_REMAP_METHOD(removeOfflinePack,
                 break;
             }
         }
-        
+
         if (tempPack == nil) {
             return resolve(@{});
         }
-        
+
         NSDictionary *userInfo = [NSKeyedUnarchiver unarchiveObjectWithData:tempPack.context];
-        
-        
+
+
         // Workaround for https://github.com/mapbox/mapbox-gl-native/issues/5508
-        
+
         [_removedPacks addObject:tempPack];
         [self discardThrottleForPack:tempPack];
         [tempPack suspend];
-        
+
         dispatch_after(dispatch_time(DISPATCH_TIME_NOW, 100 * NSEC_PER_MSEC), dispatch_get_main_queue(), ^{
             [_removedPacks removeObject:tempPack];
             [[MGLOfflineStorage sharedOfflineStorage] removePack:tempPack withCompletionHandler:^(NSError * _Nullable error) {
@@ -460,7 +533,7 @@ RCT_EXPORT_METHOD(spliceAnnotations:(nonnull NSNumber *)reactTag
 {
     [_bridge.uiManager addUIBlock:^(RCTUIManager *uiManager, NSDictionary<NSNumber *, RCTMapboxGL *> *viewRegistry) {
         RCTMapboxGL *mapView = viewRegistry[reactTag];
-        
+
         if (deleteAll) {
             [mapView removeAllAnnotations];
         } else {
@@ -468,7 +541,7 @@ RCT_EXPORT_METHOD(spliceAnnotations:(nonnull NSNumber *)reactTag
                 [mapView removeAnnotation:key];
             }
         }
-        
+
         for (NSObject * annotationObject in toAdd) {
             [mapView upsertAnnotation:convertToMGLAnnotation(annotationObject)];
         }
@@ -482,7 +555,7 @@ RCT_EXPORT_METHOD(getCenterCoordinateZoomLevel:(nonnull NSNumber *)reactTag
         RCTMapboxGL *mapView = viewRegistry[reactTag];
         CLLocationCoordinate2D region = [mapView centerCoordinate];
         double zoom = [mapView zoomLevel];
-        
+
         callback(@[ @{ @"latitude": @(region.latitude),
                        @"longitude": @(region.longitude),
                        @"zoomLevel": @(zoom) } ]);
@@ -496,12 +569,12 @@ RCT_EXPORT_METHOD(getBounds:(nonnull NSNumber *)reactTag
         RCTMapboxGL *mapView = viewRegistry[reactTag];
         MGLCoordinateBounds bounds = [mapView visibleCoordinateBounds];
         NSMutableArray *callbackArray = [[NSMutableArray alloc] init];
-        
+
         [callbackArray addObject:@(bounds.sw.latitude)];
         [callbackArray addObject:@(bounds.sw.longitude)];
         [callbackArray addObject:@(bounds.ne.latitude)];
         [callbackArray addObject:@(bounds.ne.longitude)];
-        
+
         callback(@[callbackArray]);
     }];
 }
@@ -512,7 +585,7 @@ RCT_EXPORT_METHOD(getDirection:(nonnull NSNumber *)reactTag
     [_bridge.uiManager addUIBlock:^(RCTUIManager *uiManager, NSDictionary<NSNumber *, RCTMapboxGL *> *viewRegistry) {
         RCTMapboxGL *mapView = viewRegistry[reactTag];
         double direction = [mapView direction];
-        
+
         callback(@[ @(direction) ]);
     }];
 }
@@ -523,7 +596,7 @@ RCT_EXPORT_METHOD(getPitch:(nonnull NSNumber *)reactTag
     [_bridge.uiManager addUIBlock:^(RCTUIManager *uiManager, NSDictionary<NSNumber *, RCTMapboxGL *> *viewRegistry) {
         RCTMapboxGL *mapView = viewRegistry[reactTag];
         double pitch = [mapView pitch];
-        
+
         callback(@[ @(pitch) ]);
     }];
 }
@@ -536,50 +609,50 @@ RCT_EXPORT_METHOD(easeTo:(nonnull NSNumber *)reactTag
     [_bridge.uiManager addUIBlock:^(RCTUIManager *uiManager, NSDictionary<NSNumber *, RCTMapboxGL *> *viewRegistry) {
         RCTMapboxGL *mapView = viewRegistry[reactTag];
         if ([mapView isKindOfClass:[RCTMapboxGL class]]) {
-            
+
             NSNumber * latitude = options[@"latitude"];
             NSNumber * longitude = options[@"longitude"];
             NSNumber * zoom = options[@"zoomLevel"];
             NSNumber * direction = options[@"direction"];
             NSNumber * pitch = options[@"pitch"];
             NSNumber * altitude = options[@"altitude"];
-            
+
             if (pitch && zoom) {
                 RCTLogError(@"Pitch and zoomLevel can't be set together with MapView.easeTo() on iOS. Use altitude instead of zoomLevel");
                 return;
             }
-            
+
             if (zoom && altitude) {
                 RCTLogError(@"Altitude and zoomLevel are mutually exclusive with MapView.easeTo()");
                 return;
             }
-            
+
             CLLocationCoordinate2D _center = (latitude && longitude)
             ? CLLocationCoordinate2DMake([latitude doubleValue], [longitude doubleValue])
             : mapView.centerCoordinate;
-            
+
             double _direction = direction ? [direction doubleValue] : mapView.direction;
-            
+
             if (pitch || altitude) {
                 MGLMapCamera * oldCamera = (!pitch || !altitude) ? mapView.camera : nil;
                 double _altitude = altitude ? [altitude doubleValue] : oldCamera ? oldCamera.altitude : 0;
                 double _pitch = pitch ? [pitch doubleValue] : oldCamera ? oldCamera.pitch : 0;
-                
+
                 MGLMapCamera *camera = [MGLMapCamera cameraLookingAtCenterCoordinate:_center
                                                                         fromDistance:_altitude
                                                                                pitch:_pitch
                                                                              heading:_direction];
-                
+
                 [mapView setCamera: camera
                       withDuration: 0.3
            animationTimingFunction: [CAMediaTimingFunction functionWithName:kCAMediaTimingFunctionEaseInEaseOut]
                  completionHandler: ^{
                      callback(@[[NSNull null]]);
                  }];
-                
+
             } else {
                 double _zoomLevel = zoom ? [zoom doubleValue] : mapView.zoomLevel;
-                
+
                 [mapView setCenterCoordinate: _center
                                    zoomLevel: _zoomLevel
                                    direction: _direction

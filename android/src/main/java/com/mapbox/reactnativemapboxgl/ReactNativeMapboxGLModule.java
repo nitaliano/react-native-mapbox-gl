@@ -1,27 +1,11 @@
 
 package com.mapbox.reactnativemapboxgl;
 
-import android.content.Context;
-import android.os.Bundle;
 import android.os.Handler;
-import android.os.Parcel;
-import android.support.annotation.MainThread;
-import android.support.annotation.UiThread;
 import android.util.Log;
 
-import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
-import java.io.IOException;
-import java.io.ObjectInput;
-import java.io.ObjectInputStream;
-import java.io.ObjectOutputStream;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.Map;
-
-import com.facebook.common.logging.FLog;
 import com.facebook.react.bridge.Arguments;
-import com.facebook.react.bridge.Callback;
+import com.facebook.react.bridge.JSApplicationCausedNativeException;
 import com.facebook.react.bridge.JSApplicationIllegalArgumentException;
 import com.facebook.react.bridge.Promise;
 import com.facebook.react.bridge.ReactApplicationContext;
@@ -29,32 +13,44 @@ import com.facebook.react.bridge.ReactContextBaseJavaModule;
 import com.facebook.react.bridge.ReactMethod;
 import com.facebook.react.bridge.ReadableArray;
 import com.facebook.react.bridge.ReadableMap;
-import com.facebook.react.bridge.ReadableNativeMap;
 import com.facebook.react.bridge.WritableArray;
 import com.facebook.react.bridge.WritableMap;
-import com.facebook.react.bridge.WritableNativeArray;
-import com.facebook.react.modules.core.DeviceEventManagerModule;
 import com.facebook.react.modules.core.RCTNativeAppEventEmitter;
-import com.facebook.react.uimanager.annotations.ReactProp;
-import com.mapbox.mapboxsdk.MapboxAccountManager;
-import com.mapbox.mapboxsdk.constants.MyLocationTracking;
+import com.mapbox.mapboxsdk.Mapbox;
 import com.mapbox.mapboxsdk.constants.MyBearingTracking;
+import com.mapbox.mapboxsdk.constants.MyLocationTracking;
 import com.mapbox.mapboxsdk.constants.Style;
 import com.mapbox.mapboxsdk.geometry.LatLng;
 import com.mapbox.mapboxsdk.geometry.LatLngBounds;
 import com.mapbox.mapboxsdk.offline.OfflineManager;
 import com.mapbox.mapboxsdk.offline.OfflineRegion;
-import com.mapbox.mapboxsdk.offline.OfflineRegionDefinition;
 import com.mapbox.mapboxsdk.offline.OfflineRegionError;
 import com.mapbox.mapboxsdk.offline.OfflineRegionStatus;
 import com.mapbox.mapboxsdk.offline.OfflineTilePyramidRegionDefinition;
-import com.mapbox.mapboxsdk.telemetry.MapboxEventManager;
+import com.mapbox.services.android.telemetry.MapboxTelemetry;
+
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Map;
 
 import javax.annotation.Nullable;
 
 public class ReactNativeMapboxGLModule extends ReactContextBaseJavaModule {
 
     private static final String TAG = ReactNativeMapboxGLModule.class.getSimpleName();
+
+    private static final int ANDROID_SDK_OFFLINE_PACK_STATE_INACTIVE = 0;
+    private static final int ANDROID_SDK_OFFLINE_PACK_STATE_ACTIVE = 1;
+
+    private static final int OFFLINE_PACK_STATE_UNKNOWN = 0;
+    private static final int OFFLINE_PACK_STATE_INACTIVE = 1;
+    private static final int OFFLINE_PACK_STATE_ACTIVE = 2;
+    private static final int OFFLINE_PACK_STATE_COMPLETE = 3;
 
     private ReactApplicationContext context;
     private ReactNativeMapboxGLPackage aPackage;
@@ -105,6 +101,7 @@ public class ReactNativeMapboxGLModule extends ReactContextBaseJavaModule {
         HashMap<String, Object> userTrackingMode = new HashMap<String, Object>();
         HashMap<String, Object> mapStyles = new HashMap<String, Object>();
         HashMap<String, Object> userLocationVerticalAlignment = new HashMap<String, Object>();
+        HashMap<String, Object> offlinePackState = new HashMap<String, Object>();
 
         // User tracking constants
         userTrackingMode.put("none", 0);
@@ -116,7 +113,7 @@ public class ReactNativeMapboxGLModule extends ReactContextBaseJavaModule {
         mapStyles.put("light", Style.LIGHT);
         mapStyles.put("dark", Style.DARK);
         mapStyles.put("streets", Style.MAPBOX_STREETS);
-        mapStyles.put("emerald", Style.EMERALD);
+        mapStyles.put("outdoors", Style.OUTDOORS);
         mapStyles.put("satellite", Style.SATELLITE);
         mapStyles.put("hybrid", Style.SATELLITE_STREETS);
 
@@ -125,13 +122,20 @@ public class ReactNativeMapboxGLModule extends ReactContextBaseJavaModule {
         userLocationVerticalAlignment.put("top", 1);
         userLocationVerticalAlignment.put("bottom", 2);
 
+        // Offline Pack State constants
+        offlinePackState.put("unknown", 0);
+        offlinePackState.put("inactive", 1);
+        offlinePackState.put("active", 2);
+        offlinePackState.put("complete", 3);
+        offlinePackState.put("invalid", 4);
+
         // Other constants
         constants.put("unknownResourceCount", Long.MAX_VALUE);
-        constants.put("metricsEnabled", MapboxEventManager.getMapboxEventManager().isTelemetryEnabled());
 
         constants.put("userTrackingMode", userTrackingMode);
         constants.put("mapStyles", mapStyles);
         constants.put("userLocationVerticalAlignment", userLocationVerticalAlignment);
+        constants.put("offlinePackState", offlinePackState);
 
         return constants;
     }
@@ -144,7 +148,7 @@ public class ReactNativeMapboxGLModule extends ReactContextBaseJavaModule {
             throw new JSApplicationIllegalArgumentException("Invalid access token. Register to mapbox.com and request an access token, then pass it to setAccessToken()");
         }
         if (initialized) {
-            String oldToken = MapboxAccountManager.getInstance().getAccessToken();
+            String oldToken = Mapbox.getAccessToken();
             if (!oldToken.equals(accessToken)) {
                 JSApplicationIllegalArgumentException error =
                         new JSApplicationIllegalArgumentException("Mapbox access token cannot be initialized twice with different values");
@@ -158,7 +162,7 @@ public class ReactNativeMapboxGLModule extends ReactContextBaseJavaModule {
         mainHandler.post(new Runnable() {
             @Override
             public void run() {
-                MapboxAccountManager.start(context.getApplicationContext(), accessToken);
+                Mapbox.getInstance(context.getApplicationContext(), accessToken);
                 promise.resolve(null);
             }
         });
@@ -167,14 +171,23 @@ public class ReactNativeMapboxGLModule extends ReactContextBaseJavaModule {
     // Connected
     @ReactMethod
     public void setConnected(boolean connected) {
-        MapboxAccountManager.getInstance().setConnected(connected);
+        Mapbox.getInstance(context.getApplicationContext(), Mapbox.getAccessToken()).setConnected(connected);
     }
 
     // Metrics
 
     @ReactMethod
+    public void getMetricsEnabled(final Promise promise) {
+        try {
+            promise.resolve(MapboxTelemetry.getInstance().isTelemetryEnabled());
+        } catch (NullPointerException e) {
+            promise.reject(new JSApplicationCausedNativeException("You should call getMetricsEnabled after setAccessToken"));
+        }
+    }
+
+    @ReactMethod
     public void setMetricsEnabled(boolean value) {
-        MapboxEventManager.getMapboxEventManager().setTelemetryEnabled(value);
+        MapboxTelemetry.getInstance().setTelemetryEnabled(value);
     }
 
     // Offline packs
@@ -347,12 +360,50 @@ public class ReactNativeMapboxGLModule extends ReactContextBaseJavaModule {
             e.printStackTrace();
         }
 
+        result.putInt("state", normalizeOfflineRegionState(status));
         result.putInt("countOfBytesCompleted", (int)status.getCompletedResourceSize());
         result.putInt("countOfResourcesCompleted", (int)status.getCompletedResourceCount());
         result.putInt("countOfResourcesExpected", (int)status.getRequiredResourceCount());
         result.putInt("maximumResourcesExpected", (int)status.getRequiredResourceCount());
 
         return result;
+    }
+
+    /*
+     * Normalizes offline region status state for the sake of parity with iOS for React Native
+     * Essentially we force Android state to be the same as iOS state for ease of cross-platform development
+     *
+     * On iOS:
+     * 0: Unknown
+     * 1: Inactive
+     * 2: Active
+     * 3: Complete
+     * 4: Invalid (iOS ONLY)
+     *
+     * On Android:
+     * 0: Inactive (Complete is inactive, AND countOfResourcesCompleted == countOfResourcesExpected)
+     * 1: Active
+     */
+    static int normalizeOfflineRegionState(OfflineRegionStatus status) {
+        int state = (int)status.getDownloadState();
+        boolean isComplete = (boolean)status.isComplete();
+
+        switch (state) {
+            case ANDROID_SDK_OFFLINE_PACK_STATE_INACTIVE:
+                if (isComplete) {
+                    state = OFFLINE_PACK_STATE_COMPLETE;
+                } else {
+                    state = OFFLINE_PACK_STATE_INACTIVE;
+                }
+                break;
+            case ANDROID_SDK_OFFLINE_PACK_STATE_ACTIVE:
+                state = OFFLINE_PACK_STATE_ACTIVE;
+                break;
+            default:
+                state = OFFLINE_PACK_STATE_UNKNOWN;
+        }
+
+        return state;
     }
 
     static String getOfflineRegionName(OfflineRegion region) {
@@ -489,14 +540,7 @@ public class ReactNativeMapboxGLModule extends ReactContextBaseJavaModule {
         mainHandler.post(new Runnable() {
             @Override
             public void run() {
-                OfflineRegionProgressObserver foundObserver = null;
-
-                for (OfflineRegionProgressObserver observer : offlinePackObservers) {
-                    if (packName.equals(observer.name)) {
-                        foundObserver = observer;
-                        break;
-                    }
-                }
+                final OfflineRegionProgressObserver foundObserver = getObserver(packName);
 
                 if (foundObserver == null) {
                     promise.resolve(Arguments.createMap());
@@ -506,13 +550,11 @@ public class ReactNativeMapboxGLModule extends ReactContextBaseJavaModule {
                 offlinePackObservers.remove(foundObserver);
                 foundObserver.invalidate();
                 foundObserver.region.setDownloadState(OfflineRegion.STATE_INACTIVE);
-
-                final OfflineRegionProgressObserver _foundObserver = foundObserver;
                 foundObserver.region.delete(new OfflineRegion.OfflineRegionDeleteCallback() {
                     @Override
                     public void onDelete() {
                         WritableMap result = Arguments.createMap();
-                        result.putString("deleted", _foundObserver.name);
+                        result.putString("deleted", foundObserver.name);
                         promise.resolve(result);
                     }
 
@@ -523,6 +565,81 @@ public class ReactNativeMapboxGLModule extends ReactContextBaseJavaModule {
                 });
             }
         });
+    }
+
+    @ReactMethod
+    public void suspendOfflinePack(final String packName, final Promise promise) {
+        mainHandler.post(new Runnable() {
+            @Override
+            public void run() {
+                final OfflineRegionProgressObserver foundObserver = getObserver(packName);
+
+                if (foundObserver == null) {
+                    promise.resolve(Arguments.createMap());
+                    return;
+                }
+
+                foundObserver.region.setDownloadState(OfflineRegion.STATE_INACTIVE);
+                foundObserver.region.getStatus(new OfflineRegion.OfflineRegionStatusCallback() {
+                    @Override
+                    public void onStatus(OfflineRegionStatus status) {
+                        foundObserver.onStatusChanged(status);
+                        WritableMap result = Arguments.createMap();
+                        result.putString("suspended", foundObserver.name);
+                        promise.resolve(result);
+                    }
+                    @Override
+                    public void onError(String error) {
+                        Log.e(context.getApplicationContext().getPackageName(), error);
+                        promise.reject(new JSApplicationIllegalArgumentException(error));
+                    }
+                });
+            }
+        });
+    }
+
+    @ReactMethod
+    public void resumeOfflinePack(final String packName, final Promise promise) {
+        mainHandler.post(new Runnable() {
+            @Override
+            public void run() {
+                final OfflineRegionProgressObserver foundObserver = getObserver(packName);
+
+                if (foundObserver == null) {
+                    promise.resolve(Arguments.createMap());
+                    return;
+                }
+
+                foundObserver.region.setDownloadState(OfflineRegion.STATE_ACTIVE);
+                foundObserver.region.getStatus(new OfflineRegion.OfflineRegionStatusCallback() {
+                    @Override
+                    public void onStatus(OfflineRegionStatus status) {
+                        foundObserver.onStatusChanged(status);
+                        WritableMap result = Arguments.createMap();
+                        result.putString("resumed", foundObserver.name);
+                        promise.resolve(result);
+                    }
+                    @Override
+                    public void onError(String error) {
+                        Log.e(context.getApplicationContext().getPackageName(), error);
+                        promise.reject(new JSApplicationIllegalArgumentException(error));
+                    }
+                });
+            }
+        });
+    }
+
+    OfflineRegionProgressObserver getObserver(String name) {
+        OfflineRegionProgressObserver foundObserver = null;
+
+        for (OfflineRegionProgressObserver observer : offlinePackObservers) {
+            if (name.equals(observer.name)) {
+                foundObserver = observer;
+                break;
+            }
+        }
+
+        return foundObserver;
     }
 
     // Offline throttle control
