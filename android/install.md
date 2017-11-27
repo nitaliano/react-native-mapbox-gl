@@ -21,7 +21,7 @@ allprojects {
 }
 ```
 
-### app:build.gradle
+####  _$(PROJECT_ROOT)/android/app/build.gradle_
 
 Add project under `dependencies`
 
@@ -36,7 +36,7 @@ Update Android SDK version if you did `react-native init`, we want to be on `25`
 * `buildToolsVersion "25.0.1"`
 * `targetSdkVersion 25`
 
-### settings.gradle
+#### _$(PROJECT_ROOT)/android/settings.gradle_
 
 Include project, so gradle knows where to find the project
 
