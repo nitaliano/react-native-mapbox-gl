@@ -2,7 +2,7 @@
 
 ## Gradle Setup
 
-#### $(PROJECT_ROOT)/android/app/build.gradle
+#### $PROJECT_ROOT/android/app/build.gradle
 
 We need to add some `repositories` in order to get our dependencies.
 
@@ -21,7 +21,7 @@ allprojects {
 }
 ```
 
-#### $(PROJECT_ROOT)/android/app/build.gradle
+#### $PROJECT_ROOT/android/app/build.gradle
 
 Add project under `dependencies`
 
@@ -36,7 +36,7 @@ Update Android SDK version if you did `react-native init`, we want to be on `25`
 * `buildToolsVersion "25.0.1"`
 * `targetSdkVersion 25`
 
-#### $(PROJECT_ROOT)/android/settings.gradle
+#### $PROJECT_ROOT/android/settings.gradle
 
 Include project, so gradle knows where to find the project
 
