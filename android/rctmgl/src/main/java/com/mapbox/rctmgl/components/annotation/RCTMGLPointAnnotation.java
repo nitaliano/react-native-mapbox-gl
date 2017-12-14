@@ -121,12 +121,20 @@ public class RCTMGLPointAnnotation extends AbstractMapFeature {
         }
     }
 
+    public String getTitle () {
+        return mTitle;
+    }
+
     public void setSnippet(String snippet) {
         mSnippet = snippet;
 
         if (mAnnotation != null) {
             mAnnotation.setSnippet(snippet);
         }
+    }
+
+    public String getSnippet () {
+        return mSnippet;
     }
 
     public void setCoordinate(Point point) {
