@@ -405,16 +405,10 @@ public class RCTMGLMapView extends MapView implements
 
         if (id != mActiveMarkerID) {
             final MarkerView markerView = annotation.getMarker();
-            String title = annotation.getTitle();
-            String snippet = annotation.getSnippet();
             annotation.onSelect(true);
             mActiveMarkerID = id;
-            RCTMGLCallout calloutView = annotation.getCalloutView();
-            if (title != null || snippet !== null || (!markerView.isInfoWindowShown() && calloutView != null)) {
+            if (!markerView.isInfoWindowShown() && annotation.hasInfoWindow()) {
                 mMap.selectMarker(markerView);
-            }
-            if (!markerView.isInfoWindowShown() && calloutView != null) {
-                markerView.showInfoWindow(mMap, this);
             }
         }
     }

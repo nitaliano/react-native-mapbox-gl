@@ -113,6 +113,10 @@ public class RCTMGLPointAnnotation extends AbstractMapFeature {
         return mCallout;
     }
 
+    public boolean hasInfoWindow() {
+        return (mTitle != null || mSnippet != null || mCallout != null);
+    }
+
     public void setTitle(String title) {
         mTitle = title;
 
@@ -121,20 +125,12 @@ public class RCTMGLPointAnnotation extends AbstractMapFeature {
         }
     }
 
-    public String getTitle () {
-        return mTitle;
-    }
-
     public void setSnippet(String snippet) {
         mSnippet = snippet;
 
         if (mAnnotation != null) {
             mAnnotation.setSnippet(snippet);
         }
-    }
-
-    public String getSnippet () {
-        return mSnippet;
     }
 
     public void setCoordinate(Point point) {
