@@ -2,7 +2,7 @@
 
 ## Gradle Setup
 
-### project:build.gradle
+#### $PROJECT_ROOT/android/app/build.gradle
 
 We need to add some `repositories` in order to get our dependencies.
 
@@ -21,7 +21,7 @@ allprojects {
 }
 ```
 
-### app:build.gradle
+#### $PROJECT_ROOT/android/app/build.gradle
 
 Add project under `dependencies`
 
@@ -36,7 +36,7 @@ Update Android SDK version if you did `react-native init`, we want to be on `26`
 * `buildToolsVersion "26.0.1"`
 * `targetSdkVersion 26`
 
-### settings.gradle
+#### $PROJECT_ROOT/android/settings.gradle
 
 Include project, so gradle knows where to find the project
 
@@ -45,7 +45,7 @@ include ':mapbox-react-native-mapbox-gl'
 project(':mapbox-react-native-mapbox-gl').projectDir = new File(rootProject.projectDir, '../node_modules/@mapbox/react-native-mapbox-gl/android/rctmgl')
 ```
 
-### MainApplication.java
+#### MainApplication.java
 
 We need to register our package
 
