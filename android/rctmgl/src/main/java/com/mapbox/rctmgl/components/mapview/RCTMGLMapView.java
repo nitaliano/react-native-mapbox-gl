@@ -308,60 +308,54 @@ public class RCTMGLMapView extends MapView implements
 
     @Override
     public void onMapClick(@NonNull LatLng point) {
-        boolean isEventCaptured = false;
-
         if (mActiveMarkerID != -1) {
             for (String key : mPointAnnotations.keySet()) {
                 RCTMGLPointAnnotation annotation = mPointAnnotations.get(key);
 
                 if (mActiveMarkerID == annotation.getMapboxID()) {
-                    isEventCaptured = deselectAnnotation(annotation);
+                    deselectAnnotation(annotation);
                 }
             }
-        }
+        } else {
+            PointF screenPoint = mMap.getProjection().toScreenLocation(point);
+            List<RCTSource> touchableSources = getAllTouchableSources();
 
-        if (isEventCaptured) {
-            return;
-        }
+            Map<String, Feature> hits = new HashMap<>();
+            List<RCTSource> hitTouchableSources = new ArrayList<>();
+            for (RCTSource touchableSource : touchableSources) {
+                Map<String, Double> hitbox = touchableSource.getTouchHitbox();
+                if (hitbox == null) {
+                    continue;
+                }
 
-        PointF screenPoint = mMap.getProjection().toScreenLocation(point);
-        List<RCTSource> touchableSources = getAllTouchableSources();
+                float halfWidth = hitbox.get("width").floatValue() / 2.0f;
+                float halfHeight = hitbox.get("height").floatValue() / 2.0f;
 
-        Map<String, Feature> hits = new HashMap<>();
-        List<RCTSource> hitTouchableSources = new ArrayList<>();
-        for (RCTSource touchableSource : touchableSources) {
-            Map<String, Double> hitbox = touchableSource.getTouchHitbox();
-            if (hitbox == null) {
-                continue;
+                RectF hitboxF = new RectF();
+                hitboxF.set(
+                        screenPoint.x - halfWidth,
+                        screenPoint.y - halfHeight,
+                        screenPoint.x + halfWidth,
+                        screenPoint.y + halfHeight);
+
+                List<Feature> features = mMap.queryRenderedFeatures(hitboxF, touchableSource.getLayerIDs());
+                if (features.size() > 0) {
+                    hits.put(touchableSource.getID(), features.get(0));
+                    hitTouchableSources.add(touchableSource);
+                }
             }
 
-            float halfWidth = hitbox.get("width").floatValue() / 2.0f;
-            float halfHeight = hitbox.get("height").floatValue() / 2.0f;
-
-            RectF hitboxF = new RectF();
-            hitboxF.set(
-                    screenPoint.x - halfWidth,
-                    screenPoint.y - halfHeight,
-                    screenPoint.x + halfWidth,
-                    screenPoint.y + halfHeight);
-
-            List<Feature> features = mMap.queryRenderedFeatures(hitboxF, touchableSource.getLayerIDs());
-            if (features.size() > 0) {
-                hits.put(touchableSource.getID(), features.get(0));
-                hitTouchableSources.add(touchableSource);
+            if (hits.size() > 0) {
+                RCTSource source = getTouchableSourceWithHighestZIndex(hitTouchableSources);
+                if (source != null && source.hasPressListener()) {
+                    source.onPress(hits.get(source.getID()));
+                    return;
+                }
             }
-        }
 
-        if (hits.size() > 0) {
-            RCTSource source = getTouchableSourceWithHighestZIndex(hitTouchableSources);
-            if (source != null && source.hasPressListener()) {
-                source.onPress(hits.get(source.getID()));
-                return;
-            }
+            MapClickEvent event = new MapClickEvent(this, point, screenPoint);
+            mManager.handleEvent(event);
         }
-
-        MapClickEvent event = new MapClickEvent(this, point, screenPoint);
-        mManager.handleEvent(event);
     }
 
     @Override
@@ -416,16 +410,14 @@ public class RCTMGLMapView extends MapView implements
     public boolean deselectAnnotation(RCTMGLPointAnnotation annotation) {
         MarkerView markerView = annotation.getMarker();
 
-        RCTMGLCallout calloutView = annotation.getCalloutView();
-        if (calloutView != null) {
-            markerView.hideInfoWindow();
+        if (annotation.hasInfoWindow()) {
+            mMap.deselectMarker(markerView);
         }
 
-        mMap.deselectMarker(markerView);
         mActiveMarkerID = -1;
         annotation.onDeselect();
 
-        return calloutView != null;
+        return annotation.hasInfoWindow();
     }
 
     @Override
