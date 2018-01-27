@@ -12,6 +12,7 @@ import android.util.DisplayMetrics;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.MotionEvent;
+import android.view.View.OnAttachStateChangeListener;
 
 import com.facebook.react.bridge.LifecycleEventListener;
 import com.facebook.react.bridge.ReactContext;
@@ -169,6 +170,22 @@ public class RCTMGLMapView extends MapView implements
         mHandler = new Handler();
 
         setLifecycleListeners();
+            
+        addOnAttachStateChangeListener(new OnAttachStateChangeListener() {
+            @Override
+            public void onViewAttachedToWindow(View v) {
+                if(mLocationLayer != null){
+                    mLocationLayer.onStart();
+                }
+            }
+
+            @Override
+            public void onViewDetachedFromWindow(View v) {
+                if(mLocationLayer != null){
+                    mLocationLayer.onStop();
+                }
+            }
+        });
     }
 
     public void addFeature(View childView, int childPosition) {
