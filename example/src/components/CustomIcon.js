@@ -11,9 +11,7 @@ import exampleIcon from '../assets/example.png';
 
 const styles = MapboxGL.StyleSheet.create({
   icon: {
-    iconImage: exampleIcon,
     iconAllowOverlap: true,
-    iconSize: 0.5,
   },
 });
 
@@ -51,13 +49,11 @@ class CustomIcon extends React.Component {
             centerCoordinate={[-73.970895, 40.723279]}
             style={sheet.matchParent}>
 
-            <MapboxGL.ShapeSource id='symbolLocationSource' shape={this.state.featureCollection}>
+            <MapboxGL.GeoJSONSource id='jamtamSource' data={this.state.featureCollection}>
               <MapboxGL.SymbolLayer
-                id='symbolLocationSymbols'
-                minZoomLevel={1}
+                id='jamtamLayer'
                 style={styles.icon} />
-            </MapboxGL.ShapeSource>
-
+            </MapboxGL.GeoJSONSource>
         </MapboxGL.MapView>
 
         <Bubble>

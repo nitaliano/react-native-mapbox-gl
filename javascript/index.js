@@ -67,6 +67,7 @@ MapboxGL.VectorSource = VectorSource;
 MapboxGL.ShapeSource = ShapeSource;
 MapboxGL.RasterSource = RasterSource;
 MapboxGL.ImageSource = ImageSource;
+MapboxGL.GeoJSONSource = ShapeSource;
 
 // layers
 MapboxGL.FillLayer = FillLayer;

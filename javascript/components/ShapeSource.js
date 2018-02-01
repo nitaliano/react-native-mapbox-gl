@@ -108,11 +108,11 @@ class ShapeSource extends React.Component {
   };
 
   _getShape () {
-    if (!this.props.shape) {
+    if (!this.props.shape && !this.props.data) {
       return;
     }
     // TODO: Add turf validation and throw exeception
-    return toJSONString(this.props.shape);
+    return toJSONString(this.props.shape || this.props.data);
   }
 
   _getImages () {

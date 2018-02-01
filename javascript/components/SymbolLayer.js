@@ -75,6 +75,10 @@ class SymbolLayer extends AbstractLayer {
     sourceID: MapboxGL.StyleSource.DefaultSourceID,
   };
 
+  getDefaultStyle () {
+    return { iconImage: 'rocket-15' };
+  }
+
   render () {
     const props = {
       ...this.baseProps,

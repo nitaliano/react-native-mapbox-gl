@@ -20,18 +20,27 @@ class AbstractLayer extends React.Component {
     };
   }
 
+  getDefaultStyle () {
+    return null;
+  }
+
   getStyle () {
-    if (!this.props.style) {
+    let styles = [];
+    let defaultStyle = this.getDefaultStyle();
+
+    if (defaultStyle) {
+      styles.push(defaultStyle);
+    }
+
+    if (this.props.style) {
+      styles.push(this.props.style);
+    }
+
+    if (!styles.length) {
       return;
     }
 
-    if (!Array.isArray(this.props.style)) {
-      return this._getMapboxStyleSheet(this.props.style);
-    }
-
-    const styles = this.props.style;
     let flattenStyle = {};
-
     for (let style of styles) {
       if (!style) {
         continue;
