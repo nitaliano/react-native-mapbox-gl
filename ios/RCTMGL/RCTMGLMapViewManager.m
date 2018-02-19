@@ -38,7 +38,6 @@ RCT_EXPORT_MODULE(RCTMGLMapView)
 - (UIView *)view
 {
     RCTMGLMapView *mapView = [[RCTMGLMapView alloc] initWithFrame:RCT_MAPBOX_MIN_MAP_FRAME];
-    mapView.autoresizingMask = UIViewAutoresizingFlexibleWidth | UIViewAutoresizingFlexibleHeight;
     mapView.delegate = self;
 
     // setup map gesture recongizers
@@ -153,6 +152,40 @@ RCT_EXPORT_METHOD(getVisibleBounds:(nonnull NSNumber*)reactTag
         
         RCTMGLMapView *reactMapView = (RCTMGLMapView*)view;
         resolve(@{ @"visibleBounds": [RCTMGLUtils fromCoordinateBounds:reactMapView.visibleCoordinateBounds] });
+    }];
+}
+
+RCT_EXPORT_METHOD(getZoom:(nonnull NSNumber*)reactTag
+                  resolver:(RCTPromiseResolveBlock)resolve
+                  rejecter:(RCTPromiseRejectBlock)reject)
+{
+    [self.bridge.uiManager addUIBlock:^(__unused RCTUIManager *manager, NSDictionary<NSNumber*, UIView*> *viewRegistry) {
+        id view = viewRegistry[reactTag];
+
+        if (![view isKindOfClass:[RCTMGLMapView class]]) {
+            RCTLogError(@"Invalid react tag, could not find RCTMGLMapView");
+            return;
+        }
+
+        RCTMGLMapView *reactMapView = (RCTMGLMapView*)view;
+        resolve(@{ @"zoom": @(reactMapView.zoomLevel) });
+    }];
+}
+
+RCT_EXPORT_METHOD(getCenter:(nonnull NSNumber*)reactTag
+                  resolver:(RCTPromiseResolveBlock)resolve
+                  rejecter:(RCTPromiseRejectBlock)reject)
+{
+    [self.bridge.uiManager addUIBlock:^(__unused RCTUIManager *manager, NSDictionary<NSNumber*, UIView*> *viewRegistry) {
+        id view = viewRegistry[reactTag];
+
+        if (![view isKindOfClass:[RCTMGLMapView class]]) {
+            RCTLogError(@"Invalid react tag, could not find RCTMGLMapView");
+            return;
+        }
+
+        RCTMGLMapView *reactMapView = (RCTMGLMapView*)view;
+        resolve(@{ @"center": @[@(reactMapView.centerCoordinate.longitude), @(reactMapView.centerCoordinate.latitude)]});
     }];
 }
 
@@ -331,6 +364,29 @@ RCT_EXPORT_METHOD(setCamera:(nonnull NSNumber*)reactTag
 }
 
 #pragma mark - MGLMapViewDelegate
+
+- (void)mapView:(MGLMapView *)mapView didUpdateUserLocation:(MGLUserLocation *)userLocation
+{
+    if (userLocation == nil) {
+        return;
+    }
+    
+    RCTMGLMapView *reactMapView = (RCTMGLMapView *)mapView;
+    
+    NSDictionary *coords = @{
+      @"speed": @(userLocation.location.speed),
+      @"heading": @(userLocation.heading.trueHeading),
+      @"accuracy": @(userLocation.location.horizontalAccuracy),
+      @"altitude": @(userLocation.location.altitude),
+      @"latitude": @(userLocation.location.coordinate.latitude),
+      @"longitude": @(userLocation.location.coordinate.longitude)
+     };
+    
+    double utcTimestampMS = [userLocation.location.timestamp timeIntervalSince1970] * 1000.0;
+    NSDictionary *payload = @{ @"timestamp": @(utcTimestampMS), @"coords": coords };
+    RCTMGLEvent *locationEvent = [RCTMGLEvent makeEvent:RCT_MAPBOX_USER_LOCATION_UPDATE withPayload:payload];
+    [self fireEvent:locationEvent withCallback:reactMapView.onMapChange];
+}
 
 - (void)mapView:(MGLMapView *)mapView didChangeUserTrackingMode:(MGLUserTrackingMode)mode animated:(BOOL)animated
 {
