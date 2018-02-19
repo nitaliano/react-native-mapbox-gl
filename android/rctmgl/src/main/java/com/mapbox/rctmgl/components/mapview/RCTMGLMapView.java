@@ -73,6 +73,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import javax.annotation.Nullable;
+
 /**
  * Created by nickitaliano on 8/18/17.
  */
@@ -96,6 +98,7 @@ public class RCTMGLMapView extends MapView implements
 
     private CameraUpdateQueue mCameraUpdateQueue;
     private CameraChangeTracker mCameraChangeTracker = new CameraChangeTracker();
+    private Map<Integer, ReadableArray> mPreRenderMethodMap = new HashMap<>();
 
     private MapboxMap mMap;
     private LocationManager mLocationManger;
@@ -183,6 +186,10 @@ public class RCTMGLMapView extends MapView implements
             mLocationLayer.onStop();
         }
 
+    }
+
+    public void enqueuePreRenderMapMethod(Integer methodID, @Nullable ReadableArray args) {
+        mPreRenderMethodMap.put(methodID, args);
     }
 
     public void addFeature(View childView, int childPosition) {
@@ -608,6 +615,12 @@ public class RCTMGLMapView extends MapView implements
                 event = new MapChangeEvent(this, EventTypes.DID_FINISH_RENDERING_MAP);
                 break;
             case DID_FINISH_RENDERING_MAP_FULLY_RENDERED:
+                if (mPreRenderMethodMap.size() > 0) {
+                    for (Integer methodID : mPreRenderMethodMap.keySet()) {
+                        mManager.receiveCommand(this, methodID, mPreRenderMethodMap.get(methodID));
+                    }
+                    mPreRenderMethodMap.clear();
+                }
                 event = new MapChangeEvent(this, EventTypes.DID_FINISH_RENDERING_MAP_FULLY);
                 break;
             case DID_FINISH_LOADING_STYLE:
@@ -831,6 +844,17 @@ public class RCTMGLMapView extends MapView implements
         mManager.handleEvent(event);
     }
 
+    public void getZoom(String callbackID) {
+        AndroidCallbackEvent event = new AndroidCallbackEvent(this, callbackID, EventKeys.MAP_ANDROID_CALLBACK);
+        CameraPosition position = mMap.getCameraPosition();
+
+        WritableMap payload = new WritableNativeMap();
+        payload.putDouble("zoom", position.zoom);
+        event.setPayload(payload);
+
+        mManager.handleEvent(event);
+    }
+
     public void queryRenderedFeaturesInRect(String callbackID, RectF rect, FilterParser.FilterList filter, List<String> layerIDs) {
         AndroidCallbackEvent event = new AndroidCallbackEvent(this, callbackID, EventKeys.MAP_ANDROID_CALLBACK);
         List<Feature> features = mMap.queryRenderedFeatures(rect, FilterParser.parse(filter), layerIDs.toArray(new String[layerIDs.size()]));
@@ -885,6 +909,20 @@ public class RCTMGLMapView extends MapView implements
                 mManager.handleEvent(event);
             }
         });
+    }
+
+    public void getCenter(String callbackID) {
+        AndroidCallbackEvent event = new AndroidCallbackEvent(this, callbackID, EventKeys.MAP_ANDROID_CALLBACK);
+        LatLng center = mMap.getCameraPosition().target;
+
+        WritableArray array = new WritableNativeArray();
+        array.pushDouble(center.getLongitude());
+        array.pushDouble(center.getLatitude());
+        WritableMap payload = new WritableNativeMap();
+        payload.putArray("center", array);
+        event.setPayload(payload);
+
+        mManager.handleEvent(event);
     }
 
     public void init() {
