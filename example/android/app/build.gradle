@@ -138,6 +138,8 @@ android {
 }
 
 dependencies {
+    compile project(':react-native-vector-icons')
+    compile project(':@mapbox/react-native-mapbox-gl')
     compile project(':mapbox-react-native-mapbox-gl')
     compile project(':react-native-vector-icons')
     compile fileTree(dir: "libs", include: ["*.jar"])

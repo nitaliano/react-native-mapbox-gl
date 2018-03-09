@@ -16,7 +16,7 @@ public class UserTrackingMode {
         if (!isShowUserLocation) {
             return LocationLayerMode.NONE;
         } else if (mode == NONE) {
-            return LocationLayerMode.TRACKING;
+            return LocationLayerMode.COMPASS;
         } else if (mode == FollowWithCourse) {
             return LocationLayerMode.NAVIGATION;
         } else if (mode == FollowWithHeading) {
