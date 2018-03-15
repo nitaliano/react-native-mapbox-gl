@@ -998,6 +998,10 @@ public class RCTMGLMapView extends MapView implements
         mManager.handleEvent(event);
     }
 
+    public void centerMap(String callbackID) {
+	updateUserLocation(true);
+    }
+
     public void init() {
         setStyleUrl(mStyleURL);
 
