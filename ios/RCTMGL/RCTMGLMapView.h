@@ -33,6 +33,7 @@
 @property (nonatomic, assign) BOOL reactLogoEnabled;
 @property (nonatomic, assign) BOOL reactCompassEnabled;
 @property (nonatomic, assign) BOOL reactShowUserLocation;
+@property (nonatomic, assign) BOOL reactShowUserOrientation;
 @property (nonatomic, assign) BOOL reactZoomEnabled;
 
 @property (nonatomic, copy) NSString *reactCenterCoordinate;

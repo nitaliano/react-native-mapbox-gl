@@ -12,16 +12,16 @@ public class UserTrackingMode {
     public static final int FollowWithCourse = 2;
     public static final int FollowWithHeading = 3;
 
-    public static int getMapLayerMode(int mode, boolean isShowUserLocation) {
+    public static int getMapLayerMode(int mode, boolean isShowUserLocation, boolean isShowUserOrientation) {
         if (!isShowUserLocation) {
             return LocationLayerMode.NONE;
-        } else if (mode == NONE) {
+	} else if (mode == FollowWithHeading || isShowUserOrientation) {
             return LocationLayerMode.COMPASS;
+        } else if (mode == NONE) {
+            return LocationLayerMode.TRACKING;
         } else if (mode == FollowWithCourse) {
             return LocationLayerMode.NAVIGATION;
-        } else if (mode == FollowWithHeading) {
-            return LocationLayerMode.COMPASS;
-        } else {
+	} else {
             return LocationLayerMode.TRACKING;
         }
     }

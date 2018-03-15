@@ -157,6 +157,13 @@ static double const M2PI = M_PI * 2;
     self.showsUserLocation = _reactShowUserLocation;
 }
 
+- (void)setReactShowUserOrientation:(BOOL)reactShowUserOrientation
+{
+    _reactShowUserOrientation = reactShowUserOrientation;
+    self.reactShowUserOrientation = _reactShowUserOrientation;
+}
+
+
 - (void)setReactCenterCoordinate:(NSString *)reactCenterCoordinate
 {
     _reactCenterCoordinate = reactCenterCoordinate;

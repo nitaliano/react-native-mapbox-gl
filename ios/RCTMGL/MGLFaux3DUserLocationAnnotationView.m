@@ -234,7 +234,7 @@ const CGFloat MGLUserLocationHeadingUpdateThreshold = 0.01;
     
     // heading indicator (tinted, beam or arrow)
     RCTMGLMapView *reactMapView = (RCTMGLMapView *)self.mapView;
-    BOOL headingTrackingModeEnabled = reactMapView.reactUserTrackingMode == MGLUserTrackingModeFollowWithHeading;
+    BOOL headingTrackingModeEnabled = reactMapView.reactShowUserOrientation || reactMapView.reactUserTrackingMode == MGLUserTrackingModeFollowWithHeading;
     BOOL showHeadingIndicator = self.mapView.showsUserHeadingIndicator || headingTrackingModeEnabled;
 
     if (showHeadingIndicator)

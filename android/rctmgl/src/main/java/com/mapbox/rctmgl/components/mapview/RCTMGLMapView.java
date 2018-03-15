@@ -126,6 +126,7 @@ public class RCTMGLMapView extends MapView implements
     private Boolean mCompassEnabled;
     private Boolean mZoomEnabled;
     private boolean mShowUserLocation;
+    private boolean mShowUserOrientation;
 
     private long mActiveMarkerID = -1;
     private int mUserTrackingMode;
@@ -799,6 +800,11 @@ public class RCTMGLMapView extends MapView implements
         }
     }
 
+    public void setReactShowUserOrientation(boolean showUserOrientation) {
+        mShowUserOrientation = showUserOrientation;
+    }
+
+    
     public void setReactUserTrackingMode(int userTrackingMode) {
         int oldTrackingMode = mUserTrackingMode;
         mUserTrackingMode = userTrackingMode;
@@ -1156,7 +1162,7 @@ public class RCTMGLMapView extends MapView implements
             mLocationLayer = new LocationLayerPlugin(this, mMap, mLocationManger.getEngine());
         }
 
-        int userLayerMode = UserTrackingMode.getMapLayerMode(mUserLocation.getTrackingMode(), mShowUserLocation);
+        int userLayerMode = UserTrackingMode.getMapLayerMode(mUserLocation.getTrackingMode(), mShowUserLocation, mShowUserOrientation);
         if (userLayerMode != mLocationLayer.getLocationLayerMode()) {
             mLocationLayer.setLocationLayerEnabled(userLayerMode);
         }
@@ -1348,7 +1354,7 @@ public class RCTMGLMapView extends MapView implements
         double direction = currentCamera.bearing;
 
         int userTrackingMode = mUserLocation.getTrackingMode();
-        if (userTrackingMode == UserTrackingMode.FollowWithHeading || userTrackingMode == UserTrackingMode.FollowWithCourse) {
+        if (userTrackingMode == UserTrackingMode.FollowWithHeading || userTrackingMode == UserTrackingMode.FollowWithCourse || mShowUserOrientation) {
             direction = mUserLocation.getBearing();
         } else if (mHeading != 0.0) {
             direction = mHeading;

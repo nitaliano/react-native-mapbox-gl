@@ -47,6 +47,11 @@ class MapView extends React.Component {
     showUserLocation: PropTypes.bool,
 
     /**
+     * Shows the users orientation (when location visible)
+     */
+    showUserOrientation: PropTypes.bool,
+      
+    /**
      * The mode used to track the user location on the map
      */
     userTrackingMode: PropTypes.number,
