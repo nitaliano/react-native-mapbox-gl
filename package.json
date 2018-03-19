@@ -40,7 +40,8 @@
     "react-native": ">=0.47.1"
   },
   "dependencies": {
-    "@turf/helpers": "4.6.0"
+    "@turf/helpers": "4.6.0",
+    "xcode": "^1.0.0"
   },
   "devDependencies": {
     "babel-eslint": "6.1.2",
@@ -86,7 +87,11 @@
   },
   "rnpm": {
     "android": {
-      "sourceDir": "./android/rctmgl"
+      "sourceDir": "./android/rctmgl",
+      "packageFolder": "com/mapbox/rctmgl"
+    },
+    "commands": {
+      "postlink": "node node_modules/@mapbox/react-native-mapbox-gl/scripts/postlink/run.js"
     }
   }
 }
