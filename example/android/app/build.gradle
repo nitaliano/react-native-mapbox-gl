@@ -91,7 +91,6 @@ def enableProguardInReleaseBuilds = false
 
 android {
     compileSdkVersion 26
-    buildToolsVersion "23.0.1"
 
     lintOptions {
         checkReleaseBuilds false

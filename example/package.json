@@ -8,12 +8,11 @@
     "copy:changes": "node ./scripts/watch_rngl.js",
     "pack:gl": "./scripts/npm_pack_rngl.sh",
     "clean:node:modules": "./scripts/clean_node_modules.sh",
-    "preinstall": "npm run pack:gl",
     "postinstall": "node ./scripts/set_access_token.js"
   },
   "dependencies": {
     "@mapbox/geo-viewport": "^0.2.2",
-    "@mapbox/react-native-mapbox-gl": "file:../mapbox-react-native-mapbox-gl-6.1.0.tgz",
+    "@mapbox/react-native-mapbox-gl": "^6.1.0",
     "@turf/along": "^4.7.3",
     "@turf/bearing": "^5.0.0",
     "@turf/distance": "^5.0.0",
@@ -24,8 +23,8 @@
     "mapbox": "^1.0.0-beta9",
     "npm": "^5.3.0",
     "prop-types": "^15.5.10",
-    "react": "16.0.0-alpha.12",
-    "react-native": "^0.53.0",
+    "react": "16.2.0",
+    "react-native": "^0.54.2",
     "react-native-elements": "^0.16.0",
     "react-native-vector-icons": "^4.3.0",
     "url": "^0.11.0"
