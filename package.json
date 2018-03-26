@@ -37,13 +37,13 @@
   },
   "peerDependencies": {
     "prop-types": ">=15.5.8",
-    "react": "^16.0.0-alpha || ^16.0.0-beta || ^16.0.0",
-    "react-native": ">=0.47.1"
+    "react": "^16.3.0-alpha.1",
+    "react-native": ">=0.54.2"
   },
   "dependencies": {
     "@turf/helpers": "4.6.0",
-    "@types/react": "^16.0.3",
-    "@types/react-native": "^0.47.6"
+    "@types/react": "^16.0.41",
+    "@types/react-native": "^0.52.19"
   },
   "devDependencies": {
     "babel-eslint": "6.1.2",
@@ -62,10 +62,10 @@
     "lint-staged": "^7.0.0",
     "node-dir": "0.1.17",
     "prettier": "^1.11.1",
-    "react": "16.0.0-alpha.12",
+    "react": "16.3.0-alpha.1",
     "react-docgen": "2.18.0",
-    "react-native": "0.48.4",
-    "react-test-renderer": "16.0.0-alpha.12"
+    "react-native": "0.54.2",
+    "react-test-renderer": "16.2.0"
   },
   "jest": {
     "preset": "react-native",
