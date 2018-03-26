@@ -1,0 +1,199 @@
+## <MapboxGL.FillExtrusionLayer />
+### FillExtrusionLayer is a style layer that renders one or more 3D extruded polygons on the map.
+
+### props
+| Prop | Type | Default | Required | Description |
+| ---- | :--: | :-----: | :------: | :----------: |
+| id | `string` | `none` | `false` | A string that uniquely identifies the source in the style to which it is added. |
+| sourceID | `string` | `MapboxGL.StyleSource.DefaultSourceID` | `false` | The source from which to obtain the data to style. If the source has not yet been added to the current style, the behavior is undefined. |
+| sourceLayerID | `string` | `none` | `false` | Identifier of the layer within the source identified by the sourceID property from which the receiver obtains the data to style. |
+| aboveLayerID | `string` | `none` | `false` | Inserts a layer above aboveLayerID. |
+| belowLayerID | `string` | `none` | `false` | Inserts a layer below belowLayerID |
+| layerIndex | `number` | `none` | `false` | Inserts a layer at a specified index |
+| filter | `array` | `none` | `false` | Filter only the features in the source layer that satisfy a condition that you define |
+| minZoomLevel | `number` | `none` | `false` | The minimum zoom level at which the layer gets parsed and appears. |
+| maxZoomLevel | `number` | `none` | `false` | The maximum zoom level at which the layer gets parsed and appears. |
+| style | `union` | `none` | `false` | Customizable style attributes |
+
+
+### styles
+
+* <a href="#name">visibility</a><br/>
+* <a href="#name-1">fillExtrusionOpacity</a><br/>
+* <a href="#name-2">fillExtrusionColor</a><br/>
+* <a href="#name-3">fillExtrusionTranslate</a><br/>
+* <a href="#name-4">fillExtrusionTranslateAnchor</a><br/>
+* <a href="#name-5">fillExtrusionPattern</a><br/>
+* <a href="#name-6">fillExtrusionHeight</a><br/>
+* <a href="#name-7">fillExtrusionBase</a><br/>
+
+___
+
+#### Name
+`visibility`
+
+#### Description
+Whether this layer is displayed.
+
+#### Type
+`enum`
+#### Default Value
+`visible`
+
+#### Supported Values
+**visible** - The layer is shown.<br />
+**none** - The layer is not shown.<br />
+
+
+
+___
+
+#### Name
+`fillExtrusionOpacity`
+
+#### Description
+The opacity of the entire fill extrusion layer. This is rendered on a perLayer, not perFeature, basis, and dataDriven styling is not available.
+
+#### Type
+`number`
+#### Default Value
+`1`
+
+#### Minimum
+`0`
+
+
+#### Maximum
+`1`
+
+#### Supported Style Functions
+`camera`
+
+___
+
+#### Name
+`fillExtrusionColor`
+
+#### Description
+The base color of the extruded fill. The extrusion's surfaces will be shaded differently based on this color in combination with the root `light` settings. If this color is specified as `rgba` with an alpha component, the alpha component will be ignored; use `fillExtrusionOpacity` to set layer opacity.
+
+#### Type
+`color`
+#### Default Value
+`#000000`
+
+
+#### Disabled By
+`fillExtrusionPattern`
+
+#### Supported Style Functions
+`camera, source, composite`
+
+___
+
+#### Name
+`fillExtrusionTranslate`
+
+#### Description
+The geometry's offset. Values are [x, y] where negatives indicate left and up (on the flat plane), respectively.
+
+#### Type
+`array<number>`
+#### Default Value
+`[0,0]`
+
+#### Units
+`pixels`
+
+
+#### Supported Style Functions
+`camera`
+
+___
+
+#### Name
+`fillExtrusionTranslateAnchor`
+
+#### Description
+Controls the frame of reference for `fillExtrusionTranslate`.
+
+#### Type
+`enum`
+#### Default Value
+`map`
+
+#### Supported Values
+**map** - The fill extrusion is translated relative to the map.<br />
+**viewport** - The fill extrusion is translated relative to the viewport.<br />
+
+
+#### Requires
+`fillExtrusionTranslate`
+
+#### Supported Style Functions
+`camera`
+
+___
+
+#### Name
+`fillExtrusionPattern`
+
+#### Description
+Name of image in sprite to use for drawing images on extruded fills. For seamless patterns, image width and height must be a factor of two (2, 4, 8, ..., 512).
+
+#### Type
+`string`
+
+
+#### Supported Style Functions
+`camera`
+
+___
+
+#### Name
+`fillExtrusionHeight`
+
+#### Description
+The height with which to extrude this layer.
+
+#### Type
+`number`
+#### Default Value
+`0`
+
+#### Units
+`meters`
+
+#### Minimum
+`0`
+
+
+#### Supported Style Functions
+`camera, source, composite`
+
+___
+
+#### Name
+`fillExtrusionBase`
+
+#### Description
+The height with which to extrude the base of this layer. Must be less than or equal to `fillExtrusionHeight`.
+
+#### Type
+`number`
+#### Default Value
+`0`
+
+#### Units
+`meters`
+
+#### Minimum
+`0`
+
+
+#### Requires
+`fillExtrusionHeight`
+
+#### Supported Style Functions
+`camera, source, composite`
+

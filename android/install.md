@@ -1,72 +1,100 @@
-#### Step 1 - NPM Install
+# Android Installation
 
-Run with ```--ignore-scripts``` if you don't want to download the iOS SDK, as well.
+## Gradle Setup
 
-```shell
-npm install --save react-native-mapbox-gl --ignore-scripts
+### project:build.gradle
+
+We need to add some `repositories` in order to get our dependencies.
+
+* `jcenter()`
+* `https://jitpack.io`
+* `http://maven.google.com`
+
 ```
-
-#### Step 2 - Use with Gradle
-
-##### Option A - Automatically
-
-```shell
-react-native link
-```
-
-##### Option B - Manually
-
-Edit the following files:
-
-```gradle
-// file: android/settings.gradle
-...
-
-include ':reactnativemapboxgl'
-project(':reactnativemapboxgl').projectDir = new File(rootProject.projectDir, '../node_modules/react-native-mapbox-gl/android')
-```
-
-```gradle
-// file: android/app/build.gradle
-...
-
-dependencies {
-    ...
-    compile project(':reactnativemapboxgl')
+allprojects {
+    repositories {
+        jcenter()
+        maven { url "$rootDir/../node_modules/react-native/android" }
+        maven { url "https://jitpack.io" }
+        maven { url "https://maven.google.com" }
+    }
 }
 ```
 
-```java
-// file: android/app/src/main/java/com/yourcompany/yourapp/MainApplication.java
-import com.mapbox.reactnativemapboxgl.ReactNativeMapboxGLPackage; // <-- import
-...
-/**
-   * A list of packages used by the app. If the app uses additional views
-   * or modules besides the default ones, add more packages here.
-   */
+### app:build.gradle
+
+Add project under `dependencies`
+
+```
+dependencies {
+    compile project(':mapbox-react-native-mapbox-gl')
+}
+```
+
+Update Android SDK version if you did `react-native init`, we want to be on `26` or higher.
+* `compileSdkVersion 26`
+* `buildToolsVersion "26.0.1"`
+* `targetSdkVersion 26`
+
+### settings.gradle
+
+Include project, so gradle knows where to find the project
+
+```
+include ':mapbox-react-native-mapbox-gl'
+project(':mapbox-react-native-mapbox-gl').projectDir = new File(rootProject.projectDir, '../node_modules/@mapbox/react-native-mapbox-gl/android/rctmgl')
+```
+
+### MainApplication.java
+
+We need to register our package
+
+Add `import com.mapbox.rctmgl.RCTMGLPackage;` as an import statement and
+`new RCTMGLPackage()` in `getPackages()`
+
+Here is an example
+```
+package com.rngltest;
+
+import android.app.Application;
+
+import com.facebook.react.ReactApplication;
+import com.facebook.react.ReactNativeHost;
+import com.facebook.react.ReactPackage;
+import com.facebook.react.shell.MainReactPackage;
+import com.facebook.soloader.SoLoader;
+import com.mapbox.rctmgl.RCTMGLPackage;
+
+import java.util.Arrays;
+import java.util.List;
+
+public class MainApplication extends Application implements ReactApplication {
+
+  private final ReactNativeHost mReactNativeHost = new ReactNativeHost(this) {
+    @Override
+    public boolean getUseDeveloperSupport() {
+      return BuildConfig.DEBUG;
+    }
+
     @Override
     protected List<ReactPackage> getPackages() {
       return Arrays.<ReactPackage>asList(
-        new MainReactPackage(),
-        new ReactNativeMapboxGLPackage());  // <-- Register package here
+          new MainReactPackage(),
+          new RCTMGLPackage()
+      );
     }
+  };
+
+  @Override
+  public ReactNativeHost getReactNativeHost() {
+    return mReactNativeHost;
+  }
+
+  @Override
+  public void onCreate() {
+    super.onCreate();
+    SoLoader.init(this, /* native exopackage */ false);
+  }
+}
 ```
-
-#### Step 3 - Add Mapbox to AndroidManifest.xml
-
-Add the following permissions to the `<manifest>` root node of your `AndroidManifest.xml`:
-
-```xml
-<uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
-<uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
-<uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
-<uses-permission android:name="android.permission.INTERNET" />
-```
-
-Also, add the Mapbox analytics service to the `<application>` node:
-
-```xml
-<service android:name="com.mapbox.mapboxsdk.telemetry.TelemetryService"/>
-```
-
-#### Step 4 - Add to project, [see example](../example.js)
+Checkout the [example application](../example/README.md) to see how it's configured for an example.

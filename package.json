@@ -1,8 +1,9 @@
 {
-  "name": "react-native-mapbox-gl",
+  "name": "@mapbox/react-native-mapbox-gl",
   "description": "A Mapbox GL react native module for creating custom maps",
-  "version": "5.2.1",
+  "version": "6.1.0",
   "author": "Bobby Sudekum",
+  "main": "./javascript/index.js",
   "types": "./index.d.ts",
   "keywords": [
     "gl",
@@ -23,26 +24,75 @@
     "url": "https://github.com/mapbox/react-native-mapbox-gl"
   },
   "scripts": {
-    "preinstall": "node ./scripts/download-mapbox-gl-native-ios-if-on-mac.js 3.3.1",
-    "test": "npm run lint",
-    "lint": "eslint --no-eslintrc -c .eslintrc index.js example.js"
-  },
-  "devDependencies": {
-    "babel-eslint": "^6.1.2",
-    "eslint": "^3.1.1",
-    "eslint-config-strict-react": "^8.0.1",
-    "eslint-plugin-react": "^5.2.2",
-    "eslint-plugin-react-native": "1.1.0"
-  },
-  "dependencies": {
-    "@types/react": "^16.0.3",
-    "@types/react-native": "^0.47.6",
-    "babel-eslint": "^6.1.2",
-    "lodash": "^4.13.1"
+    "fetch:ios:sdk": "node ./scripts/download-mapbox-gl-native-ios-if-on-mac.js 3.7.3",
+    "fetch:style:spec": ". ./scripts/download-style-spec.sh",
+    "generate": "node ./scripts/autogenerate",
+    "preinstall": "npm run fetch:ios:sdk",
+    "test": "npm run lint && npm run unittest",
+    "unittest": "jest --coverage --verbose",
+    "unittest:single": "jest --testNamePattern",
+    "format": "npm run lint -- --fix",
+    "lint": "./node_modules/eslint/bin/eslint.js ./javascript/** ./example/src/** ./__tests__/**",
+    "precommit": "lint-staged"
   },
   "peerDependencies": {
-    "react": ">=15.4.0",
-    "react-native": ">=0.44.3",
-    "prop-types": ">=15.5.8"
+    "prop-types": ">=15.5.8",
+    "react": "^16.0.0-alpha || ^16.0.0-beta || ^16.0.0",
+    "react-native": ">=0.47.1"
+  },
+  "dependencies": {
+    "@turf/helpers": "4.6.0",
+    "@types/react": "^16.0.3",
+    "@types/react-native": "^0.47.6"
+  },
+  "devDependencies": {
+    "babel-eslint": "6.1.2",
+    "babel-jest": "21.0.2",
+    "babel-preset-react-native": "3.0.2",
+    "ejs": "^2.5.7",
+    "ejs-lint": "^0.3.0",
+    "eslint": "^3.19.0",
+    "eslint-config-strict-react": "8.0.1",
+    "eslint-plugin-import": "2.7.0",
+    "eslint-plugin-prettier": "^2.6.0",
+    "eslint-plugin-react": "5.2.2",
+    "husky": "^0.14.3",
+    "jest": "21.0.2",
+    "jest-cli": "^21.2.1",
+    "lint-staged": "^7.0.0",
+    "node-dir": "0.1.17",
+    "prettier": "^1.11.1",
+    "react": "16.0.0-alpha.12",
+    "react-docgen": "2.18.0",
+    "react-native": "0.48.4",
+    "react-test-renderer": "16.0.0-alpha.12"
+  },
+  "jest": {
+    "preset": "react-native",
+    "collectCoverageFrom": [
+      "javascript/**/*.js"
+    ],
+    "setupFiles": [
+      "./__tests__/__mocks__/react-native-mapbox-gl.mock.js",
+      "./__tests__/__mocks__/react-native.mock.js"
+    ],
+    "modulePathIgnorePatterns": [
+      "example",
+      "__tests__/__mocks__"
+    ]
+  },
+  "lint-staged": {
+    "linters": {
+      "*.js": [
+        "eslint ./javascript/**/*.js  ./example/src/**/*.js ./__tests__/**/*.js --fix",
+        "git add"
+      ]
+    },
+    "ignore": ["**/scripts/**/*.js"]
+  },
+  "rnpm": {
+    "android": {
+      "sourceDir": "./android/rctmgl"
+    }
   }
 }

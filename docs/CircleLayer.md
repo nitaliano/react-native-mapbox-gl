@@ -1,0 +1,281 @@
+## <MapboxGL.CircleLayer />
+### CircleLayer is a style layer that renders one or more filled circles on the map.
+
+### props
+| Prop | Type | Default | Required | Description |
+| ---- | :--: | :-----: | :------: | :----------: |
+| id | `string` | `none` | `false` | A string that uniquely identifies the source in the style to which it is added. |
+| sourceID | `string` | `MapboxGL.StyleSource.DefaultSourceID` | `false` | The source from which to obtain the data to style.<br/>If the source has not yet been added to the current style, the behavior is undefined. |
+| sourceLayerID | `string` | `none` | `false` | Identifier of the layer within the source identified by the sourceID property<br/>from which the receiver obtains the data to style. |
+| aboveLayerID | `string` | `none` | `false` | Inserts a layer above aboveLayerID. |
+| belowLayerID | `string` | `none` | `false` | Inserts a layer below belowLayerID |
+| layerIndex | `number` | `none` | `false` | Inserts a layer at a specified index |
+| filter | `array` | `none` | `false` | Filter only the features in the source layer that satisfy a condition that you define |
+| minZoomLevel | `number` | `none` | `false` | The minimum zoom level at which the layer gets parsed and appears. |
+| maxZoomLevel | `number` | `none` | `false` | The maximum zoom level at which the layer gets parsed and appears. |
+| style | `union` | `none` | `false` | Customizable style attributes |
+
+
+### styles
+
+* <a href="#name">visibility</a><br/>
+* <a href="#name-1">circleRadius</a><br/>
+* <a href="#name-2">circleColor</a><br/>
+* <a href="#name-3">circleBlur</a><br/>
+* <a href="#name-4">circleOpacity</a><br/>
+* <a href="#name-5">circleTranslate</a><br/>
+* <a href="#name-6">circleTranslateAnchor</a><br/>
+* <a href="#name-7">circlePitchScale</a><br/>
+* <a href="#name-8">circlePitchAlignment</a><br/>
+* <a href="#name-9">circleStrokeWidth</a><br/>
+* <a href="#name-10">circleStrokeColor</a><br/>
+* <a href="#name-11">circleStrokeOpacity</a><br/>
+
+___
+
+#### Name
+`visibility`
+
+#### Description
+Whether this layer is displayed.
+
+#### Type
+`enum`
+#### Default Value
+`visible`
+
+#### Supported Values
+**visible** - The layer is shown.<br />
+**none** - The layer is not shown.<br />
+
+
+
+___
+
+#### Name
+`circleRadius`
+
+#### Description
+Circle radius.
+
+#### Type
+`number`
+#### Default Value
+`5`
+
+#### Units
+`pixels`
+
+#### Minimum
+`0`
+
+
+#### Supported Style Functions
+`camera, source, composite`
+
+___
+
+#### Name
+`circleColor`
+
+#### Description
+The fill color of the circle.
+
+#### Type
+`color`
+#### Default Value
+`#000000`
+
+
+#### Supported Style Functions
+`camera, source, composite`
+
+___
+
+#### Name
+`circleBlur`
+
+#### Description
+Amount to blur the circle. 1 blurs the circle such that only the centerpoint is full opacity.
+
+#### Type
+`number`
+#### Default Value
+`0`
+
+
+#### Supported Style Functions
+`camera, source, composite`
+
+___
+
+#### Name
+`circleOpacity`
+
+#### Description
+The opacity at which the circle will be drawn.
+
+#### Type
+`number`
+#### Default Value
+`1`
+
+#### Minimum
+`0`
+
+
+#### Maximum
+`1`
+
+#### Supported Style Functions
+`camera, source, composite`
+
+___
+
+#### Name
+`circleTranslate`
+
+#### Description
+The geometry's offset. Values are [x, y] where negatives indicate left and up, respectively.
+
+#### Type
+`array<number>`
+#### Default Value
+`[0,0]`
+
+#### Units
+`pixels`
+
+
+#### Supported Style Functions
+`camera`
+
+___
+
+#### Name
+`circleTranslateAnchor`
+
+#### Description
+Controls the frame of reference for `circleTranslate`.
+
+#### Type
+`enum`
+#### Default Value
+`map`
+
+#### Supported Values
+**map** - The circle is translated relative to the map.<br />
+**viewport** - The circle is translated relative to the viewport.<br />
+
+
+#### Requires
+`circleTranslate`
+
+#### Supported Style Functions
+`camera`
+
+___
+
+#### Name
+`circlePitchScale`
+
+#### Description
+Controls the scaling behavior of the circle when the map is pitched.
+
+#### Type
+`enum`
+#### Default Value
+`map`
+
+#### Supported Values
+**map** - Circles are scaled according to their apparent distance to the camera.<br />
+**viewport** - Circles are not scaled.<br />
+
+
+#### Supported Style Functions
+`camera`
+
+___
+
+#### Name
+`circlePitchAlignment`
+
+#### Description
+Orientation of circle when map is pitched.
+
+#### Type
+`enum`
+#### Default Value
+`viewport`
+
+#### Supported Values
+**map** - The circle is aligned to the plane of the map.<br />
+**viewport** - The circle is aligned to the plane of the viewport.<br />
+
+
+#### Supported Style Functions
+`camera`
+
+___
+
+#### Name
+`circleStrokeWidth`
+
+#### Description
+The width of the circle's stroke. Strokes are placed outside of the `circleRadius`.
+
+#### Type
+`number`
+#### Default Value
+`0`
+
+#### Units
+`pixels`
+
+#### Minimum
+`0`
+
+
+#### Supported Style Functions
+`camera, source, composite`
+
+___
+
+#### Name
+`circleStrokeColor`
+
+#### Description
+The stroke color of the circle.
+
+#### Type
+`color`
+#### Default Value
+`#000000`
+
+
+#### Supported Style Functions
+`camera, source, composite`
+
+___
+
+#### Name
+`circleStrokeOpacity`
+
+#### Description
+The opacity of the circle's stroke.
+
+#### Type
+`number`
+#### Default Value
+`1`
+
+#### Minimum
+`0`
+
+
+#### Maximum
+`1`
+
+#### Supported Style Functions
+`camera, source, composite`
+
