@@ -233,7 +233,7 @@ declare namespace Mapbox {
          */
         setVisibleCoordinateBounds(latitudeSW: boolean, longitudeSW: boolean, latitudeNE: boolean,
                                    longitudeNE: boolean, paddingTop?: boolean, paddingRight?: boolean,
-                                   paddingBottom?: boolean, paddingLeft?: boolean, animated = true): void;
+                                   paddingBottom?: boolean, paddingLeft?: boolean, animated?: boolean): void;
 
         /**
          * Getters
