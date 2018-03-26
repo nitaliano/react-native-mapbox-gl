@@ -252,11 +252,6 @@ declare namespace Mapbox {
         selectAnnotation(annotationId: string, animated?: boolean): void;
 
         deselectAnnotation(): void;
-
-        /**
-         * Only iOS
-         */
-        queryRenderedFeatures(options, callback: () => void): Promise;
     }
     class Annotation extends Component {}
 
