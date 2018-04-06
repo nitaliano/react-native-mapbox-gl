@@ -161,9 +161,7 @@ public abstract class RCTLayer<T extends Layer> extends AbstractMapFeature {
         mFilter = buildFilter(filterList);
 
         if (mLayer != null) {
-            if (mFilter != null) {
-                updateFilter(mFilter);
-            }
+            updateFilter(mFilter);
         }
     }
 
