@@ -29,44 +29,214 @@ declare enum UserLocationVerticalAlignment {
     bottom = 2,
 }
 
-interface MapViewPropTypes extends ViewProperties {
-    initialZoomLevel?: number;
-    initialDirection?: number;
-    initialCenterCoordinate: {
-        latitude: number;
-        longitude: number;
+// https://github.com/mapbox/react-native-mapbox-gl/blob/master/docs/MapView.md#props
+interface MapViewProps extends ViewProperties {
+
+    /** Animates changes between pitch and bearing */
+    animated?: boolean
+
+    /** Initial center coordinate on map [lng, lat] */
+    centerCoordinate?: number[]
+
+    /** Shows the users location on the map */
+    showUserLocation?: boolean
+
+    /** The mode used to track the user location on the map */
+    userTrackingMode?: number; // TODO enum
+
+    /** The vertical alignment of the user location within in map. This is only enabled while tracking the users location. */
+    userLocationVerticalAlignment?: number
+
+    /** The distance from the edges of the map view’s frame to the edges of the map view’s logical viewport. */
+    contentInset?: number | string []
+
+    /** Initial heading on map */
+    heading?: number
+
+    /** Initial pitch on map */
+    pitch?: number
+
+    /** Style URL for map */
+    styleURL: string
+
+    /** Initial zoom level of map */
+    zoomLevel?: number
+
+    /** Min zoom level of map */
+    minZoomLevel?: number
+
+    /** Max zoom level of map */
+    maxZoomLevel?: number
+
+    /** Automatically change the language of the map labels to the system’s preferred language,
+this is not something that can be toggled on/off */
+    localizeLabels?: boolean
+
+    /** Enable/Disable zoom on the map */
+    zoomEnabled?: boolean
+
+    /** Enable/Disable scroll on the map */
+    scrollEnabled?: boolean
+
+    /** Enable/Disable pitch on map */
+    pitchEnabled?: boolean
+
+    /** Enable/Disable rotation on map */
+    rotateEnabled?: boolean
+
+    /** The Mapbox terms of service, which governs the use of Mapbox-hosted vector tiles and styles,
+requires these copyright notices to accompany any map that features Mapbox-designed styles, OpenStreetMap data, or other Mapbox data such as satellite or terrain data.
+If that applies to this map view, do not hide this view or remove any notices from it.
+
+You are additionally required to provide users with the option to disable anonymous usage and location sharing (telemetry).
+If this view is hidden, you must implement this setting elsewhere in your app. See our website for Android and iOS for implementation details.
+
+Enable/Disable attribution on map. For iOS you need to add MGLMapboxMetricsEnabledSettingShownInApp=YES
+to your Info.plist */
+    attributionEnabled?: boolean
+
+    /** Enable/Disable the logo on the map. */
+    logoEnabled?: boolean
+
+    /** Enable/Disable the compass from appearing on the map */
+    compassEnabled?: boolean
+
+    /** [Android only] Enable/Disable use of GLSurfaceView insted of TextureView. */
+    surfaceView?: boolean
+
+    /** Map press listener, gets called when a user presses the map */
+    onPress?: () => void
+
+    /** Map long press listener, gets called when a user long presses the map */
+    onLongPress?: () => void
+
+    /** This event is triggered whenever the currently displayed map region is about to change. */
+    onRegionWillChange?: () => void
+
+    /** This event is triggered whenever the currently displayed map region is changing. */
+    onRegionIsChanging?: () => void
+
+    /** This event is triggered whenever the currently displayed map region finished changing */
+    onRegionDidChange?: () => void
+
+    /** This event is triggered whenever the location engine receives a location update */
+    onUserLocationUpdate?: () => void
+
+    /** This event is triggered when the map is about to start loading a new map style. */
+    onWillStartLoadingMap?: () => void
+
+    /** This is triggered when the map has successfully loaded a new map style. */
+    onDidFinishLoadingMap?: () => void
+
+    /** This event is triggered when the map has failed to load a new map style. */
+    onDidFailLoadingMap?: () => void
+
+    /** This event is triggered when the map will start rendering a frame. */
+    onWillStartRenderingFrame?: () => void
+
+    /** This event is triggered when the map finished rendering a frame. */
+    onDidFinishRenderingFrame?: () => void
+
+    /** This event is triggered when the map fully finished rendering a frame. */
+    onDidFinishRenderingFrameFully?: () => void
+
+    /** This event is triggered when the map will start rendering the map. */
+    onWillStartRenderingMap?: () => void
+
+    /** This event is triggered when the map finished rendering the map. */
+    onDidFinishRenderingMap?: () => void
+
+    /** This event is triggered when the map fully finished rendering the map. */
+    onDidFinishRenderingMapFully?: () => void
+
+    /** This event is triggered when a style has finished loading. */
+    onDidFinishLoadingStyle?: () => void
+
+    /** This event is triggered when the users tracking mode is changed. */
+    onUserTrackingModeChange?: () => void
+
+}
+
+interface Annotations {
+    /**
+     * For type polyline and polygon must be an array of arrays. For type point, array as [latitude longitude]
+     */
+    coordinates: number [] | [number []];
+    type: 'point' | 'polyline' | 'polygon';
+
+    /**
+     * Unique identifier used for adding or selecting an annotation.
+     */
+    id: string;
+
+    /**
+     * Title string. Appears when marker pressed
+     */
+    title?: string;
+    subtitle?: string;
+
+    /**
+     * Only for type=polygon. Controls the opacity of the polygon
+     */
+    fillAlpha?: number;
+
+    /**
+     * Only for type=polygon. CSS color (#rrggbb). Controls the fill color of the polygon
+     */
+    fillColor?: string;
+
+    /**
+     * Only for type=polygon or type=polyline. Controls the opacity of the line
+     */
+    strokeAlpha?: number;
+
+    /**
+     * Only for type=polygon or type=polyline. CSS color (#rrggbb). Controls line color.
+     */
+    strokeColor?: string;
+
+    /**
+     * Only for type=polygon or type=polyline. Controls line width.
+     */
+    strokeWidth?: number;
+
+    /**
+     * Marker image for type=point
+     */
+    annotationImage?: {
+        height: number,
+        width: number,
+        url: string
     };
-    clipsToBounds?: boolean;
-    debugActive?: boolean;
-    rotateEnabled?: boolean;
-    scrollEnabled?: boolean;
-    zoomEnabled?: boolean;
-    minimumZoomLevel?: number;
-    maximumZoomLevel?: number;
-    pitchEnabled?: boolean;
-    annotationsPopUpEnabled?: boolean;
-    showsUserLocation?: boolean;
-    styleURL: string;
-    userTrackingMode?: number;
-    attributionButtonIsHidden?: boolean;
-    logoIsHidden?: boolean;
-    compassIsHidden?: boolean;
-    userLocationVerticalAlignment?: number;
-    contentInset?: number | string [];
-    annotations?: Annotations [];
-    annotationsAreImmutable?: boolean;
-    onRegionDidChange?: () => void;
-    onRegionWillChange?: () => void;
-    onOpenAnnotation?: () => void;
-    onCloseAnnotation?: () => void;
-    onUpdateUserLocation?: () => void;
-    onRightAnnotationTapped?: () => void;
-    onFinishLoadingMap?: () => void;
-    onStartLoadingMap?: () => void;
-    onLocateUserFailed?: () => void;
-    onLongPress?: () => void;
-    onTap?: () => void;
-    onChangeUserTrackingMode?: () => void;
+    /**
+     * iOS only. Clickable image that appears when type=point marker pressed
+     */
+    rightCalloutAccessory?: {
+        height: number,
+        width: number,
+        url: string
+    };
+}
+
+interface CameraPosition {
+    latitude?: number;
+    longitude?: number;
+
+    /**
+     * Can't be specified at the same time with altitude
+     */
+    zoomLevel?: number;
+    direction?: number;
+
+    /**
+     * On iOS, pitch can't be specified at the same time as zoomLevel. altitude must be used instead.
+     */
+    pitch?: number;
+
+    /**
+     * Not available on android, use zoomLevel instead.
+     */
+    altitude?: number;
 }
 
 interface Annotations {
@@ -205,7 +375,7 @@ interface Progress {
 }
 
 declare namespace Mapbox {
-    class MapView extends Component<MapViewPropTypes> {
+    class MapView extends Component<MapViewProps> {
         /**
          * Viewport setters
          */
