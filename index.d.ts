@@ -1,5 +1,3 @@
-// Types for react-native-mapbox-gl v5.2.1
-
 import {Component} from 'react';
 import {
     ViewProperties,
@@ -7,26 +5,30 @@ import {
     EmitterSubscription
 } from 'react-native';
 
+// https://github.com/mapbox/react-native-mapbox-gl/blob/master/android/rctmgl/src/main/java/com/mapbox/rctmgl/modules/RCTMGLModule.java#L57-L64
+// https://github.com/mapbox/mapbox-gl-native/blob/master/platform/android/MapboxGLAndroidSDK/src/main/java/com/mapbox/mapboxsdk/constants/Style.java
 interface MapStyles {
-    streets: string;
-    dark: string;
-    light: string;
-    satellite: string;
-    hybrid: string;
-    emerald: string;
+    Street: string
+    Dark: string
+    Light: string
+    Outdoors: string
+    Satellite: string
+    SatelliteStreet: string
+    TrafficDay: string
+    TrafficNight: string
 }
 
-declare enum UserTrackingMode {
-    none = 0,
-    follow = 1,
-    followWithCourse = 2,
-    followWithHeading = 3,
+interface UserTrackingModes {
+    None: number
+    Follow: number
+    FollowWithCourse: number
+    FollowWithHeading: number
 }
 
-declare enum UserLocationVerticalAlignment {
-    center = 0,
-    top = 1,
-    bottom = 2,
+interface UserLocationVerticalAlignment {
+    Center: number
+    Top: number
+    Bottom: number
 }
 
 // https://github.com/mapbox/react-native-mapbox-gl/blob/master/docs/MapView.md#props
@@ -157,86 +159,31 @@ to your Info.plist */
 
 }
 
-interface Annotations {
-    /**
-     * For type polyline and polygon must be an array of arrays. For type point, array as [latitude longitude]
-     */
-    coordinates: number [] | [number []];
-    type: 'point' | 'polyline' | 'polygon';
+// https://github.com/mapbox/react-native-mapbox-gl/blob/master/docs/VectorSource.md
+interface VectorSourceProps {
 
-    /**
-     * Unique identifier used for adding or selecting an annotation.
-     */
-    id: string;
+    /** A string that uniquely identifies the source. */
+    id?: string
 
-    /**
-     * Title string. Appears when marker pressed
-     */
-    title?: string;
-    subtitle?: string;
+    /** A URL to a TileJSON configuration file describing the source’s contents and other metadata. */
+    url?: string
 
-    /**
-     * Only for type=polygon. Controls the opacity of the polygon
-     */
-    fillAlpha?: number;
+    /** Source press listener, gets called when a user presses one of the children layers only
+if that layer has a higher z-index than another source layers */
+    onPress?: () => void
 
-    /**
-     * Only for type=polygon. CSS color (#rrggbb). Controls the fill color of the polygon
-     */
-    fillColor?: string;
+    // hitbox: Shape // TODO
 
-    /**
-     * Only for type=polygon or type=polyline. Controls the opacity of the line
-     */
-    strokeAlpha?: number;
-
-    /**
-     * Only for type=polygon or type=polyline. CSS color (#rrggbb). Controls line color.
-     */
-    strokeColor?: string;
-
-    /**
-     * Only for type=polygon or type=polyline. Controls line width.
-     */
-    strokeWidth?: number;
-
-    /**
-     * Marker image for type=point
-     */
-    annotationImage?: {
-        height: number,
-        width: number,
-        url: string
-    };
-    /**
-     * iOS only. Clickable image that appears when type=point marker pressed
-     */
-    rightCalloutAccessory?: {
-        height: number,
-        width: number,
-        url: string
-    };
 }
 
-interface CameraPosition {
-    latitude?: number;
-    longitude?: number;
+// https://github.com/mapbox/react-native-mapbox-gl/blob/master/docs/ShapeSource.md
+interface ShapeSourceProps {
+    // TODO
+}
 
-    /**
-     * Can't be specified at the same time with altitude
-     */
-    zoomLevel?: number;
-    direction?: number;
-
-    /**
-     * On iOS, pitch can't be specified at the same time as zoomLevel. altitude must be used instead.
-     */
-    pitch?: number;
-
-    /**
-     * Not available on android, use zoomLevel instead.
-     */
-    altitude?: number;
+// https://github.com/mapbox/react-native-mapbox-gl/blob/master/docs/RasterSource.md
+interface RasterSourceProps {
+    // TODO
 }
 
 interface Annotations {
@@ -374,8 +321,8 @@ interface Progress {
 
 }
 
-declare namespace Mapbox {
-    class MapView extends Component<MapViewProps> {
+namespace Mapbox {
+    class MapView extends Component<MapViewProps, Source[]> {
         /**
          * Viewport setters
          */
@@ -423,12 +370,50 @@ declare namespace Mapbox {
 
         deselectAnnotation(): void;
     }
+
+    type Source = VectorSource | ShapeSource | RasterSource
+
+    class VectorSource extends Component<VectorSourceProps> {}
+
+    class ShapeSource extends Component<ShapeSourceProps> {}
+
+    class RasterSource extends Component<RasterSourceProps> {}
+
     class Annotation extends Component {}
 
-    const mapStyles: MapStyles;
-    const userTrackingMode: UserTrackingMode;
-    const userLocationVerticalAlignment: UserLocationVerticalAlignment;
-    const unknownResourceCount: number;
+    // Constants
+    // https://github.com/mapbox/react-native-mapbox-gl/blob/master/android/rctmgl/src/main/java/com/mapbox/rctmgl/modules/RCTMGLModule.java#L240-L270
+    const StyleURL: any // TODO
+    const EventTypes: any // TODO
+    const UserTrackingModes: UserTrackingModes
+    const UserLocationVerticalAlignment: UserLocationVerticalAlignment
+    const CameraModes: any // TODO
+    const StyleSource: any // TODO
+    const InterpolationMode: any // TODO
+    const LineJoin: any // TODO
+    const LineCap: any // TODO
+    const LineTranslateAnchor: any // TODO
+    const CirclePitchScale: any // TODO
+    const CircleTranslateAnchor: any // TODO
+    const CirclePitchAlignment: any // TODO
+    const FillExtrusionTranslateAnchor: any // TODO
+    const FillTranslateAnchor: any // TODO
+    const IconRotationAlignment: any // TODO
+    const IconTextFit: any // TODO
+    const IconTranslateAnchor: any // TODO
+    const SymbolPlacement: any // TODO
+    const IconAnchor: any // TODO
+    const TextAnchor: any // TODO
+    const TextJustify: any // TODO
+    const IconPitchAlignment: any // TODO
+    const TextPitchAlignment: any // TODO
+    const TextRotationAlignment: any // TODO
+    const TextTransform: any // TODO
+    const TextTranslateAnchor: any // TODO
+    const LightAnchor: any // TODO
+    const OfflinePackDownloadState: any // TODO
+    const OfflineCallbackName: any // TODO
+
 
     function getMetricsEnabled(): boolean;
     function setMetricsEnabled(enabled: boolean): void;
@@ -447,6 +432,16 @@ declare namespace Mapbox {
     function addOfflineMaxAllowedTilesListener(handler: () => void): EmitterSubscription;
     function addOfflineErrorListener(handler: () => void): EmitterSubscription;
     function setOfflinePackProgressThrottleInterval(milis: number): void;
+
+    // TODO undocumented
+
+    /** Request location permissions if not set. Returns if they were granted. */
+    function requestAndroidLocationPermissions(): boolean
+
+    // https://github.com/mapbox/react-native-mapbox-gl/issues/1000
+    function setTelemetryEnabled(enabled: boolean): void
+    function getTelemetryEnabled(): boolean
+    
 }
 
 export default Mapbox;
