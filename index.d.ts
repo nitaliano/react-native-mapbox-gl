@@ -1,9 +1,5 @@
-import {Component} from 'react';
-import {
-    ViewProperties,
-    NativeModules,
-    EmitterSubscription
-} from 'react-native';
+import { Component } from 'react';
+import { EmitterSubscription, StyleProp, ViewProperties } from 'react-native';
 
 // https://github.com/mapbox/react-native-mapbox-gl/blob/master/android/rctmgl/src/main/java/com/mapbox/rctmgl/modules/RCTMGLModule.java#L57-L64
 // https://github.com/mapbox/mapbox-gl-native/blob/master/platform/android/MapboxGLAndroidSDK/src/main/java/com/mapbox/mapboxsdk/constants/Style.java
@@ -29,6 +25,145 @@ interface UserLocationVerticalAlignment {
     Center: number
     Top: number
     Bottom: number
+}
+
+// https://github.com/mapbox/react-native-mapbox-gl#layers
+// https://github.com/mapbox/react-native-mapbox-gl/blob/master/android/rctmgl/src/main/java/com/mapbox/rctmgl/components/styles/layers/RCTLayer.java
+interface LayerProps {
+
+    /** A string that uniquely identifies the source in the style to which it is added. */
+    id?: string
+    
+    /** The source from which to obtain the data to style. If the source has not yet been added to the current style, the behavior is undefined. */
+    sourceID?: string
+
+    /** Identifier of the layer within the source identified by the sourceID property from which the receiver obtains the data to style. */
+    sourceLayerID?: string
+
+    /** Inserts a layer above aboveLayerID. */
+    aboveLayerID?: string
+
+    /** Inserts a layer below belowLayerID */
+    beloyLayerID?: string
+
+    /** Inserts a layer at a specified index */
+    layerIndex?: number
+
+    /** Filter only the features in the source layer that satisfy a condition that you define */
+    filter?: string[] // TODO
+
+    /** The minimum zoom level at which the layer gets parsed and appears. */
+    minZoomLevel?: number
+
+    /** The maximum zoom level at which the layer gets parsed and appears. */
+    maxZoomLevel?: number
+}
+
+interface BackgroundLayerProps extends LayerProps {
+    style?: StyleProp<BackgroundLayerStyle>
+}
+
+interface CircleLayerProps extends LayerProps {
+    style?: StyleProp<CircleLayerStyle>
+}
+
+interface FillExtrusionLayerProps extends LayerProps {
+    style?: StyleProp<FillExtrusionLayerStyle>
+}
+
+interface FillLayerProps extends LayerProps {
+    style?: StyleProp<FillLayerStyle>
+}
+
+interface LineLayerProps extends LayerProps {
+    style?: StyleProp<LineLayerStyle>
+}
+
+interface RasterLayerProps extends LayerProps {
+    style?: StyleProp<RasterLayerStyle>
+}
+
+interface SymbolLayerProps extends LayerProps {
+    style?: StyleProp<SymbolLayerStyle>
+}
+
+// Styles
+// https://github.com/mapbox/react-native-mapbox-gl/blob/master/docs/LineLayer.md#styles
+
+
+interface BackgroundLayerStyle extends LineLayerStyle {} // TODO
+
+interface CircleLayerStyle extends LineLayerStyle {} // TODO
+
+interface FillExtrusionLayerStyle extends LineLayerStyle {} // TODO
+
+interface FillLayerStyle extends LineLayerStyle {} // TODO
+
+interface LineLayerStyle extends LineCapStyle, LineJoinStyle, LineMiterLimitStyle, LineRoundLimitStyle, VisibilityStyle, LineOpacityStyle, LineColorStyle {}
+
+interface RasterLayerStyle extends LineLayerStyle {} // TODO
+
+interface SymbolLayerStyle extends LineLayerStyle {} // TODO
+
+
+interface LineCapStyle {
+    lineCap?: "butt" | "round" | "square"
+}
+
+interface LineJoinStyle {
+    lineJoin?: "bevel" | "round" | "miter"
+}
+
+interface LineMiterLimitStyle {
+    // TODO
+}
+
+interface LineRoundLimitStyle {
+    // TODO
+}
+
+interface VisibilityStyle {
+    visibility?: "visible" | "none"
+}
+
+interface LineOpacityStyle {
+    // TODO
+}
+
+interface LineColorStyle {
+    // TODO
+}
+
+interface LineTranslateStyle {
+    // TODO
+}
+
+interface LineTranslateAnchorStyle {
+    // TODO
+}
+
+interface LineWidthStyle {
+    // TODO
+}
+
+interface LineGapWidthStyle {
+    // TODO
+}
+
+interface LineOffsetStyle {
+    // TODO
+}
+
+interface LineBlueStyle {
+    // TODO
+}
+
+interface LineDasharrayStyle {
+    // TODO
+}
+
+interface LinePatternStyle {
+    // TODO
 }
 
 // https://github.com/mapbox/react-native-mapbox-gl/blob/master/docs/MapView.md#props
@@ -156,7 +291,6 @@ to your Info.plist */
 
     /** This event is triggered when the users tracking mode is changed. */
     onUserTrackingModeChange?: () => void
-
 }
 
 // https://github.com/mapbox/react-native-mapbox-gl/blob/master/docs/VectorSource.md
@@ -173,7 +307,6 @@ if that layer has a higher z-index than another source layers */
     onPress?: () => void
 
     // hitbox: Shape // TODO
-
 }
 
 // https://github.com/mapbox/react-native-mapbox-gl/blob/master/docs/ShapeSource.md
@@ -318,7 +451,6 @@ interface Progress {
      * The estimated maximum number of total tiles in this pack
      */
     maximumResourcesExpected: number
-
 }
 
 namespace Mapbox {
@@ -373,11 +505,27 @@ namespace Mapbox {
 
     type Source = VectorSource | ShapeSource | RasterSource
 
-    class VectorSource extends Component<VectorSourceProps> {}
+    class VectorSource extends Component<VectorSourceProps, Layer> {}
 
-    class ShapeSource extends Component<ShapeSourceProps> {}
+    class ShapeSource extends Component<ShapeSourceProps, Layer> {}
 
-    class RasterSource extends Component<RasterSourceProps> {}
+    class RasterSource extends Component<RasterSourceProps, Layer> {}
+
+    type Layer = BackgroundLayer | CircleLayer | FillExtrusionLayer | FillLayer | LineLayer | RasterLayer | SymbolLayer
+
+    class BackgroundLayer extends Component<BackgroundLayerProps> {}
+
+    class CircleLayer extends Component<CircleLayerProps> {}
+
+    class FillExtrusionLayer extends Component<FillExtrusionLayerProps> {}
+
+    class FillLayer extends Component<FillLayerProps> {}
+
+    class LineLayer extends Component<LineLayerProps> {}
+
+    class RasterLayer extends Component<RasterLayerProps> {}
+
+    class SymbolLayer extends Component<SymbolLayerProps> {}
 
     class Annotation extends Component {}
 
@@ -441,7 +589,6 @@ namespace Mapbox {
     // https://github.com/mapbox/react-native-mapbox-gl/issues/1000
     function setTelemetryEnabled(enabled: boolean): void
     function getTelemetryEnabled(): boolean
-    
 }
 
-export default Mapbox;
+export default Mapbox
