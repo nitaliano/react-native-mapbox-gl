@@ -113,6 +113,10 @@ public class RCTMGLPointAnnotation extends AbstractMapFeature {
         return mCallout;
     }
 
+    public boolean hasInfoWindow() {
+        return (mTitle != null || mSnippet != null || mCallout != null);
+    }
+
     public void setTitle(String title) {
         mTitle = title;
 
