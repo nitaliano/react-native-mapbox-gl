@@ -37,6 +37,7 @@ import com.mapbox.mapboxsdk.maps.MapboxMap;
 import com.mapbox.mapboxsdk.maps.MapboxMapOptions;
 import com.mapbox.mapboxsdk.maps.OnMapReadyCallback;
 import com.mapbox.mapboxsdk.maps.UiSettings;
+import com.mapbox.mapboxsdk.plugins.localization.LocalizationPlugin;
 import com.mapbox.mapboxsdk.plugins.locationlayer.LocationLayerMode;
 import com.mapbox.mapboxsdk.plugins.locationlayer.LocationLayerPlugin;
 import com.mapbox.mapboxsdk.storage.FileSource;
@@ -128,6 +129,7 @@ public class RCTMGLMapView extends MapView implements
     private Boolean mCompassEnabled;
     private Boolean mZoomEnabled;
     private boolean mShowUserLocation;
+    private boolean mLocationCallbacksEnabled;
 
     private long mActiveMarkerID = -1;
     private int mUserTrackingMode;
@@ -149,6 +151,8 @@ public class RCTMGLMapView extends MapView implements
     private LocationManager.OnUserLocationChange mLocationChangeListener = new LocationManager.OnUserLocationChange() {
         @Override
         public void onLocationChange(Location nextLocation) {
+            sendUserLocationUpdateEvent(nextLocation);
+
             if (mMap == null || mLocationLayer == null || !mShowUserLocation) {
                 return;
             }
@@ -160,7 +164,6 @@ public class RCTMGLMapView extends MapView implements
             if (mUserTrackingState == UserTrackingState.POSSIBLE || distToNextLocation > 0.0f) {
                 updateUserLocation(true);
             }
-            sendUserLocationUpdateEvent(nextLocation);
         }
     };
 
@@ -367,7 +370,7 @@ public class RCTMGLMapView extends MapView implements
         updateUISettings();
         setMinMaxZoomLevels();
 
-        if (mShowUserLocation) {
+        if (mShowUserLocation || mLocationCallbacksEnabled) {
             enableLocation();
         }
 
@@ -823,25 +826,13 @@ public class RCTMGLMapView extends MapView implements
 
     public void setReactShowUserLocation(boolean showUserLocation) {
         mShowUserLocation = showUserLocation;
+        reconcileLocationManager();
+    }
 
-        if (mMap != null) {
-            if (mLocationManger.isActive() && !mShowUserLocation) {
-                mLocationManger.disable();
 
-                if (mLocationLayer != null) {
-                   int trackingMode = mUserLocation.getTrackingMode();
-
-                   if (trackingMode != UserTrackingMode.NONE) {
-                       mUserLocation.setTrackingMode(UserTrackingMode.NONE);
-                       updateUserTrackingMode(UserTrackingMode.NONE);
-                   }
-
-                   updateLocationLayer();
-                }
-            } else {
-                enableLocation();
-            }
-        }
+    public void setReactLocationCallbacksEnabled(boolean locationCallbacksEnabled) {
+        mLocationCallbacksEnabled = locationCallbacksEnabled;
+        reconcileLocationManager();
     }
 
     public void setReactUserTrackingMode(int userTrackingMode) {
@@ -1046,6 +1037,29 @@ public class RCTMGLMapView extends MapView implements
         return mDestroyed;
     }
 
+
+    void reconcileLocationManager(){
+
+        if (mMap != null) {
+            if (mLocationManger.isActive() && (!mShowUserLocation && !mLocationCallbacksEnabled)) {
+                mLocationManger.disable();
+
+                if (mLocationLayer != null) {
+                    int trackingMode = mUserLocation.getTrackingMode();
+
+                    if (trackingMode != UserTrackingMode.NONE) {
+                        mUserLocation.setTrackingMode(UserTrackingMode.NONE);
+                        updateUserTrackingMode(UserTrackingMode.NONE);
+                    }
+
+                    updateLocationLayer();
+                }
+            } else {
+                enableLocation();
+            }
+        }
+    }
+
     private void updateCameraPositionIfNeeded(boolean shouldUpdateTarget) {
         if (mMap != null) {
             CameraPosition prevPosition = mMap.getCameraPosition();
@@ -1164,7 +1178,7 @@ public class RCTMGLMapView extends MapView implements
         mLifeCycleListener = new LifecycleEventListener() {
             @Override
             public void onHostResume() {
-                if (mShowUserLocation && !mLocationManger.isActive()) {
+                if ((mShowUserLocation || mLocationCallbacksEnabled) && !mLocationManger.isActive()) {
                     mLocationManger.enable();
                 }
                 onResume();

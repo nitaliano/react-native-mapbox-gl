@@ -205,6 +205,11 @@ public class RCTMGLMapViewManager extends AbstractEventEmitter<RCTMGLMapView> {
         mapView.setReactShowUserLocation(showUserLocation);
     }
 
+    @ReactProp(name="enableLocationCallback")
+    public void setLocationCallbackEnabled(RCTMGLMapView mapView, boolean locationCallbackEnabled) {
+        mapView.setReactLocationCallbacksEnabled(locationCallbackEnabled);
+    }
+
     @ReactProp(name="userTrackingMode")
     public void setUserTrackingMode(RCTMGLMapView mapView, int userTrackingMode) {
         mapView.setReactUserTrackingMode(userTrackingMode);
