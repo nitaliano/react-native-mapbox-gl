@@ -54,6 +54,11 @@ class MapView extends React.Component {
     showUserLocation: PropTypes.bool,
 
     /**
+     * keeps the location engine alive to keep receiving location updates via onLo
+     */
+    enableLocationCallback: PropTypes.bool,
+
+    /**
      * The mode used to track the user location on the map
      */
     userTrackingMode: PropTypes.number,
