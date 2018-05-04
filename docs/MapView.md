@@ -17,6 +17,7 @@
 | zoomLevel | `number` | `16` | `false` | Initial zoom level of map |
 | minZoomLevel | `number` | `none` | `false` | Min zoom level of map |
 | maxZoomLevel | `number` | `none` | `false` | Max zoom level of map |
+| localizeLabels | `bool` | `false` | `false` | Automatically change the language of the map labels to the system’s preferred language,<br/>this is not something that can be toggled on/off |
 | zoomEnabled | `bool` | `none` | `false` | Enable/Disable zoom on the map |
 | scrollEnabled | `bool` | `true` | `false` | Enable/Disable scroll on the map |
 | pitchEnabled | `bool` | `true` | `false` | Enable/Disable pitch on map |
@@ -24,7 +25,7 @@
 | attributionEnabled | `bool` | `true` | `false` | The Mapbox terms of service, which governs the use of Mapbox-hosted vector tiles and styles,<br/>[requires](https://www.mapbox.com/help/how-attribution-works/) these copyright notices to accompany any map that features Mapbox-designed styles, OpenStreetMap data, or other Mapbox data such as satellite or terrain data.<br/>If that applies to this map view, do not hide this view or remove any notices from it.<br/><br/>You are additionally [required](https://www.mapbox.com/help/how-mobile-apps-work/#telemetry) to provide users with the option to disable anonymous usage and location sharing (telemetry).<br/>If this view is hidden, you must implement this setting elsewhere in your app. See our website for [Android](https://www.mapbox.com/android-docs/map-sdk/overview/#telemetry-opt-out) and [iOS](https://www.mapbox.com/ios-sdk/#telemetry_opt_out) for implementation details.<br/><br/>Enable/Disable attribution on map. For iOS you need to add MGLMapboxMetricsEnabledSettingShownInApp=YES<br/>to your Info.plist |
 | logoEnabled | `bool` | `true` | `false` | Enable/Disable the logo on the map. |
 | compassEnabled | `bool` | `none` | `false` | Enable/Disable the compass from appearing on the map |
-| textureMode | `bool` | `false` | `false` | Enable/Disable TextureMode insted of SurfaceView |
+| surfaceView | `bool` | `false` | `false` | [Android only] Enable/Disable use of GLSurfaceView insted of TextureView. |
 | onPress | `func` | `none` | `false` | Map press listener, gets called when a user presses the map |
 | onLongPress | `func` | `none` | `false` | Map long press listener, gets called when a user long presses the map |
 | onRegionWillChange | `func` | `none` | `false` | This event is triggered whenever the currently displayed map region is about to change. |
@@ -58,6 +59,22 @@ Converts a geographic coordinate to a point in the given view’s coordinate sys
 ```javascript
 const pointInView = await this._map.getPointInView([-37.817070, 144.949901]);
 ```
+
+#### getCoordinateFromView(point)
+
+Converts a point in the given view’s coordinate system to a geographic coordinate.
+
+##### arguments
+| Name | Type | Required | Description  |
+| ---- | :--: | :------: | :----------: |
+| `point` | `Array` | `Yes` | A point expressed in the given view’s coordinate system. |
+
+
+
+```javascript
+const coordinate = await this._map.getCoordinateFromView([100, 100]);
+```
+
 
 
 #### getVisibleBounds()

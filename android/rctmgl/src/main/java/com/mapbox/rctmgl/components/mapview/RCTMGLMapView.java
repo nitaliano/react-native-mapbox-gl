@@ -1,6 +1,8 @@
 package com.mapbox.rctmgl.components.mapview;
 
+import android.app.Activity;
 import android.content.Context;
+import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.PointF;
 import android.graphics.RectF;
@@ -13,6 +15,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.view.MotionEvent;
 
+import com.facebook.react.bridge.ActivityEventListener;
 import com.facebook.react.bridge.LifecycleEventListener;
 import com.facebook.react.bridge.ReactContext;
 import com.facebook.react.bridge.ReadableArray;
@@ -34,7 +37,9 @@ import com.mapbox.mapboxsdk.maps.MapboxMap;
 import com.mapbox.mapboxsdk.maps.MapboxMapOptions;
 import com.mapbox.mapboxsdk.maps.OnMapReadyCallback;
 import com.mapbox.mapboxsdk.maps.UiSettings;
+import com.mapbox.mapboxsdk.plugins.locationlayer.LocationLayerMode;
 import com.mapbox.mapboxsdk.plugins.locationlayer.LocationLayerPlugin;
+import com.mapbox.mapboxsdk.storage.FileSource;
 import com.mapbox.mapboxsdk.style.layers.Layer;
 import com.mapbox.rctmgl.components.AbstractMapFeature;
 import com.mapbox.rctmgl.components.annotation.RCTMGLCallout;
@@ -71,6 +76,7 @@ import com.mapbox.services.commons.geojson.Point;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 
 import javax.annotation.Nullable;
@@ -90,6 +96,9 @@ public class RCTMGLMapView extends MapView implements
     private RCTMGLMapViewManager mManager;
     private Context mContext;
     private Handler mHandler;
+    private LifecycleEventListener mLifeCycleListener;
+    private boolean mPaused;
+    private boolean mDestroyed;
 
     private List<AbstractMapFeature> mFeatures;
     private List<AbstractMapFeature> mQueuedFeatures;
@@ -102,12 +111,15 @@ public class RCTMGLMapView extends MapView implements
 
     private MapboxMap mMap;
     private LocationManager mLocationManger;
-    private LocationLayerPlugin mLocationLayer;
     private UserLocation mUserLocation;
+
+    private LocationLayerPlugin mLocationLayer;
+    private LocalizationPlugin mLocalizationPlugin;
 
     private String mStyleURL;
 
     private boolean mAnimated;
+    private boolean mLocalizeLabels;
     private Boolean mScrollEnabled;
     private Boolean mPitchEnabled;
     private Boolean mRotateEnabled;
@@ -132,6 +144,8 @@ public class RCTMGLMapView extends MapView implements
     private ReadableArray mInsets;
     private Point mCenterCoordinate;
 
+    private int mChangeDelimiterSuppressionDepth;
+
     private LocationManager.OnUserLocationChange mLocationChangeListener = new LocationManager.OnUserLocationChange() {
         @Override
         public void onLocationChange(Location nextLocation) {
@@ -153,10 +167,13 @@ public class RCTMGLMapView extends MapView implements
     public RCTMGLMapView(Context context, RCTMGLMapViewManager manager, MapboxMapOptions options) {
         super(context, options);
 
-        super.onCreate(null);
-        super.getMapAsync(this);
-
         mContext = context;
+
+        onCreate(null);
+        onStart();
+        onResume();
+        getMapAsync(this);
+
         mManager = manager;
         mCameraUpdateQueue = new CameraUpdateQueue();
 
@@ -172,6 +189,26 @@ public class RCTMGLMapView extends MapView implements
         mHandler = new Handler();
 
         setLifecycleListeners();
+
+        addOnMapChangedListener(this);
+    }
+
+    @Override
+    public void onResume() {
+        super.onResume();
+        mPaused = false;
+    }
+
+    @Override
+    public void onPause() {
+        super.onPause();
+        mPaused = true;
+    }
+
+    @Override
+    public void onDestroy() {
+        super.onDestroy();
+        mDestroyed = true;
     }
 
     @Override
@@ -255,11 +292,26 @@ public class RCTMGLMapView extends MapView implements
         return mFeatures.get(i);
     }
 
-    public void dispose() {
+    public synchronized void dispose() {
+        if (mDestroyed) {
+            return;
+        }
+
+        ReactContext reactContext = (ReactContext) mContext;
+        reactContext.removeLifecycleEventListener(mLifeCycleListener);
+
         if(mLocationLayer != null){
             mLocationLayer.onStop();
         }
+
         mLocationManger.dispose();
+
+        if (!mPaused) {
+            onPause();
+        }
+
+        onStop();
+        onDestroy();
     }
 
     public RCTMGLPointAnnotation getPointAnnotationByID(String annotationID) {
@@ -310,8 +362,6 @@ public class RCTMGLMapView extends MapView implements
         mMap.setOnMapClickListener(this);
         mMap.setOnMapLongClickListener(this);
 
-        addOnMapChangedListener(this);
-
         // in case props were set before the map was ready lets set them
         updateInsets();
         updateUISettings();
@@ -355,6 +405,7 @@ public class RCTMGLMapView extends MapView implements
         final RCTMGLMapView self = this;
         mMap.addOnCameraIdleListener(new MapboxMap.OnCameraIdleListener() {
             long lastTimestamp = System.currentTimeMillis();
+            boolean lastAnimated = false; // Workaround for the event called twice
 
             @Override
             public void onCameraIdle() {
@@ -363,12 +414,14 @@ public class RCTMGLMapView extends MapView implements
                 }
 
                 long curTimestamp = System.currentTimeMillis();
-                if (curTimestamp - lastTimestamp < 500) {
+                boolean curAnimated = mCameraChangeTracker.isAnimated();
+                if (curTimestamp - lastTimestamp < 500 && curAnimated == lastAnimated) {
                     return;
                 }
 
-                sendRegionChangeEvent(mCameraChangeTracker.isAnimated());
+                sendRegionChangeEvent(curAnimated);
                 lastTimestamp = curTimestamp;
+                lastAnimated = curAnimated;
             }
         });
 
@@ -420,6 +473,16 @@ public class RCTMGLMapView extends MapView implements
                 lastMapRotation = currentMapRotation;
             }
         });
+
+        mLocalizationPlugin = new LocalizationPlugin(this, mMap);
+        if (mLocalizeLabels) {
+            try {
+                mLocalizationPlugin.matchMapLanguageWithDeviceDefault();
+            } catch (Exception e) {
+                final String localeString = Locale.getDefault().toString();
+                Log.w(LOG_TAG, String.format("Could not find matching locale for %s", localeString));
+            }
+        }
     }
 
     public void reflow() {
@@ -438,11 +501,34 @@ public class RCTMGLMapView extends MapView implements
     public boolean onTouchEvent(MotionEvent ev) {
         boolean result = super.onTouchEvent(ev);
 
+        int eventAction = ev.getAction();
+
+        if (eventAction == MotionEvent.ACTION_DOWN) {
+            mChangeDelimiterSuppressionDepth = 0;
+        } else if (eventAction == MotionEvent.ACTION_MOVE) {
+            mChangeDelimiterSuppressionDepth++;
+        } else if (eventAction == MotionEvent.ACTION_CANCEL) {
+            mChangeDelimiterSuppressionDepth = 0;
+        } else if (eventAction == MotionEvent.ACTION_UP) {
+            mChangeDelimiterSuppressionDepth = 0;
+        }
+
         if (result) {
             requestDisallowInterceptTouchEvent(true);
         }
 
         return result;
+    }
+
+    private boolean isSuppressingChangeDelimiters() {
+        return mChangeDelimiterSuppressionDepth > 2;
+    }
+
+    @Override
+    protected void onLayout(boolean changed, int left, int top, int right, int bottom) {
+        if (!mPaused) {
+            super.onLayout(changed, left, top, right, bottom);
+        }
     }
 
     @Override
@@ -576,10 +662,14 @@ public class RCTMGLMapView extends MapView implements
 
         switch (changed) {
             case REGION_WILL_CHANGE:
-                event = new MapChangeEvent(this, makeRegionPayload(false), EventTypes.REGION_WILL_CHANGE);
+                if (!isSuppressingChangeDelimiters()) {
+                    event = new MapChangeEvent(this, makeRegionPayload(false), EventTypes.REGION_WILL_CHANGE);
+                }
                 break;
             case REGION_WILL_CHANGE_ANIMATED:
-                event = new MapChangeEvent(this, makeRegionPayload(true), EventTypes.REGION_WILL_CHANGE);
+                if (!isSuppressingChangeDelimiters()) {
+                    event = new MapChangeEvent(this, makeRegionPayload(true), EventTypes.REGION_WILL_CHANGE);
+                }
                 break;
             case REGION_IS_CHANGING:
                 event = new MapChangeEvent(this, EventTypes.REGION_IS_CHANGING);
@@ -660,6 +750,10 @@ public class RCTMGLMapView extends MapView implements
     public void setReactContentInset(ReadableArray array) {
         mInsets = array;
         updateInsets();
+    }
+
+    public void setLocalizeLabels(boolean localizeLabels) {
+        mLocalizeLabels = localizeLabels;
     }
 
     public void setReactZoomEnabled(boolean zoomEnabled) {
@@ -892,6 +986,21 @@ public class RCTMGLMapView extends MapView implements
         mManager.handleEvent(event);
     }
 
+    public void getCoordinateFromView(String callbackID, PointF pointInView) {
+        AndroidCallbackEvent event = new AndroidCallbackEvent(this, callbackID, EventKeys.MAP_ANDROID_CALLBACK);
+
+        LatLng mapCoordinate = mMap.getProjection().fromScreenLocation(pointInView);
+        WritableMap payload = new WritableNativeMap();
+
+        WritableArray array = new WritableNativeArray();
+        array.pushDouble(mapCoordinate.getLongitude());
+        array.pushDouble(mapCoordinate.getLatitude());
+        payload.putArray("coordinateFromView", array);
+        event.setPayload(payload);
+
+        mManager.handleEvent(event);
+    }
+
     public void takeSnap(final String callbackID, final boolean writeToDisk) {
         final AndroidCallbackEvent event = new AndroidCallbackEvent(this, callbackID, EventKeys.MAP_ANDROID_CALLBACK);
 
@@ -931,6 +1040,10 @@ public class RCTMGLMapView extends MapView implements
         // very important, this will make sure that mapbox-gl-native initializes the gl surface
         // https://github.com/mapbox/react-native-mapbox-gl/issues/955
         getViewTreeObserver().dispatchOnGlobalLayout();
+    }
+
+    public boolean isDestroyed(){
+        return mDestroyed;
     }
 
     private void updateCameraPositionIfNeeded(boolean shouldUpdateTarget) {
@@ -1047,7 +1160,8 @@ public class RCTMGLMapView extends MapView implements
 
     private void setLifecycleListeners() {
         final ReactContext reactContext = (ReactContext) mContext;
-        reactContext.addLifecycleEventListener(new LifecycleEventListener() {
+
+        mLifeCycleListener = new LifecycleEventListener() {
             @Override
             public void onHostResume() {
                 if (mShowUserLocation && !mLocationManger.isActive()) {
@@ -1067,10 +1181,10 @@ public class RCTMGLMapView extends MapView implements
             @Override
             public void onHostDestroy() {
                 dispose();
-                onDestroy();
-                reactContext.removeLifecycleEventListener(this);
             }
-        });
+        };
+
+        reactContext.addLifecycleEventListener(mLifeCycleListener);
     }
 
     private void enableLocation() {

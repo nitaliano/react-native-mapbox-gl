@@ -22,6 +22,7 @@ import com.mapbox.rctmgl.components.styles.sources.RCTSource;
 import com.mapbox.rctmgl.events.constants.EventTypes;
 import com.mapbox.rctmgl.location.UserLocationVerticalAlignment;
 import com.mapbox.rctmgl.location.UserTrackingMode;
+import com.mapbox.services.android.telemetry.MapboxTelemetry;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -66,7 +67,7 @@ public class RCTMGLModule extends ReactContextBaseJavaModule {
         Map<String, String> eventTypes = new HashMap<>();
         eventTypes.put("MapClick", EventTypes.MAP_CLICK);
         eventTypes.put("MapLongClick", EventTypes.MAP_LONG_CLICK);
-        eventTypes.put("RegionWilChange", EventTypes.REGION_WILL_CHANGE);
+        eventTypes.put("RegionWillChange", EventTypes.REGION_WILL_CHANGE);
         eventTypes.put("RegionIsChanging", EventTypes.REGION_IS_CHANGING);
         eventTypes.put("RegionDidChange", EventTypes.REGION_DID_CHANGE);
         eventTypes.put("UserLocationUpdated", EventTypes.USER_LOCATION_UPDATED);
@@ -285,5 +286,20 @@ public class RCTMGLModule extends ReactContextBaseJavaModule {
         WritableMap map = Arguments.createMap();
         map.putString("accessToken", Mapbox.getAccessToken());
         promise.resolve(map);
+    }
+
+    @ReactMethod
+    public void setTelemetryEnabled(final boolean telemetryEnabled) {
+        mReactContext.runOnUiQueueThread(new Runnable() {
+            @Override
+            public void run() {
+                MapboxTelemetry.getInstance().setTelemetryEnabled(telemetryEnabled);
+            }
+        });
+    }
+
+    @ReactMethod
+    public void isTelemetryEnabled(Promise promise) {
+        promise.resolve(MapboxTelemetry.getInstance().isTelemetryEnabled());
     }
 }

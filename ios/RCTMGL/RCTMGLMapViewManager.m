@@ -68,6 +68,7 @@ RCT_EXPORT_MODULE(RCTMGLMapView)
 #pragma mark - React View Props
 
 RCT_EXPORT_VIEW_PROPERTY(animated, BOOL)
+RCT_REMAP_VIEW_PROPERTY(localizeLabels, reactLocalizeLabels, BOOL)
 RCT_REMAP_VIEW_PROPERTY(scrollEnabled, reactScrollEnabled, BOOL)
 RCT_REMAP_VIEW_PROPERTY(pitchEnabled, reactPitchEnabled, BOOL)
 RCT_REMAP_VIEW_PROPERTY(rotateEnabled, reactRotateEnabled, BOOL)
@@ -118,6 +119,29 @@ RCT_EXPORT_METHOD(getPointInView:(nonnull NSNumber*)reactTag
         resolve(@{ @"pointInView": @[@(pointInView.x), @(pointInView.y)] });
     }];
 }
+
+RCT_EXPORT_METHOD(getCoordinateFromView:(nonnull NSNumber*)reactTag
+                  atPoint:(CGPoint)point
+                  resolver:(RCTPromiseResolveBlock)resolve
+                  rejecter:(RCTPromiseRejectBlock)reject)
+{
+  [self.bridge.uiManager addUIBlock:^(__unused RCTUIManager *manager, NSDictionary<NSNumber*, UIView*> *viewRegistry) {
+    id view = viewRegistry[reactTag];
+    
+    if (![view isKindOfClass:[RCTMGLMapView class]]) {
+      RCTLogError(@"Invalid react tag, could not find RCTMGLMapView");
+      return;
+    }
+    
+    RCTMGLMapView *reactMapView = (RCTMGLMapView*)view;
+    
+    CLLocationCoordinate2D coordinate = [reactMapView convertPoint:point
+                                            toCoordinateFromView:reactMapView];
+    
+    resolve(@{ @"coordinateFromView": @[@(coordinate.longitude), @(coordinate.latitude)] });
+  }];
+}
+
 
 RCT_EXPORT_METHOD(takeSnap:(nonnull NSNumber*)reactTag
                   writeToDisk:(BOOL)writeToDisk
@@ -523,6 +547,7 @@ RCT_EXPORT_METHOD(setCamera:(nonnull NSNumber*)reactTag
 - (void)mapView:(MGLMapView *)mapView didFinishLoadingStyle:(MGLStyle *)style
 {
     RCTMGLMapView *reactMapView = (RCTMGLMapView*)mapView;
+    style.localizesLabels = reactMapView.reactLocalizeLabels;
     
     if (reactMapView.sources.count > 0) {
         for (int i = 0; i < reactMapView.sources.count; i++) {

@@ -1,11 +1,14 @@
 package com.mapbox.rctmgl.components.mapview;
 
+import android.os.Handler;
+import android.os.Looper;
 import android.util.Log;
 import android.view.View;
 
 import com.facebook.react.bridge.ReactApplicationContext;
 import com.facebook.react.bridge.ReadableArray;
 import com.facebook.react.common.MapBuilder;
+import com.facebook.react.uimanager.LayoutShadowNode;
 import com.facebook.react.uimanager.ThemedReactContext;
 import com.facebook.react.uimanager.annotations.ReactProp;
 import com.mapbox.mapboxsdk.maps.MapboxMap;
@@ -17,9 +20,15 @@ import com.mapbox.rctmgl.utils.GeoJSONUtils;
 import com.mapbox.services.commons.geojson.Point;
 
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.FutureTask;
+import java.util.concurrent.RunnableFuture;
 
 import javax.annotation.Nullable;
+
+import static com.facebook.react.bridge.UiThreadUtil.runOnUiThread;
 
 /**
  * Created by nickitaliano on 8/18/17.
@@ -29,8 +38,11 @@ public class RCTMGLMapViewManager extends AbstractEventEmitter<RCTMGLMapView> {
     public static final String LOG_TAG = RCTMGLMapViewManager.class.getSimpleName();
     public static final String REACT_CLASS = RCTMGLMapView.class.getSimpleName();
 
+    private Map<Integer, RCTMGLMapView> mViews;
+
     public RCTMGLMapViewManager(ReactApplicationContext context) {
         super(context);
+        mViews = new HashMap<>();
     }
 
     @Override
@@ -39,10 +51,21 @@ public class RCTMGLMapViewManager extends AbstractEventEmitter<RCTMGLMapView> {
     }
 
     @Override
+    public LayoutShadowNode createShadowNodeInstance() {
+        return new MapShadowNode(this);
+    }
+
+    @Override
+    public Class<? extends LayoutShadowNode> getShadowNodeClass() {
+        return MapShadowNode.class;
+    }
+
+    @Override
     protected void onAfterUpdateTransaction(RCTMGLMapView mapView) {
         super.onAfterUpdateTransaction(mapView);
 
         if (mapView.getMapboxMap() == null) {
+            mViews.put(mapView.getId(), mapView);
             mapView.init();
         }
     }
@@ -74,11 +97,17 @@ public class RCTMGLMapViewManager extends AbstractEventEmitter<RCTMGLMapView> {
 
     @Override
     public void onDropViewInstance(RCTMGLMapView mapView) {
-        try {
-            mapView.dispose();
-        } catch (Exception e) {
-            Log.w(LOG_TAG, e.getLocalizedMessage());
+        int reactTag = mapView.getId();
+
+        if (mViews.containsKey(reactTag)) {
+            mViews.remove(reactTag);
         }
+
+        super.onDropViewInstance(mapView);
+    }
+
+    public RCTMGLMapView getByReactTag(int reactTag) {
+        return mViews.get(reactTag);
     }
 
     //region React Props
@@ -91,6 +120,11 @@ public class RCTMGLMapViewManager extends AbstractEventEmitter<RCTMGLMapView> {
     @ReactProp(name="animated")
     public void setAnimated(RCTMGLMapView mapView, boolean isAnimated) {
         mapView.setReactAnimated(isAnimated);
+    }
+
+    @ReactProp(name="localizeLabels")
+    public void setLocalizeLabels(RCTMGLMapView mapView, boolean localizeLabels) {
+        mapView.setLocalizeLabels(localizeLabels);
     }
 
     @ReactProp(name="zoomEnabled")
@@ -206,9 +240,10 @@ public class RCTMGLMapViewManager extends AbstractEventEmitter<RCTMGLMapView> {
     public static final int METHOD_QUERY_FEATURES_RECT = 3;
     public static final int METHOD_VISIBLE_BOUNDS = 4;
     public static final int METHOD_GET_POINT_IN_VIEW = 5;
-    public static final int METHOD_TAKE_SNAP = 6;
-    public static final int METHOD_GET_ZOOM = 7;
-    public static final int METHOD_GET_CENTER = 8;
+    public static final int METHOD_GET_COORDINATE_FROM_VIEW = 6;
+    public static final int METHOD_TAKE_SNAP = 7;
+    public static final int METHOD_GET_ZOOM = 8;
+    public static final int METHOD_GET_CENTER = 9;
 
     @Nullable
     @Override
@@ -219,6 +254,7 @@ public class RCTMGLMapViewManager extends AbstractEventEmitter<RCTMGLMapView> {
                 .put("queryRenderedFeaturesInRect", METHOD_QUERY_FEATURES_RECT)
                 .put("getVisibleBounds", METHOD_VISIBLE_BOUNDS)
                 .put("getPointInView", METHOD_GET_POINT_IN_VIEW)
+                .put("getCoordinateFromView", METHOD_GET_COORDINATE_FROM_VIEW)
                 .put("takeSnap", METHOD_TAKE_SNAP)
                 .put("getZoom", METHOD_GET_ZOOM)
                 .put("getCenter", METHOD_GET_CENTER)
@@ -258,6 +294,9 @@ public class RCTMGLMapViewManager extends AbstractEventEmitter<RCTMGLMapView> {
             case METHOD_GET_POINT_IN_VIEW:
                 mapView.getPointInView(args.getString(0), GeoJSONUtils.toLatLng(args.getArray(1)));
                 break;
+            case METHOD_GET_COORDINATE_FROM_VIEW:
+                mapView.getCoordinateFromView(args.getString(0), ConvertUtils.toPointF(args.getArray(1)));
+                break;
             case METHOD_TAKE_SNAP:
                 mapView.takeSnap(args.getString(0), args.getBoolean(1));
                 break;
@@ -271,4 +310,42 @@ public class RCTMGLMapViewManager extends AbstractEventEmitter<RCTMGLMapView> {
     }
 
     //endregion
+
+    private static final class MapShadowNode extends LayoutShadowNode {
+        private RCTMGLMapViewManager mViewManager;
+
+        public MapShadowNode(RCTMGLMapViewManager viewManager) {
+            mViewManager = viewManager;
+        }
+
+        @Override
+        public void dispose() {
+            super.dispose();
+            diposeNativeMapView();
+        }
+
+        /**
+         * We need this mapview to dispose (calls into nativeMap.destroy) before ReactNative starts tearing down the views in
+         * onDropViewInstance.
+         */
+        private void diposeNativeMapView() {
+            final RCTMGLMapView mapView = mViewManager.getByReactTag(getReactTag());
+
+            RunnableFuture<Void> task = new FutureTask<>(new Runnable() {
+                @Override
+                public void run() {
+                    mapView.dispose();
+                }
+            }, null);
+
+            runOnUiThread(task);
+
+            try {
+                task.get(); // this will block until Runnable completes
+            } catch (InterruptedException | ExecutionException e) {
+                // handle exception
+                Log.e(getClass().getSimpleName() , " diposeNativeMapView() exception destroying map view", e);
+            }
+        }
+    }
 }
