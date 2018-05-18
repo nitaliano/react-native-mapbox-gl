@@ -147,6 +147,8 @@ public class RCTMGLMapView extends MapView implements
     private ReadableArray mInsets;
     private Point mCenterCoordinate;
 
+    private int mChangeDelimiterSuppressionDepth;
+
     private LocationManager.OnUserLocationChange mLocationChangeListener = new LocationManager.OnUserLocationChange() {
         @Override
         public void onLocationChange(Location nextLocation) {
@@ -190,6 +192,8 @@ public class RCTMGLMapView extends MapView implements
         mHandler = new Handler();
 
         setLifecycleListeners();
+
+        addOnMapChangedListener(this);
     }
 
     @Override
@@ -361,8 +365,6 @@ public class RCTMGLMapView extends MapView implements
         mMap.setOnMapClickListener(this);
         mMap.setOnMapLongClickListener(this);
 
-        addOnMapChangedListener(this);
-
         // in case props were set before the map was ready lets set them
         updateInsets();
         updateUISettings();
@@ -502,11 +504,34 @@ public class RCTMGLMapView extends MapView implements
     public boolean onTouchEvent(MotionEvent ev) {
         boolean result = super.onTouchEvent(ev);
 
+        int eventAction = ev.getAction();
+
+        if (eventAction == MotionEvent.ACTION_DOWN) {
+            mChangeDelimiterSuppressionDepth = 0;
+        } else if (eventAction == MotionEvent.ACTION_MOVE) {
+            mChangeDelimiterSuppressionDepth++;
+        } else if (eventAction == MotionEvent.ACTION_CANCEL) {
+            mChangeDelimiterSuppressionDepth = 0;
+        } else if (eventAction == MotionEvent.ACTION_UP) {
+            mChangeDelimiterSuppressionDepth = 0;
+        }
+
         if (result) {
             requestDisallowInterceptTouchEvent(true);
         }
 
         return result;
+    }
+
+    private boolean isSuppressingChangeDelimiters() {
+        return mChangeDelimiterSuppressionDepth > 2;
+    }
+
+    @Override
+    protected void onLayout(boolean changed, int left, int top, int right, int bottom) {
+        if (!mPaused) {
+            super.onLayout(changed, left, top, right, bottom);
+        }
     }
 
     @Override
@@ -640,10 +665,14 @@ public class RCTMGLMapView extends MapView implements
 
         switch (changed) {
             case REGION_WILL_CHANGE:
-                event = new MapChangeEvent(this, makeRegionPayload(false), EventTypes.REGION_WILL_CHANGE);
+                if (!isSuppressingChangeDelimiters()) {
+                    event = new MapChangeEvent(this, makeRegionPayload(false), EventTypes.REGION_WILL_CHANGE);
+                }
                 break;
             case REGION_WILL_CHANGE_ANIMATED:
-                event = new MapChangeEvent(this, makeRegionPayload(true), EventTypes.REGION_WILL_CHANGE);
+                if (!isSuppressingChangeDelimiters()) {
+                    event = new MapChangeEvent(this, makeRegionPayload(true), EventTypes.REGION_WILL_CHANGE);
+                }
                 break;
             case REGION_IS_CHANGING:
                 event = new MapChangeEvent(this, EventTypes.REGION_IS_CHANGING);
@@ -960,6 +989,21 @@ public class RCTMGLMapView extends MapView implements
         array.pushDouble(pointInView.x);
         array.pushDouble(pointInView.y);
         payload.putArray("pointInView", array);
+        event.setPayload(payload);
+
+        mManager.handleEvent(event);
+    }
+
+    public void getCoordinateFromView(String callbackID, PointF pointInView) {
+        AndroidCallbackEvent event = new AndroidCallbackEvent(this, callbackID, EventKeys.MAP_ANDROID_CALLBACK);
+
+        LatLng mapCoordinate = mMap.getProjection().fromScreenLocation(pointInView);
+        WritableMap payload = new WritableNativeMap();
+
+        WritableArray array = new WritableNativeArray();
+        array.pushDouble(mapCoordinate.getLongitude());
+        array.pushDouble(mapCoordinate.getLatitude());
+        payload.putArray("coordinateFromView", array);
         event.setPayload(payload);
 
         mManager.handleEvent(event);

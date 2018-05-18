@@ -1,7 +1,7 @@
 {
   "name": "@mapbox/react-native-mapbox-gl",
   "description": "A Mapbox GL react native module for creating custom maps",
-  "version": "6.1.0",
+  "version": "6.1.1",
   "author": "Bobby Sudekum",
   "main": "./javascript/index.js",
   "keywords": [
@@ -30,8 +30,8 @@
     "test": "npm run lint && npm run unittest",
     "unittest": "jest --coverage --verbose",
     "unittest:single": "jest --testNamePattern",
-    "format": "./node_modules/.bin/prettier --write",
-    "lint": "./node_modules/eslint/bin/eslint.js ./javascript/** ./example/src/** ./__tests__/** --fix",
+    "format": "npm run lint -- --fix",
+    "lint": "./node_modules/eslint/bin/eslint.js ./javascript/** ./example/src/** ./__tests__/**",
     "precommit": "lint-staged"
   },
   "peerDependencies": {
@@ -40,7 +40,8 @@
     "react-native": ">=0.47.1"
   },
   "dependencies": {
-    "@turf/helpers": "4.6.0"
+    "@turf/helpers": "4.6.0",
+    "underscore": "^1.8.3"
   },
   "devDependencies": {
     "babel-eslint": "6.1.2",
@@ -51,7 +52,9 @@
     "eslint": "^3.19.0",
     "eslint-config-strict-react": "8.0.1",
     "eslint-plugin-import": "2.7.0",
+    "eslint-plugin-prettier": "^2.6.0",
     "eslint-plugin-react": "5.2.2",
+    "husky": "^0.14.3",
     "jest": "21.0.2",
     "jest-cli": "^21.2.1",
     "lint-staged": "^7.0.0",
@@ -76,17 +79,15 @@
       "__tests__/__mocks__"
     ]
   },
-  "prettier": {
-    "singleQuote": true,
-    "trailingComma": "es5",
-    "jsxBracketSameLine": true,
-    "arrowParens": "always"
-  },
   "lint-staged": {
-    "*.js": [
-      "npm run lint",
-      "npm run format",
-      "git add"
+    "linters": {
+      "*.js": [
+        "eslint ./javascript/**/*.js  ./example/src/**/*.js ./__tests__/**/*.js --fix",
+        "git add"
+      ]
+    },
+    "ignore": [
+      "**/scripts/**/*.js"
     ]
   },
   "rnpm": {
