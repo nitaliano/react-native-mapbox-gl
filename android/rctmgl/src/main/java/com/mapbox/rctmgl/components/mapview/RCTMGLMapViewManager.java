@@ -8,6 +8,7 @@ import android.view.View;
 import com.facebook.react.bridge.ReactApplicationContext;
 import com.facebook.react.bridge.ReadableArray;
 import com.facebook.react.common.MapBuilder;
+import com.facebook.react.common.MapBuilder.Builder;
 import com.facebook.react.uimanager.LayoutShadowNode;
 import com.facebook.react.uimanager.ThemedReactContext;
 import com.facebook.react.uimanager.annotations.ReactProp;
@@ -245,20 +246,27 @@ public class RCTMGLMapViewManager extends AbstractEventEmitter<RCTMGLMapView> {
     public static final int METHOD_GET_ZOOM = 8;
     public static final int METHOD_GET_CENTER = 9;
 
+    /**
+     * make this overridable for subclasses to add their own methods
+     */
+    protected Builder<String, Integer> getMapBuilder(){
+        return MapBuilder.<String, Integer>builder()
+            .put("setCamera", METHOD_SET_CAMERA)
+            .put("queryRenderedFeaturesAtPoint", METHOD_QUERY_FEATURES_POINT)
+            .put("queryRenderedFeaturesInRect", METHOD_QUERY_FEATURES_RECT)
+            .put("getVisibleBounds", METHOD_VISIBLE_BOUNDS)
+            .put("getPointInView", METHOD_GET_POINT_IN_VIEW)
+            .put("getCoordinateFromView", METHOD_GET_COORDINATE_FROM_VIEW)
+            .put("takeSnap", METHOD_TAKE_SNAP)
+            .put("getZoom", METHOD_GET_ZOOM)
+            .put("getCenter", METHOD_GET_CENTER);
+
+    }
+
     @Nullable
     @Override
     public Map<String, Integer> getCommandsMap() {
-        return MapBuilder.<String, Integer>builder()
-                .put("setCamera", METHOD_SET_CAMERA)
-                .put("queryRenderedFeaturesAtPoint", METHOD_QUERY_FEATURES_POINT)
-                .put("queryRenderedFeaturesInRect", METHOD_QUERY_FEATURES_RECT)
-                .put("getVisibleBounds", METHOD_VISIBLE_BOUNDS)
-                .put("getPointInView", METHOD_GET_POINT_IN_VIEW)
-                .put("getCoordinateFromView", METHOD_GET_COORDINATE_FROM_VIEW)
-                .put("takeSnap", METHOD_TAKE_SNAP)
-                .put("getZoom", METHOD_GET_ZOOM)
-                .put("getCenter", METHOD_GET_CENTER)
-                .build();
+        return getMapBuilder().build();
     }
 
     @Override
