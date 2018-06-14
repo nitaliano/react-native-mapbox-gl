@@ -34,7 +34,11 @@ import com.mapbox.mapboxsdk.camera.CameraUpdateFactory;
 import com.mapbox.mapboxsdk.geometry.LatLng;
 import com.mapbox.mapboxsdk.geometry.VisibleRegion;
 import com.mapbox.mapboxsdk.maps.MapView;
+import com.mapbox.mapboxsdk.maps.MapView.OnMapChangedListener;
 import com.mapbox.mapboxsdk.maps.MapboxMap;
+import com.mapbox.mapboxsdk.maps.MapboxMap.OnMapClickListener;
+import com.mapbox.mapboxsdk.maps.MapboxMap.OnMapLongClickListener;
+import com.mapbox.mapboxsdk.maps.MapboxMap.OnMarkerViewClickListener;
 import com.mapbox.mapboxsdk.maps.MapboxMapOptions;
 import com.mapbox.mapboxsdk.maps.OnMapReadyCallback;
 import com.mapbox.mapboxsdk.maps.UiSettings;
@@ -63,6 +67,7 @@ import com.mapbox.rctmgl.events.MapUserTrackingModeEvent;
 import com.mapbox.rctmgl.events.constants.EventKeys;
 import com.mapbox.rctmgl.events.constants.EventTypes;
 import com.mapbox.rctmgl.location.LocationManager;
+import com.mapbox.rctmgl.location.LocationManager.OnUserLocationChange;
 import com.mapbox.rctmgl.location.UserLocation;
 import com.mapbox.rctmgl.location.UserLocationLayerConstants;
 import com.mapbox.rctmgl.location.UserLocationVerticalAlignment;
@@ -92,13 +97,13 @@ import javax.annotation.Nullable;
 
 @SuppressWarnings({"MissingPermission"})
 public class RCTMGLMapView extends MapView implements
-        OnMapReadyCallback, MapboxMap.OnMapClickListener, MapboxMap.OnMapLongClickListener,
-        MapView.OnMapChangedListener, MapboxMap.OnMarkerViewClickListener {
+        OnMapReadyCallback, OnMapClickListener, OnMapLongClickListener,
+        OnMapChangedListener, OnMarkerViewClickListener, OnUserLocationChange {
     public static final String LOG_TAG = RCTMGLMapView.class.getSimpleName();
 
     public static final int USER_LOCATION_CAMERA_MOVE_DURATION = 1000;
 
-    private RCTMGLMapViewManager mManager;
+    protected RCTMGLMapViewManager mManager;
     private Context mContext;
     private Handler mHandler;
     private LifecycleEventListener mLifeCycleListener;
@@ -114,9 +119,9 @@ public class RCTMGLMapView extends MapView implements
     private CameraChangeTracker mCameraChangeTracker = new CameraChangeTracker();
     private Map<Integer, ReadableArray> mPreRenderMethodMap = new HashMap<>();
 
-    private MapboxMap mMap;
-    private LocationManager mLocationManger;
-    private UserLocation mUserLocation;
+    protected MapboxMap mMap;
+    protected LocationManager mLocationManger;
+    protected UserLocation mUserLocation;
 
     private LocationLayerPlugin mLocationLayer;
     private LocalizationPlugin mLocalizationPlugin;
@@ -151,24 +156,6 @@ public class RCTMGLMapView extends MapView implements
 
     private int mChangeDelimiterSuppressionDepth;
 
-    private LocationManager.OnUserLocationChange mLocationChangeListener = new LocationManager.OnUserLocationChange() {
-        @Override
-        public void onLocationChange(Location nextLocation) {
-            if (mMap == null || mLocationLayer == null || !mShowUserLocation) {
-                return;
-            }
-
-            float distToNextLocation = mUserLocation.getDistance(nextLocation);
-            mLocationLayer.onLocationChanged(nextLocation);
-            mUserLocation.setCurrentLocation(nextLocation);
-
-            if (mUserTrackingState == UserTrackingState.POSSIBLE || distToNextLocation > 0.0f) {
-                updateUserLocation(true);
-            }
-            sendUserLocationUpdateEvent(nextLocation);
-        }
-    };
-
     public RCTMGLMapView(Context context, RCTMGLMapViewManager manager, MapboxMapOptions options) {
         super(context, options);
 
@@ -184,7 +171,7 @@ public class RCTMGLMapView extends MapView implements
 
         mUserLocation = new UserLocation();
         mLocationManger = new LocationManager(context);
-        mLocationManger.setOnLocationChangeListener(mLocationChangeListener);
+        mLocationManger.setOnLocationChangeListener(this);
 
         mSources = new HashMap<>();
         mPointAnnotations = new HashMap<>();
@@ -196,6 +183,23 @@ public class RCTMGLMapView extends MapView implements
         setLifecycleListeners();
 
         addOnMapChangedListener(this);
+    }
+
+
+    @Override
+    public void onLocationChange(Location nextLocation) {
+        if (mMap == null || mLocationLayer == null || !mShowUserLocation) {
+            return;
+        }
+
+        float distToNextLocation = mUserLocation.getDistance(nextLocation);
+        mLocationLayer.onLocationChanged(nextLocation);
+        mUserLocation.setCurrentLocation(nextLocation);
+
+        if (mUserTrackingState == UserTrackingState.POSSIBLE || distToNextLocation > 0.0f) {
+            updateUserLocation(true);
+        }
+        sendUserLocationUpdateEvent(nextLocation);
     }
 
     @Override
@@ -1210,7 +1214,7 @@ public class RCTMGLMapView extends MapView implements
 
         Location lastKnownLocation = mLocationManger.getLastKnownLocation();
         if (lastKnownLocation != null) {
-            mLocationChangeListener.onLocationChange(lastKnownLocation);
+            onLocationChange(lastKnownLocation);
 
             postDelayed(new Runnable() {
                 @Override
@@ -1221,7 +1225,7 @@ public class RCTMGLMapView extends MapView implements
         }
     }
 
-    private void updateLocationLayer() {
+    protected void updateLocationLayer() {
         if (mLocationLayer == null) {
             mLocationLayer = new LocationLayerPlugin(this, mMap, mLocationManger.getEngine());
         }
@@ -1449,7 +1453,7 @@ public class RCTMGLMapView extends MapView implements
         mCameraChangeTracker.setReason(-1);
     }
 
-    private void sendUserLocationUpdateEvent(Location location) {
+    protected void sendUserLocationUpdateEvent(Location location) {
         if(location == null){
             return;
         }

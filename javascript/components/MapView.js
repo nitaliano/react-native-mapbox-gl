@@ -607,7 +607,16 @@ class MapView extends React.Component {
     return res.center;
   }
 
+
+  /**
+   * Make this class extensible. This will allow subclasses to point to their own native map class (extending from the existing RCTMGLMapView in native)
+   */
+  _getNativeModuleName() {
+    return NATIVE_MODULE_NAME;
+  }
+
   _runNativeCommand(methodName, args = []) {
+    const nativeModuleName = this._getNativeModuleName();
     if (!this._nativeRef) {
       return new Promise((resolve) => {
         this._preRefMapMethodQueue.push({
@@ -622,11 +631,11 @@ class MapView extends React.Component {
         const callbackID = '' + Date.now();
         this._addAddAndroidCallback(callbackID, resolve);
         args.unshift(callbackID);
-        runNativeCommand(NATIVE_MODULE_NAME, methodName, this._nativeRef, args);
+        runNativeCommand(nativeModuleName, methodName, this._nativeRef, args);
       });
     }
     return runNativeCommand(
-      NATIVE_MODULE_NAME,
+      nativeModuleName,
       methodName,
       this._nativeRef,
       args,
