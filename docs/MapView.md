@@ -6,6 +6,7 @@
 | ---- | :--: | :-----: | :------: | :----------: |
 | animated | `bool` | `false` | `false` | Animates changes between pitch and bearing |
 | centerCoordinate | `arrayOf` | `none` | `false` | Initial center coordinate on map [lng, lat] |
+| visibleCoordinateBounds | `arrayOf` | `none` | `false` | Initial coordinate bounds on map [[lng, lat], [lng, lat]] |
 | showUserLocation | `bool` | `none` | `false` | Shows the users location on the map |
 | userTrackingMode | `number` | `MapboxGL.UserTrackingModes.None` | `false` | The mode used to track the user location on the map |
 | userLocationVerticalAlignment | `number` | `none` | `false` | The vertical alignment of the user location within in map. This is only enabled while tracking the users location. |
