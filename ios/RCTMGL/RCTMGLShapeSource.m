@@ -108,14 +108,15 @@ static NSMutableDictionary *_buildingCoords;
     NSLog(@"clustersArray length = %lu", (unsigned long)clustersArray.count);
     for(int i = 0; i < clustersArray.count -1; i = i+2) {
         NSString *buildingCoord = clustersArray[i];
+        NSInteger apartmentsInCluster = [clustersArray[i+1] integerValue];
 
         // get coordinates from dictionary
-        for(int n = 0; n < [clustersArray[i+1] integerValue]; n++) {
+        for(int n = 0; n < apartmentsInCluster; n++) {
             [geoJson appendString:buildingJsonStart];
             [geoJson appendString:_buildingCoords[buildingCoord]];
             [geoJson appendString:buildingJsonFinish];
         
-            if (i != clustersArray.count -2) {
+            if (i != clustersArray.count -2 || n+1 != apartmentsInCluster) {
                 NSString *lastComma = @",";
                 [geoJson appendString:lastComma];
             }
