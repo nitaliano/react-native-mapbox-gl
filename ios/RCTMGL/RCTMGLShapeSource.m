@@ -100,33 +100,42 @@ static NSMutableDictionary *_buildingCoords;
 
 - (NSString*)_makeGeoJson
 {
+    NSString *geoJsonTemplate = @"{\"type\":\"FeatureCollection\",\"features\":[%@]}";
+    NSString *buildingTemplate = @"{\"type\":\"Feature\",\"properties\":{%@},\"geometry\":{\"type\": \"Point\", \"coordinates\":[%@]}}";
+    NSString *apartmentsCountTemplate = @"\"apartmentsCount\": %@";
+    
     NSArray *clustersArray = [self _requestClusters];
     
-    NSMutableString *geoJson = [NSMutableString stringWithString:@"{\"type\":\"FeatureCollection\",\"features\":["];
-    NSString *buildingJsonStart = @"{\"type\":\"Feature\",\"properties\":{},\"geometry\":{\"type\": \"Point\", \"coordinates\":[";
-    NSString *buildingJsonFinish = @"]}}";
     NSLog(@"clustersArray length = %lu", (unsigned long)clustersArray.count);
-    for(int i = 0; i < clustersArray.count -1; i = i+2) {
+    
+    NSMutableString *features = [NSMutableString stringWithString:@""];
+    for(int i = 0; i < clustersArray.count - 1; i = i + 2) {
         NSString *buildingCoord = clustersArray[i];
         NSInteger apartmentsInCluster = [clustersArray[i+1] integerValue];
-
-        // get coordinates from dictionary
-        for(int n = 0; n < apartmentsInCluster; n++) {
-            [geoJson appendString:buildingJsonStart];
-            [geoJson appendString:_buildingCoords[buildingCoord]];
-            [geoJson appendString:buildingJsonFinish];
         
-            if (i != clustersArray.count -2 || n+1 != apartmentsInCluster) {
-                NSString *lastComma = @",";
-                [geoJson appendString:lastComma];
-            }
+        NSString *apartmentsCount = [NSString stringWithFormat:apartmentsCountTemplate, clustersArray[i+1]];
+        NSString *buildingStringWithApartments = [NSString stringWithFormat:buildingTemplate,
+                                                  apartmentsCount,
+                                                  _buildingCoords[buildingCoord]];
+        NSString *buildingString = [NSString stringWithFormat:buildingTemplate,
+                                                  @"",
+                                                  _buildingCoords[buildingCoord]];
+        
+        // add first feature with the "apartmentsCount" property
+        [features appendString:buildingStringWithApartments];
+
+        // add [apartmentsInCluster - 1] features without the "apartmentsCount" property (for clusterization)
+        for(int n = 0; n < apartmentsInCluster - 1; n++) {
+            [features appendString:@","];
+            [features appendString:buildingString];
+        }
+        
+        if (i != clustersArray.count - 2) {
+            [features appendString:@","];
         }
     }
     
-    NSString *geoJsonFinish = @"]}";
-    [geoJson appendString:geoJsonFinish];
-    
-    return geoJson;
+    return [NSString stringWithFormat:geoJsonTemplate, features];
 }
 
 - (MGLSource*)makeSource
