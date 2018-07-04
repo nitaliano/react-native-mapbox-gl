@@ -214,13 +214,18 @@ public class RCTMGLShapeSourceManager extends AbstractEventEmitter<RCTMGLShapeSo
             int buildingId = Integer.parseInt(values[i]);
             int count = Integer.parseInt(values[i + 1]);
             Coordinate coordinate = buildingsMap.get(buildingId);
-            String apartmentsCount = i == 0 ? ",\"properties\": {\"apartmentsCount\": " + values[i + 1] + "}" : "";
-            String f = "{\"type\":\"Feature\"" + apartmentsCount + ", \"geometry\":{\"type\":\"Point\",\"coordinates\":[" + coordinate.lng + "," + coordinate.lat + "]}}";
+
+            String f1 = "{\"type\":\"Feature\"";
+            String f2 = ", \"geometry\":{\"type\":\"Point\",\"coordinates\":[" + coordinate.lng + "," + coordinate.lat + "]}}";
+
+            String fWithApartmentsCount = f1 + ",\"properties\": {\"apartmentsCount\": " + values[i + 1] + "}" + f2;
+            String fWithoutApartmentsCount = f1.concat(f2);
+
             for (int j = 0; j < count; j++) {
                 if ((i + j) > 0) {
                     geojson.append(",");
                 }
-                geojson.append(f);
+                geojson.append(j == 0 ? fWithApartmentsCount : fWithoutApartmentsCount);
             }
         }
         geojson.append("]}");
