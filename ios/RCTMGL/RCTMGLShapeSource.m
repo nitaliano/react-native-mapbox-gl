@@ -106,32 +106,34 @@ static NSMutableDictionary *_buildingCoords;
     
     NSArray *clustersArray = [self _requestClusters];
     
-    NSLog(@"clustersArray length = %lu", (unsigned long)clustersArray.count);
-    
     NSMutableString *features = [NSMutableString stringWithString:@""];
     for(int i = 0; i < clustersArray.count - 1; i = i + 2) {
-        NSString *buildingCoord = clustersArray[i];
-        NSInteger apartmentsInCluster = [clustersArray[i+1] integerValue];
+        NSString *buildingId = clustersArray[i];
+        NSString *buildingCoord = _buildingCoords[buildingId];
         
-        NSString *apartmentsCount = [NSString stringWithFormat:apartmentsCountTemplate, clustersArray[i+1]];
-        NSString *buildingStringWithApartments = [NSString stringWithFormat:buildingTemplate,
-                                                  apartmentsCount,
-                                                  _buildingCoords[buildingCoord]];
-        NSString *buildingString = [NSString stringWithFormat:buildingTemplate,
-                                                  @"",
-                                                  _buildingCoords[buildingCoord]];
-        
-        // add first feature with the "apartmentsCount" property
-        [features appendString:buildingStringWithApartments];
-
-        // add [apartmentsInCluster - 1] features without the "apartmentsCount" property (for clusterization)
-        for(int n = 0; n < apartmentsInCluster - 1; n++) {
-            [features appendString:@","];
-            [features appendString:buildingString];
-        }
-        
-        if (i != clustersArray.count - 2) {
-            [features appendString:@","];
+        if(buildingCoord) {
+            NSInteger apartmentsInCluster = [clustersArray[i+1] integerValue];
+            
+            NSString *apartmentsCount = [NSString stringWithFormat:apartmentsCountTemplate, clustersArray[i+1]];
+            NSString *buildingStringWithApartments = [NSString stringWithFormat:buildingTemplate,
+                                                      apartmentsCount,
+                                                      buildingCoord];
+            NSString *buildingString = [NSString stringWithFormat:buildingTemplate,
+                                        @"",
+                                        buildingCoord];
+            
+            // add first feature with the "apartmentsCount" property
+            [features appendString:buildingStringWithApartments];
+            
+            // add [apartmentsInCluster - 1] features without the "apartmentsCount" property (for clusterization)
+            for(int n = 0; n < apartmentsInCluster - 1; n++) {
+                [features appendString:@","];
+                [features appendString:buildingString];
+            }
+            
+            if (i != clustersArray.count - 2) {
+                [features appendString:@","];
+            }
         }
     }
     
