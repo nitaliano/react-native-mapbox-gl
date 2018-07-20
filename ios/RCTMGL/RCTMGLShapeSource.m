@@ -9,7 +9,31 @@
 #import "RCTMGLShapeSource.h"
 #import "RCTMGLUtils.h"
 
+
 @implementation RCTMGLShapeSource
+
+static NSMutableDictionary *_buildingCoords;
+
++ (void)initialize {
+    if(_buildingCoords == nil) {
+        NSMutableDictionary *coords = [[NSMutableDictionary alloc] init];
+        NSString* filePath = [[NSBundle mainBundle] pathForResource:@"buildings" ofType:@"csv"];
+        NSError *error;
+        NSString *fileContents = [NSString stringWithContentsOfFile:filePath encoding:NSUTF8StringEncoding error:&error];
+        
+        if (error)
+            NSLog(@"Error reading file: %@", error.localizedDescription);
+        
+        NSArray* cols = [fileContents componentsSeparatedByString:@","];
+        
+        for(int i = 0; i < cols.count -2; i = i+3) {
+            NSString *columnValue = [NSString stringWithFormat:@"%@,%@", cols[i+2], cols[i+1]];
+            coords[cols[i]] = columnValue;
+        }
+
+        _buildingCoords = coords;
+    }
+}
 
 - (void)setShape:(NSString *)shape
 {
@@ -63,10 +87,68 @@
     }
 }
 
+- (NSArray*)_requestClusters
+{
+    NSError *error = nil;
+    NSString *urlString = [NSString stringWithFormat: @"%@", _csvUrl];
+    NSString *idToApartmentsString = [NSString stringWithContentsOfURL:[NSURL URLWithString:urlString] encoding:NSUTF8StringEncoding error:&error];
+   
+    NSArray *clustersArray = [idToApartmentsString componentsSeparatedByString: @","];
+
+    return clustersArray;
+}
+
+- (NSString*)_makeGeoJson
+{
+    NSString *geoJsonTemplate = @"{\"type\":\"FeatureCollection\",\"features\":[%@]}";
+    NSString *buildingTemplate = @"{\"type\":\"Feature\",\"properties\":{%@},\"geometry\":{\"type\": \"Point\", \"coordinates\":[%@]}}";
+    NSString *apartmentsCountTemplate = @"\"apartmentsCount\": %@";
+    
+    NSArray *clustersArray = [self _requestClusters];
+    
+    NSMutableString *features = [NSMutableString stringWithString:@""];
+    for(int i = 0; i < clustersArray.count - 1; i = i + 2) {
+        NSString *buildingId = clustersArray[i];
+        NSString *buildingCoord = _buildingCoords[buildingId];
+        
+        if(buildingCoord) {
+            NSInteger apartmentsInCluster = [clustersArray[i+1] integerValue];
+            
+            NSString *apartmentsCount = [NSString stringWithFormat:apartmentsCountTemplate, clustersArray[i+1]];
+            NSString *buildingStringWithApartments = [NSString stringWithFormat:buildingTemplate,
+                                                      apartmentsCount,
+                                                      buildingCoord];
+            NSString *buildingString = [NSString stringWithFormat:buildingTemplate,
+                                        @"",
+                                        buildingCoord];
+            
+            // add first feature with the "apartmentsCount" property
+            [features appendString:buildingStringWithApartments];
+            
+            // add [apartmentsInCluster - 1] features without the "apartmentsCount" property (for clusterization)
+            for(int n = 0; n < apartmentsInCluster - 1; n++) {
+                [features appendString:@","];
+                [features appendString:buildingString];
+            }
+            
+            if (i != clustersArray.count - 2) {
+                [features appendString:@","];
+            }
+        }
+    }
+    
+    return [NSString stringWithFormat:geoJsonTemplate, features];
+}
+
 - (MGLSource*)makeSource
 {
     NSDictionary<MGLShapeSourceOption, id> *options = [self _getOptions];
-    
+    if (_csvUrl != nil) {
+        NSString *geoJson = [self _makeGeoJson];
+        MGLShape *shape = [RCTMGLUtils shapeFromGeoJSON:geoJson];
+        return [[MGLShapeSource alloc] initWithIdentifier:self.id shape:shape options:options];
+    }
+
     if (_shape != nil) {
         MGLShape *shape = [RCTMGLUtils shapeFromGeoJSON:_shape];
         return [[MGLShapeSource alloc] initWithIdentifier:self.id shape:shape options:options];

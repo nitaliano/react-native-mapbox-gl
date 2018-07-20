@@ -34,6 +34,11 @@ class ShapeSource extends React.Component {
      * An HTTP(S) URL, absolute file URL, or local file URL relative to the current application’s resource bundle.
      */
     url: PropTypes.string,
+    
+    /**
+     * An HTTP(S) URL for csv request. Result is converted to geojson inside native.
+     */
+    csvUrl: PropTypes.string,
 
     /**
      * The contents of the source. A shape can represent a GeoJSON geometry, a feature, or a feature colllection.
@@ -148,6 +153,7 @@ class ShapeSource extends React.Component {
   render() {
     const props = {
       id: this.props.id,
+      csvUrl: this.props.csvUrl,
       url: this.props.url,
       shape: this._getShape(),
       hitbox: this.props.hitbox,

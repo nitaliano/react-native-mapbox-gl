@@ -28,10 +28,16 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
+import android.os.AsyncTask;
+import java.net.URLConnection;
+import java.io.BufferedReader;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.util.HashMap;
+
 /**
  * Created by nickitaliano on 9/19/17.
  */
-
 public class RCTMGLShapeSourceManager extends AbstractEventEmitter<RCTMGLShapeSource> {
     public static final String LOG_TAG = RCTMGLShapeSourceManager.class.getSimpleName();
     public static final String REACT_CLASS = RCTMGLShapeSource.class.getSimpleName();
@@ -41,6 +47,7 @@ public class RCTMGLShapeSourceManager extends AbstractEventEmitter<RCTMGLShapeSo
     public RCTMGLShapeSourceManager(ReactApplicationContext context) {
         super(context);
         mContext = context;
+        loadBuildings(context);
     }
 
     @Override
@@ -156,7 +163,7 @@ public class RCTMGLShapeSourceManager extends AbstractEventEmitter<RCTMGLShapeSo
         source.setHasPressListener(hasPressListener);
     }
 
-    @ReactProp(name="hitbox")
+    @ReactProp(name = "hitbox")
     public void setHitbox(RCTMGLShapeSource source, ReadableMap map) {
         source.setHitbox(map);
     }
@@ -166,5 +173,138 @@ public class RCTMGLShapeSourceManager extends AbstractEventEmitter<RCTMGLShapeSo
         return MapBuilder.<String, String>builder()
                 .put(EventKeys.SHAPE_SOURCE_LAYER_CLICK, "onMapboxShapeSourcePress")
                 .build();
+    }
+    
+    @ReactProp(name = "csvUrl")
+    public void setCsvUrl(RCTMGLShapeSource source, String urlStr) {
+        //TODO: people say this is bad, but how bad it really is?
+        class DownloadFilesTask extends AsyncTask<String, Integer, Long> {
+            public RCTMGLShapeSource source;
+            @Override
+            protected Long doInBackground(String... urls) {
+                String geoJSONStr = getCustomGeojson(urls[0]);
+                setGeometry(source, geoJSONStr);
+                return null;
+            }
+        }
+        //Doesn't work without this....
+        setGeometry(source, "{\"type\":\"FeatureCollection\",\"features\":[]}");
+        DownloadFilesTask task = new DownloadFilesTask();
+        task.source = source;
+        task.execute(urlStr);
+    }
+
+    class Coordinate {
+
+        public double lat, lng;
+
+        public Coordinate(double lat, double lng) {
+            this.lat = lat;
+            this.lng = lng;
+        }
+    }
+
+    public String getCustomGeojson(String url) {
+        StringBuilder geojson = new StringBuilder();
+        geojson.append("{\"type\":\"FeatureCollection\",\"features\":[");
+        String data = getUrlContents(url);
+
+        String values[] = data.split(",");
+        for (int i = 0; i < values.length - 2; i += 2) {
+            int buildingId = Integer.parseInt(values[i]);
+            int count = Integer.parseInt(values[i + 1]);
+            Coordinate coordinate = buildingsMap.get(buildingId);
+
+            String f1 = "{\"type\":\"Feature\"";
+            String f2 = ", \"geometry\":{\"type\":\"Point\",\"coordinates\":[" + coordinate.lng + "," + coordinate.lat + "]}}";
+
+            String fWithApartmentsCount = f1 + ",\"properties\": {\"apartmentsCount\": " + values[i + 1] + "}" + f2;
+            String fWithoutApartmentsCount = f1.concat(f2);
+
+            for (int j = 0; j < count; j++) {
+                if ((i + j) > 0) {
+                    geojson.append(",");
+                }
+                geojson.append(j == 0 ? fWithApartmentsCount : fWithoutApartmentsCount);
+            }
+        }
+        geojson.append("]}");
+
+        return geojson.toString();
+    }
+
+    private static String getUrlContents(String theUrl) {
+        StringBuilder content = new StringBuilder();
+
+        // many of these calls can throw exceptions, so i've just
+        // wrapped them all in one try/catch statement.
+        try {
+            // create a url object
+            URL url = new URL(theUrl);
+
+            // create a urlconnection object
+            URLConnection urlConnection = url.openConnection();
+
+            // wrap the urlconnection in a bufferedreader
+            BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(urlConnection.getInputStream()));
+
+            String line;
+
+            // read from the urlconnection via the bufferedreader
+            while ((line = bufferedReader.readLine()) != null) {
+                content.append(line + "\n");
+            }
+            bufferedReader.close();
+        } catch (Exception e) {
+            return e.toString();
+        }
+        return content.toString();
+    }
+
+    private HashMap<Integer, Coordinate> buildingsMap;
+    
+    private void loadBuildings(Context context) {
+        buildingsMap = new HashMap<Integer, Coordinate>();
+        String dataStr = getBuildingsCsvContents(context);
+        String data[] = dataStr.split(",");
+
+        for (int i = 0; i < data.length; i += 3) {
+            buildingsMap.put(Integer.parseInt(data[i]), new Coordinate(Double.parseDouble(data[i + 1]), Double.parseDouble(data[i + 2])));
+        }
+    }
+
+    public static String getBuildingsCsvContents(Context context) {
+        String fileName = "buildings.csv";
+        StringBuilder returnString = new StringBuilder();
+        InputStream fIn = null;
+        InputStreamReader isr = null;
+        BufferedReader input = null;
+        try {
+            fIn = context.getResources().getAssets()
+                    .open(fileName, Context.MODE_WORLD_READABLE);
+            isr = new InputStreamReader(fIn);
+            input = new BufferedReader(isr);
+            String line = "";
+            while ((line = input.readLine()) != null) {
+                returnString.append(line);
+            }
+        } catch (Exception e) {
+            e.getMessage();
+        } finally {
+            try {
+                if (isr != null) {
+                    isr.close();
+                }
+                if (fIn != null) {
+                    fIn.close();
+                }
+                if (input != null) {
+                    input.close();
+                }
+            } catch (Exception e2) {
+                e2.getMessage();
+            }
+        }
+        return returnString.toString();
     }
 }
