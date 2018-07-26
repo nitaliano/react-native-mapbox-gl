@@ -421,9 +421,9 @@ public class RCTMGLMapView extends MapView implements
                 long curTimestamp = System.currentTimeMillis();
                 boolean curAnimated = mCameraChangeTracker.isAnimated();
                 if (curTimestamp - lastTimestamp < 500 && curAnimated == lastAnimated) {
-                      // even if we don't send the change event, we need to set the reason...
-                    //this happens when you have multiple calls to setCamera very quickly. This method will short circuit,
-                    //and then the next time the user moves the map, it will think it is NOT from a user interaction , because
+                    // even if we don't send the change event, we need to set the reason...
+                    // this happens when you have multiple calls to setCamera very quickly. This method will short circuit,
+                    // and then the next time the user moves the map, it will think it is NOT from a user interaction , because
                     // this flag was not reset
                     mCameraChangeTracker.setReason(-1);
                     return;
@@ -516,7 +516,9 @@ public class RCTMGLMapView extends MapView implements
         if (eventAction == MotionEvent.ACTION_DOWN) {
             mChangeDelimiterSuppressionDepth = 0;
         } else if (eventAction == MotionEvent.ACTION_MOVE) {
-            mChangeDelimiterSuppressionDepth++;
+            if (mChangeDelimiterSuppressionDepth == 0) {
+                mChangeDelimiterSuppressionDepth = 1;
+            }
         } else if (eventAction == MotionEvent.ACTION_CANCEL) {
             mChangeDelimiterSuppressionDepth = 0;
         } else if (eventAction == MotionEvent.ACTION_UP) {
@@ -531,7 +533,7 @@ public class RCTMGLMapView extends MapView implements
     }
 
     private boolean isSuppressingChangeDelimiters() {
-        return mChangeDelimiterSuppressionDepth > 2;
+        return mChangeDelimiterSuppressionDepth > 1;
     }
 
     @Override
@@ -673,13 +675,12 @@ public class RCTMGLMapView extends MapView implements
         switch (changed) {
             case REGION_WILL_CHANGE:
                 if (!isSuppressingChangeDelimiters()) {
+                    mChangeDelimiterSuppressionDepth = 2;
                     event = new MapChangeEvent(this, makeRegionPayload(false), EventTypes.REGION_WILL_CHANGE);
                 }
                 break;
             case REGION_WILL_CHANGE_ANIMATED:
-                if (!isSuppressingChangeDelimiters()) {
-                    event = new MapChangeEvent(this, makeRegionPayload(true), EventTypes.REGION_WILL_CHANGE);
-                }
+                event = new MapChangeEvent(this, makeRegionPayload(true), EventTypes.REGION_WILL_CHANGE);
                 break;
             case REGION_IS_CHANGING:
                 event = new MapChangeEvent(this, EventTypes.REGION_IS_CHANGING);
