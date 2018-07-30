@@ -712,19 +712,28 @@ class MapView extends React.Component {
   }
 
   _onChange(e) {
+    const { regionWillChangeDebounceTime, regionDidChangeDebounceTime } = this.props;
     const { type, payload } = e.nativeEvent;
     let propName = '';
 
     switch (type) {
       case MapboxGL.EventTypes.RegionWillChange:
-        this._onDebouncedRegionWillChange(payload);
-        return;
+        if (regionWillChangeDebounceTime > 0) {
+          this._onDebouncedRegionWillChange(payload);
+        } else {
+          propName = 'onRegionWillChange';
+        }
+        break;
       case MapboxGL.EventTypes.RegionIsChanging:
         propName = 'onRegionIsChanging';
         break;
       case MapboxGL.EventTypes.RegionDidChange:
-        this._onDebouncedRegionDidChange(payload);
-        return;
+        if (regionDidChangeDebounceTime > 0) {
+          this._onDebouncedRegionDidChange(payload);
+        } else {
+          propName = 'onRegionDidChange';
+        }
+        break;
       case MapboxGL.EventTypes.UserLocationUpdated:
         propName = 'onUserLocationUpdate';
         break;
