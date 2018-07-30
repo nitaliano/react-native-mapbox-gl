@@ -1223,7 +1223,7 @@ public class RCTMGLMapView extends MapView implements
         }
     }
 
-    private WritableMap makeRegionPayload(boolean isAnimated) {
+    private WritableMap makeRegionPayload() {
         CameraPosition position = mMap.getCameraPosition();
         LatLng latLng = new LatLng(position.target.getLatitude(), position.target.getLongitude());
 
@@ -1231,7 +1231,7 @@ public class RCTMGLMapView extends MapView implements
         properties.putDouble("zoomLevel", position.zoom);
         properties.putDouble("heading", position.bearing);
         properties.putDouble("pitch", position.tilt);
-        properties.putBoolean("animated", isAnimated);
+        properties.putBoolean("animated", mCameraChangeTracker.isAnimated());
         properties.putBoolean("isUserInteraction", mCameraChangeTracker.isUserInteraction());
 
         VisibleRegion visibleRegion = mMap.getProjection().getVisibleRegion();
@@ -1443,7 +1443,7 @@ public class RCTMGLMapView extends MapView implements
             // payload events
             case EventTypes.REGION_WILL_CHANGE:
             case EventTypes.REGION_DID_CHANGE:
-                event = new MapChangeEvent(this, makeRegionPayload(mCameraChangeTracker.isAnimated()), eventType);
+                event = new MapChangeEvent(this, makeRegionPayload(), eventType);
                 break;
             default:
                 event = new MapChangeEvent(this, eventType);
