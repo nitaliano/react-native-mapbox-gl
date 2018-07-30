@@ -74,6 +74,7 @@ import com.mapbox.services.commons.geojson.Point;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
@@ -143,7 +144,7 @@ public class RCTMGLMapView extends MapView implements
     private ReadableArray mInsets;
     private Point mCenterCoordinate;
 
-    private int mChangeDelimiterSuppressionDepth;
+    private HashSet<String> mHandledMapChangedEvents = null;
 
     private LocationManager.OnUserLocationChange mLocationChangeListener = new LocationManager.OnUserLocationChange() {
         @Override
@@ -374,13 +375,13 @@ public class RCTMGLMapView extends MapView implements
             mMap.moveCamera(CameraUpdateFactory.newCameraPosition(buildCamera()), new MapboxMap.CancelableCallback() {
                 @Override
                 public void onCancel() {
-                    sendRegionDidChangeEvent(false);
+                    handleMapChangedEvent(EventTypes.REGION_DID_CHANGE);
                     mCameraChangeTracker.setReason(-1);
                 }
 
                 @Override
                 public void onFinish() {
-                    sendRegionDidChangeEvent(false);
+                    handleMapChangedEvent(EventTypes.REGION_DID_CHANGE);
                     mCameraChangeTracker.setReason(-1);
                 }
             });
@@ -424,7 +425,7 @@ public class RCTMGLMapView extends MapView implements
 
                 if (!mCameraChangeTracker.isAnimating()) {
                     Log.d("MOVE_EVENT", "onCameraIdle SENDING DID_CHANGE EVENT isUserInteraction: " + mCameraChangeTracker.isUserInteraction() + " isAnimated: " + mCameraChangeTracker.isAnimated());
-                    sendRegionDidChangeEvent(mCameraChangeTracker.isAnimated());
+                    handleMapChangedEvent(EventTypes.REGION_DID_CHANGE);
                     mCameraChangeTracker.setReason(-1);
                 } else {
                     Log.d("MOVE_EVENT", "onCameraIdle NOT SENDING DID_CHANGE EVENT on fling");
@@ -448,7 +449,7 @@ public class RCTMGLMapView extends MapView implements
                     mCameraChangeTracker.setReason(reason);
 
                     Log.d("MOVE_EVENT", "onCameraMoveStarted SENDING WILL_CHANGE EVENT reason: " + reason + " isUserInteraction: " + mCameraChangeTracker.isUserInteraction() + " isAnimated: " + mCameraChangeTracker.isAnimated());
-                    sendRegionWillChangeEvent(mCameraChangeTracker.isAnimated());
+                    handleMapChangedEvent(EventTypes.REGION_WILL_CHANGE);
                 } else {
                     Log.d("MOVE_EVENT", "onCameraMoveStarted NOT SENDING WILL_CHANGE EVENT on fling");
                 }
@@ -478,7 +479,7 @@ public class RCTMGLMapView extends MapView implements
 
             @Override
             public void onCameraMove() {
-                sendRegionIsChangingEvent();
+                handleMapChangedEvent(EventTypes.REGION_IS_CHANGING);
 
                 int userTrackingMode = mUserLocation.getTrackingMode();
                 boolean isFollowWithCourseOrHeading = userTrackingMode == UserTrackingMode.FollowWithCourse || userTrackingMode == UserTrackingMode.FollowWithHeading;
@@ -665,47 +666,42 @@ public class RCTMGLMapView extends MapView implements
 
     @Override
     public void onMapChanged(int changed) {
-        IEvent event = null;
+        String eventType = null;
 
         switch (changed) {
             case REGION_WILL_CHANGE:
-                // Log.d("MOVE_EVENT", "REGION_WILL_CHANGE");
+            case REGION_IS_CHANGING:
+            case REGION_DID_CHANGE:
                 break;
             case REGION_WILL_CHANGE_ANIMATED:
                 mCameraChangeTracker.setIsAnimating(true);
-                Log.d("MOVE_EVENT onMapChanged", "REGION_WILL_CHANGE_ANIMATED");
-                break;
-            case REGION_IS_CHANGING:
-                break;
-            case REGION_DID_CHANGE:
                 break;
             case REGION_DID_CHANGE_ANIMATED:
                 mCameraChangeTracker.setIsAnimating(false);
-                Log.d("MOVE_EVENT onMapChanged", "REGION_DID_CHANGE_ANIMATED");
                 break;
             case WILL_START_LOADING_MAP:
-                event = new MapChangeEvent(this, EventTypes.WILL_START_LOADING_MAP);
+                eventType = EventTypes.WILL_START_LOADING_MAP;
                 break;
             case DID_FAIL_LOADING_MAP:
-                event = new MapChangeEvent(this, EventTypes.DID_FAIL_LOADING_MAP);
+                eventType = EventTypes.DID_FAIL_LOADING_MAP;
                 break;
             case DID_FINISH_LOADING_MAP:
-                event = new MapChangeEvent(this, EventTypes.DID_FINISH_LOADING_MAP);
+                eventType = EventTypes.DID_FINISH_LOADING_MAP;
                 break;
             case WILL_START_RENDERING_FRAME:
-                event = new MapChangeEvent(this, EventTypes.WILL_START_RENDERING_FRAME);
+                eventType = EventTypes.WILL_START_RENDERING_FRAME;
                 break;
             case DID_FINISH_RENDERING_FRAME:
-                event = new MapChangeEvent(this, EventTypes.DID_FINISH_RENDERING_FRAME);
+                eventType = EventTypes.DID_FINISH_RENDERING_FRAME;
                 break;
             case DID_FINISH_RENDERING_FRAME_FULLY_RENDERED:
-                event = new MapChangeEvent(this, EventTypes.DID_FINISH_RENDERING_FRAME_FULLY);
+                eventType = EventTypes.DID_FINISH_RENDERING_FRAME_FULLY;
                 break;
             case WILL_START_RENDERING_MAP:
-                event = new MapChangeEvent(this, EventTypes.WILL_START_RENDERING_MAP);
+                eventType = EventTypes.WILL_START_RENDERING_MAP;
                 break;
             case DID_FINISH_RENDERING_MAP:
-                event = new MapChangeEvent(this, EventTypes.DID_FINISH_RENDERING_MAP);
+                eventType = EventTypes.DID_FINISH_RENDERING_MAP;
                 break;
             case DID_FINISH_RENDERING_MAP_FULLY_RENDERED:
                 if (mPreRenderMethodMap.size() > 0) {
@@ -714,15 +710,15 @@ public class RCTMGLMapView extends MapView implements
                     }
                     mPreRenderMethodMap.clear();
                 }
-                event = new MapChangeEvent(this, EventTypes.DID_FINISH_RENDERING_MAP_FULLY);
+                eventType = EventTypes.DID_FINISH_RENDERING_MAP_FULLY;
                 break;
             case DID_FINISH_LOADING_STYLE:
-                event = new MapChangeEvent(this, EventTypes.DID_FINISH_LOADING_STYLE);
+                eventType = EventTypes.DID_FINISH_LOADING_STYLE;
                 break;
         }
 
-        if (event != null) {
-            mManager.handleEvent(event);
+        if (eventType != null) {
+            handleMapChangedEvent(eventType);
         }
     }
 
@@ -1208,7 +1204,7 @@ public class RCTMGLMapView extends MapView implements
             postDelayed(new Runnable() {
                 @Override
                 public void run() {
-                    sendRegionDidChangeEvent(false);
+                    handleMapChangedEvent(EventTypes.REGION_DID_CHANGE);
                     mCameraChangeTracker.setReason(-1);
                 }
             }, 200);
@@ -1437,19 +1433,30 @@ public class RCTMGLMapView extends MapView implements
         return cameraPosition.bearing;
     }
 
-    private void sendRegionDidChangeEvent(boolean isAnimated) {
-        IEvent event = new MapChangeEvent(this, makeRegionPayload(isAnimated), EventTypes.REGION_DID_CHANGE);
+    private void handleMapChangedEvent(String eventType) {
+        if (!canHandleEvent(eventType)) return;
+
+        IEvent event;
+
+        switch (eventType) {
+            // payload events
+            case EventTypes.REGION_WILL_CHANGE:
+            case EventTypes.REGION_DID_CHANGE:
+                event = new MapChangeEvent(this, makeRegionPayload(mCameraChangeTracker.isAnimated()), eventType);
+                break;
+            default:
+                event = new MapChangeEvent(this, eventType);
+        }
+
         mManager.handleEvent(event);
     }
 
-    private void sendRegionWillChangeEvent(boolean isAnimated) {
-        IEvent event = new MapChangeEvent(this, makeRegionPayload(isAnimated), EventTypes.REGION_WILL_CHANGE);
-        mManager.handleEvent(event);
+    private boolean canHandleEvent(String event) {
+        return mHandledMapChangedEvents == null || mHandledMapChangedEvents.contains(event);
     }
 
-    private void sendRegionIsChangingEvent() {
-        IEvent event = new MapChangeEvent(this, EventTypes.REGION_IS_CHANGING);
-        mManager.handleEvent(event);
+    public void setHandledMapChangedEvents(ArrayList<String> eventsWhiteList) {
+        this.mHandledMapChangedEvents = new HashSet<>(eventsWhiteList);
     }
 
     private void sendUserLocationUpdateEvent(Location location) {
