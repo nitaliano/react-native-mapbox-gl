@@ -375,14 +375,12 @@ public class RCTMGLMapView extends MapView implements
             mMap.moveCamera(CameraUpdateFactory.newCameraPosition(buildCamera()), new MapboxMap.CancelableCallback() {
                 @Override
                 public void onCancel() {
-                    handleMapChangedEvent(EventTypes.REGION_DID_CHANGE);
-                    mCameraChangeTracker.setReason(-1);
+                    sendRegionDidChangeEvent();
                 }
 
                 @Override
                 public void onFinish() {
-                    handleMapChangedEvent(EventTypes.REGION_DID_CHANGE);
-                    mCameraChangeTracker.setReason(-1);
+                    sendRegionDidChangeEvent();
                 }
             });
         }
@@ -425,8 +423,7 @@ public class RCTMGLMapView extends MapView implements
 
                 if (!mCameraChangeTracker.isAnimating()) {
                     Log.d("MOVE_EVENT", "onCameraIdle SENDING DID_CHANGE EVENT isUserInteraction: " + mCameraChangeTracker.isUserInteraction() + " isAnimated: " + mCameraChangeTracker.isAnimated());
-                    handleMapChangedEvent(EventTypes.REGION_DID_CHANGE);
-                    mCameraChangeTracker.setReason(-1);
+                    sendRegionDidChangeEvent();
                 } else {
                     Log.d("MOVE_EVENT", "onCameraIdle NOT SENDING DID_CHANGE EVENT on fling");
                 }
@@ -1204,8 +1201,7 @@ public class RCTMGLMapView extends MapView implements
             postDelayed(new Runnable() {
                 @Override
                 public void run() {
-                    handleMapChangedEvent(EventTypes.REGION_DID_CHANGE);
-                    mCameraChangeTracker.setReason(-1);
+                    sendRegionDidChangeEvent();
                 }
             }, 200);
         }
@@ -1431,6 +1427,11 @@ public class RCTMGLMapView extends MapView implements
     private double getMapRotation() {
         CameraPosition cameraPosition = mMap.getCameraPosition();
         return cameraPosition.bearing;
+    }
+
+    private void sendRegionDidChangeEvent() {
+        handleMapChangedEvent(EventTypes.REGION_DID_CHANGE);
+        mCameraChangeTracker.setReason(-1);
     }
 
     private void handleMapChangedEvent(String eventType) {
