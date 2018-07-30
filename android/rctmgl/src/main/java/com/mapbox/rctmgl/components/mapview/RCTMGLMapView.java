@@ -43,6 +43,8 @@ import com.mapbox.mapboxsdk.plugins.locationlayer.LocationLayerMode;
 import com.mapbox.mapboxsdk.plugins.locationlayer.LocationLayerPlugin;
 import com.mapbox.mapboxsdk.storage.FileSource;
 import com.mapbox.mapboxsdk.style.layers.Layer;
+import com.mapbox.mapboxsdk.style.layers.Property;
+import com.mapbox.mapboxsdk.style.layers.PropertyFactory;
 import com.mapbox.rctmgl.components.AbstractMapFeature;
 import com.mapbox.rctmgl.components.annotation.RCTMGLCallout;
 import com.mapbox.rctmgl.components.annotation.RCTMGLCalloutAdapter;
@@ -62,6 +64,7 @@ import com.mapbox.rctmgl.events.constants.EventKeys;
 import com.mapbox.rctmgl.events.constants.EventTypes;
 import com.mapbox.rctmgl.location.LocationManager;
 import com.mapbox.rctmgl.location.UserLocation;
+import com.mapbox.rctmgl.location.UserLocationLayerConstants;
 import com.mapbox.rctmgl.location.UserLocationVerticalAlignment;
 import com.mapbox.rctmgl.location.UserTrackingMode;
 import com.mapbox.rctmgl.location.UserTrackingState;
@@ -419,6 +422,11 @@ public class RCTMGLMapView extends MapView implements
                 long curTimestamp = System.currentTimeMillis();
                 boolean curAnimated = mCameraChangeTracker.isAnimated();
                 if (curTimestamp - lastTimestamp < 500 && curAnimated == lastAnimated) {
+                      // even if we don't send the change event, we need to set the reason...
+                    //this happens when you have multiple calls to setCamera very quickly. This method will short circuit,
+                    //and then the next time the user moves the map, it will think it is NOT from a user interaction , because
+                    // this flag was not reset
+                    mCameraChangeTracker.setReason(-1);
                     return;
                 }
 
@@ -1227,6 +1235,11 @@ public class RCTMGLMapView extends MapView implements
         int userLayerMode = UserTrackingMode.getMapLayerMode(mUserLocation.getTrackingMode(), mShowUserLocation, mShowUserOrientation);
         if (userLayerMode != mLocationLayer.getLocationLayerMode()) {
             mLocationLayer.setLocationLayerEnabled(userLayerMode);
+
+            Layer accLayer = mMap.getLayer(UserLocationLayerConstants.ACCURACY_LAYER_ID);
+            if (accLayer != null) {
+                accLayer.setProperties(PropertyFactory.visibility(Property.NONE));
+            }
         }
     }
 
