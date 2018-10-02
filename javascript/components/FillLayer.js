@@ -80,7 +80,7 @@ class FillLayer extends AbstractLayer {
       ...this.baseProps,
       sourceLayerID: this.props.sourceLayerID,
     };
-    return <RCTMGLFillLayer {...props} />;
+    return <RCTMGLFillLayer ref='nativeLayer' {...props} />;
   }
 }
 

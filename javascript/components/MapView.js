@@ -17,6 +17,9 @@ import {
   viewPropTypes,
 } from '../utils';
 
+import NativeBridgeComponent from './NativeBridgeComponent';
+import Camera from './Camera';
+
 import _ from 'underscore';
 
 import { getFilter } from '../utils/filterUtils';
@@ -34,34 +37,9 @@ const styles = StyleSheet.create({
 /**
  * MapView backed by Mapbox Native GL
  */
-class MapView extends React.Component {
+class MapView extends NativeBridgeComponent {
   static propTypes = {
     ...viewPropTypes,
-
-    /**
-     * Animates changes between pitch and bearing
-     */
-    animated: PropTypes.bool,
-
-    /**
-     * Initial center coordinate on map [lng, lat]
-     */
-    centerCoordinate: PropTypes.arrayOf(PropTypes.number),
-
-    /**
-     * Shows the users location on the map
-     */
-    showUserLocation: PropTypes.bool,
-
-    /**
-     * The mode used to track the user location on the map
-     */
-    userTrackingMode: PropTypes.number,
-
-    /**
-     * The vertical alignment of the user location within in map. This is only enabled while tracking the users location.
-     */
-    userLocationVerticalAlignment: PropTypes.number,
 
     /**
      * The distance from the edges of the map view’s frame to the edges of the map view’s logical viewport.
@@ -72,16 +50,6 @@ class MapView extends React.Component {
     ]),
 
     /**
-     * Initial heading on map
-     */
-    heading: PropTypes.number,
-
-    /**
-     * Initial pitch on map
-     */
-    pitch: PropTypes.number,
-
-    /**
      * Style for wrapping React Native View
      */
     style: PropTypes.any,
@@ -90,21 +58,6 @@ class MapView extends React.Component {
      * Style URL for map
      */
     styleURL: PropTypes.string,
-
-    /**
-     * Initial zoom level of map
-     */
-    zoomLevel: PropTypes.number,
-
-    /**
-     * Min zoom level of map
-     */
-    minZoomLevel: PropTypes.number,
-
-    /**
-     * Max zoom level of map
-     */
-    maxZoomLevel: PropTypes.number,
 
     /**
      * Automatically change the language of the map labels to the system’s preferred language,
@@ -186,11 +139,6 @@ class MapView extends React.Component {
     onRegionDidChange: PropTypes.func,
 
     /**
-     * This event is triggered whenever the location engine receives a location update
-     */
-    onUserLocationUpdate: PropTypes.func,
-
-    /**
      * This event is triggered when the map is about to start loading a new map style.
      */
     onWillStartLoadingMap: PropTypes.func,
@@ -241,11 +189,6 @@ class MapView extends React.Component {
     onDidFinishLoadingStyle: PropTypes.func,
 
     /**
-     * This event is triggered when the users tracking mode is changed.
-     */
-    onUserTrackingModeChange: PropTypes.func,
-
-    /**
      * The emitted frequency of regionwillchange events
      */
     regionWillChangeDebounceTime: PropTypes.number,
@@ -257,17 +200,12 @@ class MapView extends React.Component {
   };
 
   static defaultProps = {
-    animated: false,
-    heading: 0,
-    pitch: 0,
     localizeLabels: false,
     scrollEnabled: true,
     pitchEnabled: true,
     rotateEnabled: true,
     attributionEnabled: true,
     logoEnabled: true,
-    zoomLevel: 16,
-    userTrackingMode: MapboxGL.UserTrackingModes.None,
     styleURL: MapboxGL.StyleURL.Street,
     surfaceView: false,
     regionWillChangeDebounceTime: 10,
@@ -279,12 +217,15 @@ class MapView extends React.Component {
 
     this.state = {
       isReady: null,
+      region: null,
+      width: 0,
+      height: 0,
+      isUserInteraction: false,
     };
 
     this._onPress = this._onPress.bind(this);
     this._onLongPress = this._onLongPress.bind(this);
     this._onChange = this._onChange.bind(this);
-    this._onAndroidCallback = this._onAndroidCallback.bind(this);
     this._onLayout = this._onLayout.bind(this);
 
     // debounced map change methods
@@ -299,7 +240,6 @@ class MapView extends React.Component {
       props.regionDidChangeDebounceTime,
     );
 
-    this._callbackMap = new Map();
     this._preRefMapMethodQueue = [];
   }
 
@@ -478,9 +418,6 @@ class MapView extends React.Component {
    *  @return {void}
    */
   flyTo(coordinates, duration = 2000) {
-    if (!this._nativeRef) {
-      return Promise.reject('No native reference found');
-    }
     return this.setCamera({
       centerCoordinate: coordinates,
       duration: duration,
@@ -500,9 +437,6 @@ class MapView extends React.Component {
    *  @return {void}
    */
   moveTo(coordinates, duration = 0) {
-    if (!this._nativeRef) {
-      return Promise.reject('No native reference found');
-    }
     return this.setCamera({
       centerCoordinate: coordinates,
       duration: duration,
@@ -521,9 +455,6 @@ class MapView extends React.Component {
    * @return {void}
    */
   zoomTo(zoomLevel, duration = 2000) {
-    if (!this._nativeRef) {
-      return Promise.reject('No native reference found');
-    }
     return this.setCamera({
       zoom: zoomLevel,
       duration: duration,
@@ -616,75 +547,12 @@ class MapView extends React.Component {
         });
       });
     }
-
-    if (isAndroid()) {
-      return new Promise((resolve) => {
-        const callbackID = '' + Date.now();
-        this._addAddAndroidCallback(callbackID, resolve);
-        args.unshift(callbackID);
-        runNativeCommand(NATIVE_MODULE_NAME, methodName, this._nativeRef, args);
-      });
-    }
-    return runNativeCommand(
+    return super._runNativeCommand(
       NATIVE_MODULE_NAME,
-      methodName,
       this._nativeRef,
+      methodName,
       args,
     );
-  }
-
-  _createStopConfig(config = {}) {
-    let stopConfig = {
-      mode: isNumber(config.mode) ? config.mode : MapboxGL.CameraModes.Ease,
-      pitch: config.pitch,
-      heading: config.heading,
-      duration: config.duration || 2000,
-      zoom: config.zoom,
-    };
-
-    if (config.centerCoordinate) {
-      stopConfig.centerCoordinate = toJSONString(
-        makePoint(config.centerCoordinate),
-      );
-    }
-
-    if (config.bounds && config.bounds.ne && config.bounds.sw) {
-      const {
-        ne,
-        sw,
-        paddingLeft,
-        paddingRight,
-        paddingTop,
-        paddingBottom,
-      } = config.bounds;
-      stopConfig.bounds = toJSONString(makeLatLngBounds(ne, sw));
-      stopConfig.boundsPaddingTop = paddingTop || 0;
-      stopConfig.boundsPaddingRight = paddingRight || 0;
-      stopConfig.boundsPaddingBottom = paddingBottom || 0;
-      stopConfig.boundsPaddingLeft = paddingLeft || 0;
-    }
-
-    return stopConfig;
-  }
-
-  _addAddAndroidCallback(id, callback) {
-    this._callbackMap.set(id, callback);
-  }
-
-  _removeAndroidCallback(id) {
-    this._callbackMap.remove(id);
-  }
-
-  _onAndroidCallback(e) {
-    const callbackID = e.nativeEvent.type;
-    const callback = this._callbackMap.get(callbackID);
-
-    if (!callback) {
-      return;
-    }
-
-    this._callbackMap.delete(callbackID);
-    callback.call(null, e.nativeEvent.payload);
   }
 
   _onPress(e) {
@@ -703,12 +571,14 @@ class MapView extends React.Component {
     if (isFunction(this.props.onRegionWillChange)) {
       this.props.onRegionWillChange(payload);
     }
+    this.setState({ isUserInteraction: payload.properties.isUserInteraction });
   }
 
   _onRegionDidChange(payload) {
     if (isFunction(this.props.onRegionDidChange)) {
       this.props.onRegionDidChange(payload);
     }
+    this.setState({ region: payload });
   }
 
   _onChange(e) {
@@ -765,8 +635,12 @@ class MapView extends React.Component {
     }
   }
 
-  _onLayout() {
-    this.setState({ isReady: true });
+  _onLayout(e) {
+    this.setState({
+      isReady: true,
+      width: e.nativeEvent.layout.width,
+      height: e.nativeEvent.layout.height,
+    });
   }
 
   _handleOnChange(propName, payload) {
@@ -810,10 +684,15 @@ class MapView extends React.Component {
     }
   }
 
+  setNativeProps(props) {
+    if (this._nativeRef) {
+      this._nativeRef.setNativeProps(props);
+    }
+  }
+
   render() {
     let props = {
       ...this.props,
-      centerCoordinate: this._getCenterCoordinate(),
       contentInset: this._getContentInset(),
       style: styles.matchParent,
     };

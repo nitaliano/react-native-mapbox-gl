@@ -82,7 +82,7 @@ class CircleLayer extends AbstractLayer {
       ...this.baseProps,
       sourceLayerID: this.props.sourceLayerID,
     };
-    return <RCTMGLCircleLayer {...props} />;
+    return <RCTMGLCircleLayer ref='nativeLayer' {...props} />;
   }
 }
 

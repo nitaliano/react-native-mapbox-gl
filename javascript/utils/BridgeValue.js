@@ -25,7 +25,7 @@ export default class BridgeValue {
     } else if (this.rawValue && typeof this.rawValue === 'object') {
       return Types.HashMap;
     } else {
-      throw new Error('[type] BridgeValue must be a primitive/array/object');
+      throw new Error(`[type - ${this.rawValue}] BridgeValue must be a primitive/array/object`);
     }
   }
 
@@ -58,16 +58,16 @@ export default class BridgeValue {
     ) {
       value = this.rawValue;
     } else {
-      throw new Error('[value] BridgeValue must be a primitive/array/object');
+      throw new Error(`[value - ${this.rawValue}] BridgeValue must be a primitive/array/object`);
     }
 
     return value;
   }
 
-  toJSON() {
+  toJSON(formatter) {
     return {
       type: this.type,
-      value: this.value,
+      value: typeof formatter === 'function' ? formatter(this.value) : this.value,
     };
   }
 }
