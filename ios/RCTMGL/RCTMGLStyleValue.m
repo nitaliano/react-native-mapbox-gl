@@ -71,26 +71,13 @@
 
 - (BOOL)shouldAddImage
 {
-    NSObject *json = expressionJSON;
-    
-    if ([json isKindOfClass:[NSDictionary class]]) {
-        NSDictionary *dict = (NSDictionary *)json;
-        return [dict objectForKey:@"uri"] != nil;
-    }
-    
-    return NO;
+    NSString *imageURI = (NSString *)expressionJSON;
+    return [imageURI containsString:@"://"];
 }
 
 - (NSString *)getImageURI
 {
-    NSObject *json = expressionJSON;
-    
-    if ([json isKindOfClass:[NSDictionary class]]) {
-        NSDictionary *dict = (NSDictionary *)json;
-        return [dict objectForKey:@"uri"];
-    }
-    
-    return (NSString *)json;
+    return (NSString *)expressionJSON;
 }
 
 - (MGLTransition)getTransition

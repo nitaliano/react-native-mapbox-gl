@@ -1,7 +1,5 @@
 package com.mapbox.rctmgl.components.mapview;
 
-import android.os.Handler;
-import android.os.Looper;
 import android.util.Log;
 import android.view.View;
 
@@ -11,15 +9,14 @@ import com.facebook.react.common.MapBuilder;
 import com.facebook.react.uimanager.LayoutShadowNode;
 import com.facebook.react.uimanager.ThemedReactContext;
 import com.facebook.react.uimanager.annotations.ReactProp;
+import com.mapbox.geojson.Point;
 import com.mapbox.mapboxsdk.maps.MapboxMap;
 import com.mapbox.rctmgl.components.AbstractEventEmitter;
 import com.mapbox.rctmgl.events.constants.EventKeys;
 import com.mapbox.rctmgl.utils.ConvertUtils;
-import com.mapbox.rctmgl.utils.FilterParser;
+import com.mapbox.rctmgl.utils.ExpressionParser;
 import com.mapbox.rctmgl.utils.GeoJSONUtils;
-import com.mapbox.services.commons.geojson.Point;
 
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.ExecutionException;
@@ -117,11 +114,6 @@ public class RCTMGLMapViewManager extends AbstractEventEmitter<RCTMGLMapView> {
         mapView.setReactStyleURL(styleURL);
     }
 
-    @ReactProp(name="animated")
-    public void setAnimated(RCTMGLMapView mapView, boolean isAnimated) {
-        mapView.setReactAnimated(isAnimated);
-    }
-
     @ReactProp(name="localizeLabels")
     public void setLocalizeLabels(RCTMGLMapView mapView, boolean localizeLabels) {
         mapView.setLocalizeLabels(localizeLabels);
@@ -162,57 +154,9 @@ public class RCTMGLMapViewManager extends AbstractEventEmitter<RCTMGLMapView> {
         mapView.setReactCompassEnabled(compassEnabled);
     }
 
-    @ReactProp(name="heading")
-    public void setHeading(RCTMGLMapView mapView, double heading) {
-        mapView.setReactHeading(heading);
-    }
-
-    @ReactProp(name="pitch")
-    public void setPitch(RCTMGLMapView mapView, double pitch) {
-        mapView.setReactPitch(pitch);
-    }
-
-    @ReactProp(name="zoomLevel")
-    public void setZoomLevel(RCTMGLMapView mapView, double zoomLevel) {
-        mapView.setReactZoomLevel(zoomLevel);
-    }
-
-    @ReactProp(name="minZoomLevel")
-    public void setMinZoomLevel(RCTMGLMapView mapView, double minZoomLevel) {
-        mapView.setReactMinZoomLevel(minZoomLevel);
-    }
-
-    @ReactProp(name="maxZoomLevel")
-    public void setMaxZoomLevel(RCTMGLMapView mapView, double maxZoomLevel) {
-        mapView.setReactMaxZoomLevel(maxZoomLevel);
-    }
-
     @ReactProp(name="contentInset")
     public void setContentInset(RCTMGLMapView mapView, ReadableArray array) {
         mapView.setReactContentInset(array);
-    }
-
-    @ReactProp(name="centerCoordinate")
-    public void setCenterCoordinate(RCTMGLMapView mapView, String featureJSONStr) {
-        Point centerCoordinate = GeoJSONUtils.toPointGeometry(featureJSONStr);
-        if (centerCoordinate != null) {
-            mapView.setReactCenterCoordinate(centerCoordinate);
-        }
-    }
-
-    @ReactProp(name="showUserLocation")
-    public void setShowUserLocation(RCTMGLMapView mapView, boolean showUserLocation) {
-        mapView.setReactShowUserLocation(showUserLocation);
-    }
-
-    @ReactProp(name="userTrackingMode")
-    public void setUserTrackingMode(RCTMGLMapView mapView, int userTrackingMode) {
-        mapView.setReactUserTrackingMode(userTrackingMode);
-    }
-
-    @ReactProp(name="userLocationVerticalAlignment")
-    public void setUserLocationVerticalAlignment(RCTMGLMapView mapView, int userLocationVerticalAlignment) {
-        mapView.setReactUserLocationVerticalAlignment(userLocationVerticalAlignment);
     }
 
     //endregion
@@ -234,8 +178,6 @@ public class RCTMGLMapViewManager extends AbstractEventEmitter<RCTMGLMapView> {
     //endregion
 
     //region React Methods
-
-    public static final int METHOD_SET_CAMERA = 1;
     public static final int METHOD_QUERY_FEATURES_POINT = 2;
     public static final int METHOD_QUERY_FEATURES_RECT = 3;
     public static final int METHOD_VISIBLE_BOUNDS = 4;
@@ -249,7 +191,6 @@ public class RCTMGLMapViewManager extends AbstractEventEmitter<RCTMGLMapView> {
     @Override
     public Map<String, Integer> getCommandsMap() {
         return MapBuilder.<String, Integer>builder()
-                .put("setCamera", METHOD_SET_CAMERA)
                 .put("queryRenderedFeaturesAtPoint", METHOD_QUERY_FEATURES_POINT)
                 .put("queryRenderedFeaturesInRect", METHOD_QUERY_FEATURES_RECT)
                 .put("getVisibleBounds", METHOD_VISIBLE_BOUNDS)
@@ -271,21 +212,18 @@ public class RCTMGLMapViewManager extends AbstractEventEmitter<RCTMGLMapView> {
         }
 
         switch (commandID) {
-            case METHOD_SET_CAMERA:
-                mapView.setCamera(args.getString(0), args.getMap(1));
-                break;
             case METHOD_QUERY_FEATURES_POINT:
                 mapView.queryRenderedFeaturesAtPoint(
                         args.getString(0),
                         ConvertUtils.toPointF(args.getArray(1)),
-                        FilterParser.getFilterList(args.getArray(2)),
+                        ExpressionParser.from(args.getArray(2)),
                         ConvertUtils.toStringList(args.getArray(3)));
                 break;
             case METHOD_QUERY_FEATURES_RECT:
                 mapView.queryRenderedFeaturesInRect(
                         args.getString(0),
                         ConvertUtils.toRectF(args.getArray(1)),
-                        FilterParser.getFilterList(args.getArray(2)),
+                        ExpressionParser.from(args.getArray(2)),
                         ConvertUtils.toStringList(args.getArray(3)));
                 break;
             case METHOD_VISIBLE_BOUNDS:

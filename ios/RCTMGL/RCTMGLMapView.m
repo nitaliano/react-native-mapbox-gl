@@ -55,6 +55,9 @@ static double const M2PI = M_PI * 2;
         RCTMGLPointAnnotation *pointAnnotation = (RCTMGLPointAnnotation *)subview;
         pointAnnotation.map = self;
         [_pointAnnotations addObject:pointAnnotation];
+    } else if ([subview isKindOfClass:[RCTMGLCamera class]]) {
+        RCTMGLCamera *camera = (RCTMGLCamera *)subview;
+        camera.map = self;
     } else {
         NSArray<id<RCTComponent>> *childSubviews = [subview reactSubviews];
 
@@ -74,6 +77,9 @@ static double const M2PI = M_PI * 2;
         RCTMGLPointAnnotation *pointAnnotation = (RCTMGLPointAnnotation *)subview;
         pointAnnotation.map = nil;
         [_pointAnnotations removeObject:pointAnnotation];
+    } else if ([subview isKindOfClass:[RCTMGLCamera class]]) {
+        RCTMGLCamera *camera = (RCTMGLCamera *)subview;
+        camera.map = nil;
     } else {
         NSArray<id<RCTComponent>> *childSubViews = [subview reactSubviews];
         
@@ -151,18 +157,6 @@ static double const M2PI = M_PI * 2;
     self.compassView.hidden = !_reactCompassEnabled;
 }
 
-- (void)setReactShowUserLocation:(BOOL)reactShowUserLocation
-{
-    _reactShowUserLocation = reactShowUserLocation;
-    self.showsUserLocation = _reactShowUserLocation;
-}
-
-- (void)setReactCenterCoordinate:(NSString *)reactCenterCoordinate
-{
-    _reactCenterCoordinate = reactCenterCoordinate;
-    [self _updateCameraIfNeeded:YES];
-}
-
 - (void)setReactContentInset:(NSArray<NSNumber *> *)reactContentInset
 {
     CGFloat top = 0.0f, right = 0.0f, left = 0.0f, bottom = 0.0f;
@@ -192,49 +186,6 @@ static double const M2PI = M_PI * 2;
     _reactStyleURL = reactStyleURL;
     [self _removeAllSourcesFromMap];
     self.styleURL = [self _getStyleURLFromKey:_reactStyleURL];
-}
-
-- (void)setHeading:(double)heading
-{
-    _heading = heading;
-    [self _updateCameraIfNeeded:NO];
-}
-
-- (void)setPitch:(double)pitch
-{
-    _pitch = pitch;
-    [self _updateCameraIfNeeded:NO];
-}
-
-- (void)setReactZoomLevel:(double)reactZoomLevel
-{
-    _reactZoomLevel = reactZoomLevel;
-    self.zoomLevel = _reactZoomLevel;
-}
-
-- (void)setReactMinZoomLevel:(double)reactMinZoomLevel
-{
-    _reactMinZoomLevel = reactMinZoomLevel;
-    self.minimumZoomLevel = _reactMinZoomLevel;
-}
-
-- (void)setReactMaxZoomLevel:(double)reactMaxZoomLevel
-{
-    _reactMaxZoomLevel = reactMaxZoomLevel;
-    self.maximumZoomLevel = reactMaxZoomLevel;
-}
-
-- (void)setReactUserTrackingMode:(int)reactUserTrackingMode
-{
-    _reactUserTrackingMode = reactUserTrackingMode;
-    [self setUserTrackingMode:_reactUserTrackingMode animated:NO];
-    self.showsUserHeadingIndicator = (NSUInteger)_reactUserTrackingMode == MGLUserTrackingModeFollowWithHeading;
-}
-
-- (void)setReactUserLocationVerticalAlignment:(int)reactUserLocationVerticalAlignment
-{
-    _reactUserLocationVerticalAlignment = reactUserLocationVerticalAlignment;
-    self.userLocationVerticalAlignment = reactUserLocationVerticalAlignment;
 }
 
 #pragma mark - methods
@@ -329,18 +280,6 @@ static double const M2PI = M_PI * 2;
 - (NSURL*)_getStyleURLFromKey:(NSString *)styleURL
 {
     return [NSURL URLWithString:styleURL];
-}
-
-- (void)_updateCameraIfNeeded:(BOOL)shouldUpdateCenterCoord
-{
-    if (shouldUpdateCenterCoord) {
-        [self setCenterCoordinate:[RCTMGLUtils fromFeature:_reactCenterCoordinate] animated:_animated];
-    } else {
-        MGLMapCamera *camera = [self.camera copy];
-        camera.pitch = _pitch;
-        camera.heading = _heading;
-        [self setCamera:camera animated:_animated];
-    }
 }
 
 - (void)_removeAllSourcesFromMap

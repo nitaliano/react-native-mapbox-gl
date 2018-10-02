@@ -2,6 +2,7 @@ package com.mapbox.rctmgl.components;
 
 import android.view.ViewGroup;
 
+import com.facebook.react.ReactApplication;
 import com.facebook.react.bridge.ReactApplicationContext;
 import com.facebook.react.common.MapBuilder;
 import com.facebook.react.uimanager.ViewGroupManager;
@@ -12,6 +13,7 @@ import java.util.Map;
 
 import javax.annotation.Nullable;
 
+import com.mapbox.rctmgl.events.EventEmitter;
 import com.mapbox.rctmgl.events.IEvent;
 
 /**
@@ -37,7 +39,11 @@ abstract public class AbstractEventEmitter<T extends ViewGroup> extends ViewGrou
         }
 
         mRateLimitedEvents.put(eventCacheKey, System.currentTimeMillis());
-        getEventEmitter().receiveEvent(event.getID(), event.getKey(), event.toJSON());
+
+        RCTEventEmitter emitter = EventEmitter.getViewEmitter(mRCTAppContext);
+        if (emitter != null) {
+            emitter.receiveEvent(event.getID(), event.getKey(), event.toJSON());
+        }
     }
 
     @Nullable
@@ -54,10 +60,6 @@ abstract public class AbstractEventEmitter<T extends ViewGroup> extends ViewGrou
     }
 
     public abstract Map<String, String> customEvents();
-
-    private RCTEventEmitter getEventEmitter() {
-        return mRCTAppContext.getJSModule(RCTEventEmitter.class);
-    }
 
     private boolean shouldDropEvent(String cacheKey, IEvent event) {
         Long lastEventTimestamp = mRateLimitedEvents.get(cacheKey);
