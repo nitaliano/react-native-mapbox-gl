@@ -14,7 +14,7 @@ Pod::Spec.new do |s|
   s.source_files	= "ios/RCTMGL/**/*.{h,m}"
 
   s.vendored_frameworks = 'ios/Mapbox.framework'
-  s.preserve_paths = ['scripts']
+  s.prepare_command = 'node scripts/download-mapbox-gl-native-ios-if-on-mac.js 3.7.8'
 
   s.dependency 'React'
 end
