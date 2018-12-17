@@ -9,15 +9,14 @@ import sheet from '../styles/sheet';
 const styles = MapboxGL.StyleSheet.create({
   line: {
     lineCap: "round",
-    lineJoin: "rouncd",
+    lineJoin: "round",
     lineOpacity: 0.6,
     lineColor: "rgb(53, 175, 109)",
     lineWidth: 2
   },
 });
 
-const VECTOR_SOURCE_URL =
-  'https://d25uarhxywzl1j.cloudfront.net/v0.1/{z}/{x}/{y}.mvt';
+const TILEJSON_URL = "https://s3.amazonaws.com/tgaw/tilejson.json";
 
 // This example ported to React Native:
 // https://www.mapbox.com/mapbox-gl-js/example/third-party/
@@ -32,10 +31,11 @@ class ThirdPartyVectorTileSource extends React.PureComponent {
         <MapboxGL.MapView
           zoomLevel={12}
           centerCoordinate={[-87.622088, 41.878781]}
+          styleURL="mapbox://styles/mapbox/light-v9"
           style={sheet.matchParent}>
           <MapboxGL.VectorSource
             id="customTileSourceExample"
-            url={VECTOR_SOURCE_URL}>
+            url={TILEJSON_URL}>
             <MapboxGL.LineLayer
               id="customTileSourceLine"
               sourceLayerID="mapillary-sequences"
