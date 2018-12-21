@@ -345,6 +345,27 @@ class MapView extends React.Component {
   }
 
   /**
+   * The user's viewport bounds in the given view's coordinate system.
+   *
+   * @example
+   * const visibleBounds = await this._map.getVisibleBoundsInViewCoordinates();
+   *
+   * @return {Array}
+   */
+  async getVisibleBoundsInViewCoordinates() {
+    const bounds = await this.getVisibleBounds();
+    const viewCoords = [
+      await this.getPointInView(bounds[0]),
+      await this.getPointInView(bounds[1]),
+    ];
+    const maxX = Math.max(viewCoords[0][0], viewCoords[1][0]);
+    const minX = Math.min(viewCoords[0][0], viewCoords[1][0]);
+    const maxY = Math.max(viewCoords[0][1], viewCoords[1][1]);
+    const minY = Math.min(viewCoords[0][1], viewCoords[1][1]);
+    return [maxY, maxX, minY, minX];
+  }
+
+  /**
    * Returns an array of rendered map features that intersect with a given point.
    *
    * @example
