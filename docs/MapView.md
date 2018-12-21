@@ -93,6 +93,22 @@ const visibleBounds = await this._map.getVisibleBounds();
 ```
 
 
+#### getVisibleBoundsInViewCoordinates()
+
+The user's viewport bounds in the given view's coordinate system.
+
+##### arguments
+| Name | Type | Required | Description  |
+| ---- | :--: | :------: | :----------: |
+
+
+
+
+```javascript
+const visibleBounds = await this._map.getVisibleBoundsInViewCoordinates();
+```
+
+
 #### queryRenderedFeaturesAtPoint(coordinate[, filter][, layerIDs])
 
 Returns an array of rendered map features that intersect with a given point.
