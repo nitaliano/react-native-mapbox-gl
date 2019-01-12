@@ -42,6 +42,13 @@ yarn add @mapbox/react-native-mapbox-gl
 npm install @mapbox/react-native-mapbox-gl --save
 ```
 
+**also add following pacakge to dependency in your package.json**
+
+```
+    "@cedarstudios/react-native-mapbox-gl": "git+https://github.com/cedarstudios/react-native-mapbox-gl.git",
+```
+
+
 ## Installation Guides
 
 * [Android](/android/install.md)
