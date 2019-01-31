@@ -47,7 +47,7 @@ export function runNativeCommand(module, name, nativeRef, args = []) {
   }
 
   const managerInstance = isAndroid()
-    ? NativeModules.UIManager[module]
+    ? NativeModules.UIManager.getViewManagerConfig(module)
     : NativeModules[getIOSModuleName(module)];
   if (!managerInstance) {
     throw new Error(`Could not find ${module}`);
