@@ -57,14 +57,8 @@ const styles = StyleSheet.create({
     fontSize: 18,
     fontWeight: 'bold',
   },
-  header: {
-    marginTop: 48,
-    fontSize: 24,
-    textAlign: 'center',
-  },
   exampleList: {
     flex: 1,
-    marginTop: 60 + 12, // header + list padding,
   },
   exampleListItemBorder: {
     borderBottomWidth: StyleSheet.hairlineWidth,

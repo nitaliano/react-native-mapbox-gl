@@ -50,7 +50,7 @@ class MapHeader extends React.PureComponent {
     return (
       <Icon
         size={32}
-        iconStyle={{position: 'relative', top: 2}}
+        iconStyle={{alignSelf: "center"}}
         onPress={this.props.onBack}
         color={colors.secondary.white}
         underlayColor={'rgba(255, 255, 255, 0.4)'}
@@ -79,7 +79,7 @@ class MapHeader extends React.PureComponent {
         backgroundColor={this.props.backgroundColor}
         statusBarProps={statusBarProps}
         elevation={2}
-        outerContainerStyles={containerStyle}
+        containerStyle={containerStyle}
         leftComponent={this.renderBackIcon()}
         centerComponent={this.renderTitle()}
       />

@@ -33,7 +33,6 @@ npm start
 
 ## Run Android Simulator
 
-* Open up Android Studio and build with gradle
 * Start Android emulator
 * Run `adb reverse tcp:8081 tcp:8081` to foward port to packager(needed for hot reloading, if you're not developing you can skip this step).
 * Run `react-native run-android` from `example` directory
