@@ -5,7 +5,6 @@ import {Button} from 'react-native-elements';
 import {lineString as makeLineString} from '@turf/helpers';
 
 import RouteSimulator from '../utils/RouteSimulator';
-import MapboxClient from '../MapboxClient';
 import sheet from '../styles/sheet';
 import {SF_OFFICE_COORDINATE} from '../utils';
 
