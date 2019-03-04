@@ -9,6 +9,9 @@ const styles = StyleSheet.create({
     label: {
         fontSize: 24,
         color: colors.secondary.white,
+    },
+    container: {
+        borderBottomWidth: 0
     }
 });
 
@@ -38,7 +41,12 @@ class MapHeader extends React.PureComponent {
                 placement="left"
                 backgroundColor={this.props.backgroundColor}
                 statusBarProps={statusBarProps}
-                leftComponent={{icon: this.props.onBack ? 'arrow-back' : "", onPress: this.props.onBack, color: colors.secondary.white}}
+                containerStyle={styles.container}
+                leftComponent={{
+                    icon: this.props.onBack ? 'arrow-back' : "",
+                    onPress: this.props.onBack,
+                    color: colors.secondary.white
+                }}
                 centerComponent={{text: this.props.label, style: styles.label}}
             />
         );
