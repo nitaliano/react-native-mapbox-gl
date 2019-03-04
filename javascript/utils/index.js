@@ -71,7 +71,7 @@ export function cloneReactChildrenWithProps(children, propsToAdd = {}) {
     foundChildren = [children];
   }
 
-  const filteredChildren = foundChildren.filter(child => !!child); // filter out falsy children, since some can be null
+  const filteredChildren = foundChildren.filter(child => child != null); // filter out falsy children, since some can be null
   return React.Children.map(filteredChildren, child =>
     React.cloneElement(child, propsToAdd),
   );
