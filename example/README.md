@@ -22,8 +22,7 @@ cd example
 ```
 * Create a file called `accesstoken` in the root of the example project and just paste in your [Mapbox access token](https://www.mapbox.com/studio/account/tokens/).
 
-* Install our dependencies using `npm i`.
-
+* Install our dependencies using `npm install`.
 ## Start React Native Packager
 
 Open up another tab in your Terminal and run
@@ -50,9 +49,8 @@ chmod +x gradlew
 
 You can run this with the react-native cli or Xcode
 
-```
-react-native run-ios
-```
+* Run `cd ios && pod install && cd ..` from `example` directory to install cocoapods pods
+* Run `react-native run-ios` from `example` directory
 
 **NOTE**
 
