@@ -1,6 +1,6 @@
 import React from 'react';
 import MapboxGL from '@mapbox/react-native-mapbox-gl';
-import {FlatList, Modal, SafeAreaView, StyleSheet, Text, TouchableOpacity, View,} from 'react-native';
+import {FlatList, Modal, StyleSheet, Text, TouchableOpacity, View,} from 'react-native';
 import {Icon} from 'react-native-elements';
 // Components
 import MapHeader from './components/common/MapHeader';
@@ -43,6 +43,7 @@ import TakeSnapshotWithMap from './components/TakeSnapshotWithMap';
 import GetZoom from './components/GetZoom';
 import GetCenter from './components/GetCenter';
 import UserLocationChange from './components/UserLocationChange';
+import SafeAreaView from 'react-native-safe-area-view';
 
 const styles = StyleSheet.create({
     noPermissionsText: {
@@ -61,6 +62,7 @@ const styles = StyleSheet.create({
         paddingHorizontal: 16,
         flexDirection: 'row',
         justifyContent: 'space-between',
+        backgroundColor: colors.secondary.white
     },
     exampleListLabel: {
         fontSize: 18,
@@ -185,15 +187,18 @@ class App extends React.Component {
 
         return (
             <Modal {...modalProps}>
-                <View style={styles.exampleBackground}>
-                    {modalProps.visible ? (
-                        <item.Component
-                            key={item.label}
-                            label={item.label}
-                            onDismissExample={this.onCloseExample}
-                        />
-                    ) : null}
-                </View>
+                <SafeAreaView style={[sheet.matchParent, {backgroundColor: colors.primary.pink}]}
+                              forceInset={{top: 'always'}}>
+                    <View style={styles.exampleBackground}>
+                        {modalProps.visible ? (
+                            <item.Component
+                                key={item.label}
+                                label={item.label}
+                                onDismissExample={this.onCloseExample}
+                            />
+                        ) : null}
+                    </View>
+                </SafeAreaView>
             </Modal>
         );
     }
@@ -204,7 +209,8 @@ class App extends React.Component {
                 return null;
             }
             return (
-                <SafeAreaView style={[sheet.matchParent, {backgroundColor: colors.primary.blue}]}>
+                <SafeAreaView style={[sheet.matchParent, {backgroundColor: colors.primary.blue}]}
+                              forceInset={{top: 'always'}}>
                     <View style={sheet.matchParent}>
                         <Text style={styles.noPermissionsText}>
                             You need to accept location permissions in order to use this example
@@ -216,8 +222,8 @@ class App extends React.Component {
         }
 
         return (
-            <SafeAreaView style={[sheet.matchParent, {backgroundColor: colors.primary.blue}]}>
-
+            <SafeAreaView style={[sheet.matchParent, {backgroundColor: colors.primary.blue}]}
+                          forceInset={{top: 'always'}}>
                 <View style={sheet.matchParent}>
                     <MapHeader label="React Native Mapbox GL"/>
 

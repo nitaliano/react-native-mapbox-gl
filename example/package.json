@@ -29,6 +29,7 @@
     "react": "16.8.3",
     "react-native": "0.58.6",
     "react-native-elements": "^1.1.0",
+    "react-native-safe-area-view": "^0.13.1",
     "react-native-vector-icons": "^6.3.0",
     "url": "^0.11.0"
   },
