@@ -13,6 +13,6 @@ Pod::Spec.new do |s|
   s.source      	= { :git => "https://github.com/mapbox/react-native-mapbox-gl.git" }
   s.source_files	= "ios/RCTMGL/**/*.{h,m}"
 
-  s.vendored_frameworks = 'ios/Mapbox.framework'
   s.dependency 'React'
+  s.dependency 'Mapbox-iOS-SDK', '~> 3.7.8'
 end
