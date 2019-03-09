@@ -14,7 +14,9 @@ Then run `pod install` and rebuild your project.
 
 ### Add Native Mapbox SDK Framework
 
-Select your project in the `Project navigator`. Click `General` tab then add `node_modules/@mapbox/react-native-mapbox-gl/ios/Mapbox.framework` to `Embedded Binaries`. :collision: **Important, make sure you're adding it to general -> `Embedded Binaries` :collision:**
+[Download a release of the Mapbox iOS SDK](https://github.com/mapbox/mapbox-gl-native/releases] (the target Mapbox-iOS-SDK version will be listed in `node_modules/@mapbox/react-native-mapbox-gl/react-native-mapbox-gl.podspec`, unzip it and copy `Mapbox.framework` into the `Frameworks` directory in your project.
+
+Select your project in the `Project navigator`. Click `General` tab then add `Frameworks/Mapbox.framework` to `Embedded Binaries`. :collision: **Important, make sure you're adding it to General -> `Embedded Binaries` :collision:**
 
 Click 'Add other' to open the file browser and select Mapbox.framework.
 
@@ -26,11 +28,6 @@ Select the 'Copy items if needed' checkbox.
 ### Add React Native Mapbox SDK Files
 In Xcode's `Project navigator`, right click on the `Libraries` folder ➜ `Add Files to <...>`. Add `node_modules/@mapbox/react-native-mapbox-gl/ios/RCTMGL.xcodeproj`.
 Then in Xcode navigate to `Build Phases` click on it and you should see `Link Binary with Libraries`, we need to add `libRCTMGL.a`.
-
-### Add Framework Header Search Paths
-In the `Build Settings` of your application target search for `FRAMEWORK_SEARCH_PATHS`. Add `$(PROJECT_DIR)/../node_modules/@mapbox/react-native-mapbox-gl/ios` non-recursive to your `Framework Search Paths`.
-
-**Important** If there is a select input under `Debug` line, choose `Any iOS SDK`.
 
 ### Add Run Script
 
