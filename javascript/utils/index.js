@@ -8,6 +8,18 @@ import {
 } from 'react-native';
 import resolveAssetSource from 'react-native/Libraries/Image/resolveAssetSource';
 
+function getAndroidManagerInstance(module) {
+  const haveViewManagerConfig =
+    NativeModules.UIManager && NativeModules.UIManager.getViewManagerConfig;
+  return haveViewManagerConfig
+    ? NativeModules.UIManager.getViewManagerConfig(module)
+    : NativeModules.UIManager[module];
+}
+
+function getIosManagerInstance(module) {
+  return NativeModules[getIOSModuleName(module)];
+}
+
 export const viewPropTypes = ViewPropTypes || View.props;
 
 export function isAndroid() {
@@ -38,15 +50,6 @@ export function isPrimitive(value) {
   return isString(value) || isNumber(value) || isBoolean(value);
 }
 
-export function getAndroidManagerInstance(module) {
-  const haveViewManagerConfig = NativeModules.UIManager && NativeModules.UIManager.getViewManagerConfig;
-  return haveViewManagerConfig ? NativeModules.UIManager.getViewManagerConfig(module) : NativeModules.UIManager[module];
-}
-
-export function getIosManagerInstance(module) {
-  return NativeModules[getIOSModuleName(module)];
-}
-
 export function runNativeCommand(module, name, nativeRef, args = []) {
   const handle = findNodeHandle(nativeRef);
   if (!handle) {
@@ -55,9 +58,9 @@ export function runNativeCommand(module, name, nativeRef, args = []) {
 
   const managerInstance = isAndroid()
     ? getAndroidManagerInstance(module)
-    : getIosManagerInstance(module)];
-  
-    if (!managerInstance) {
+    : getIosManagerInstance(module);
+
+  if (!managerInstance) {
     throw new Error(`Could not find ${module}`);
   }
 
@@ -80,7 +83,7 @@ export function cloneReactChildrenWithProps(children, propsToAdd = {}) {
   if (!Array.isArray(children)) {
     foundChildren = [children];
   } else {
-    foundChildren = children
+    foundChildren = children;
   }
 
   const filteredChildren = foundChildren.filter(child => !!child); // filter out falsy children, since some can be null
