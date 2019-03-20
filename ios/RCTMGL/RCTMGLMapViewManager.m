@@ -486,9 +486,7 @@ RCT_EXPORT_METHOD(setCamera:(nonnull NSNumber*)reactTag
 
 - (void)mapViewRegionIsChanging:(MGLMapView *)mapView
 {
-    ((RCTMGLMapView *) mapView).isUserInteraction = (BOOL)(reason & ~MGLCameraChangeReasonProgrammatic);
-
-    NSDictionary *payload = [self _makeRegionPayload:mapView animated:animated];
+    NSDictionary *payload = [self _makeRegionPayload:mapView animated:false];
     [self reactMapDidChange:mapView eventType:RCT_MAPBOX_REGION_IS_CHANGING andPayload:payload];
 }
 
