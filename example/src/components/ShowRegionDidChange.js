@@ -9,6 +9,13 @@ import BaseExamplePropTypes from './common/BaseExamplePropTypes';
 import TabBarPage from './common/TabBarPage';
 import Bubble from './common/Bubble';
 
+const isValidCoordinate = geometry => {
+  if (!geometry) {
+    return false;
+  }
+  return geometry.coordinates[0] !== 0 && geometry.coordinates[1] !== 0;
+};
+
 class ShowRegionDidChange extends React.Component {
   static propTypes = {
     ...BaseExamplePropTypes,
@@ -52,13 +59,6 @@ class ShowRegionDidChange extends React.Component {
     console.log('Visible Bounds', visibleBounds); // eslint-disable-line no-console
   }
 
-  isValidCoordinate(geometry) {
-    if (!geometry) {
-      return false;
-    }
-    return geometry.coordinates[0] !== 0 && geometry.coordinates[1] !== 0;
-  }
-
   onRegionWillChange(regionFeature) {
     this.setState({reason: 'will change', regionFeature});
   }
@@ -67,10 +67,14 @@ class ShowRegionDidChange extends React.Component {
     this.setState({reason: 'did change', regionFeature});
   }
 
+  onRegionIsChanging(regionFeature) {
+    this.setState({reason: 'is changing', regionFeature});
+  }
+
   renderRegionChange() {
     if (
       !this.state.regionFeature ||
-      !this.isValidCoordinate(this.state.regionFeature.geometry)
+      !isValidCoordinate(this.state.regionFeature.geometry)
     ) {
       return (
         <Bubble>
@@ -118,6 +122,7 @@ class ShowRegionDidChange extends React.Component {
           onDidFinishLoadingMap={this.onDidFinishLoadingMap}
           onRegionWillChange={this.onRegionWillChange}
           onRegionDidChange={this.onRegionDidChange}
+          onRegionIsChanging={this.onRegionIsChanging}
         />
 
         {this.renderRegionChange()}
