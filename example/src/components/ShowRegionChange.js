@@ -16,7 +16,7 @@ const isValidCoordinate = geometry => {
   return geometry.coordinates[0] !== 0 && geometry.coordinates[1] !== 0;
 };
 
-class ShowRegionDidChange extends React.Component {
+class ShowRegionChange extends React.Component {
   static propTypes = {
     ...BaseExamplePropTypes,
   };
@@ -40,8 +40,8 @@ class ShowRegionDidChange extends React.Component {
 
     this.onRegionDidChange = this.onRegionDidChange.bind(this);
     this.onRegionWillChange = this.onRegionWillChange.bind(this);
-    this.onDidFinishLoadingMap = this.onDidFinishLoadingMap.bind(this);
     this.onOptionPress = this.onOptionPress.bind(this);
+    this.onRegionIsChanging = this.onRegionIsChanging.bind(this);
   }
 
   async onOptionPress(optionIndex, optionData) {
@@ -52,11 +52,6 @@ class ShowRegionDidChange extends React.Component {
     } else if (optionIndex === 2) {
       await this.map.zoomTo(optionData, 200);
     }
-  }
-
-  async onDidFinishLoadingMap() {
-    const visibleBounds = await this.map.getVisibleBounds();
-    console.log('Visible Bounds', visibleBounds); // eslint-disable-line no-console
   }
 
   onRegionWillChange(regionFeature) {
@@ -131,4 +126,4 @@ class ShowRegionDidChange extends React.Component {
   }
 }
 
-export default ShowRegionDidChange;
+export default ShowRegionChange;
