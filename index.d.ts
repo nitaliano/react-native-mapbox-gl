@@ -6,10 +6,7 @@ import {
 
 import {
     ViewProperties,
-    NativeModules,
-    EmitterSubscription,
     ViewStyle,
-    RegisteredStyle
 } from 'react-native';
 
 /**
