@@ -49,7 +49,9 @@ class MapView extends React.Component {
     /**
      * Initial bounds on map [[lng, lat], [lng, lat]]
      */
-    visibleCoordinateBounds: PropTypes.arrayOf(PropTypes.arrayOf(PropTypes.number)),
+    visibleCoordinateBounds: PropTypes.arrayOf(
+      PropTypes.arrayOf(PropTypes.number),
+    ),
 
     /**
      * Shows the users location on the map
