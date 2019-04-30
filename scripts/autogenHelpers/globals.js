@@ -188,6 +188,10 @@ global.jsStyleType = function(prop) {
     return 'StyleTypes.Color';
   }
 
+  if (prop.type === 'enum') {
+    return 'StyleTypes.Enum';
+  }
+
   if (prop.type === 'string' && prop.image) {
     return 'StyleTypes.Image';
   }

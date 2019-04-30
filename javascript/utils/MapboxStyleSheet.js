@@ -56,6 +56,15 @@ class MapStyleTranslationItem extends MapStyleItem {
   }
 }
 
+class MapStyleEnumItem extends MapStyleItem {
+  constructor(prop, value, extras = {}) {
+    super(StyleTypes.Enum, {
+      value: resolveStyleValue(prop, value),
+      ...extras,
+    });
+  }
+}
+
 class MapStyleConstantItem extends MapStyleItem {
   constructor(prop, value, extras = {}) {
     super(StyleTypes.Constant, {
@@ -183,6 +192,8 @@ function makeStyleValue(prop, value, extras = {}, shouldMarkAsStyle = true) {
       shouldAddImage: typeof value === 'number', // required from JS, tell native code to add image to map style
       ...extraData,
     });
+  } else if (styleMap[prop] === StyleTypes.Enum) {
+    item = new MapStyleEnumItem(prop, value, extraData);
   } else {
     item = new MapStyleConstantItem(prop, value, extraData);
   }
