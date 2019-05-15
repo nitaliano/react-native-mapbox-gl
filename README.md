@@ -15,6 +15,7 @@ Not a Mapbox user yet? [Sign up for an account here](https://www.mapbox.com/sign
 
 
 ## Installation
+🛑 NB: The current release `6.1.4` is not up on NPM. You have to get the master version from github. 🛑
 
 **Dependencies**
 
@@ -30,12 +31,12 @@ cd react-native-mapbox-gl
 
 **Yarn**
 ```
-yarn add @mapbox/react-native-mapbox-gl
+yarn add https://github.com/nitaliano/react-native-mapbox-gl#master
 ```
 
 **Npm**
 ```
-npm install @mapbox/react-native-mapbox-gl --save
+npm install https://github.com/nitaliano/react-native-mapbox-gl/tarball/master
 ```
 
 ## Installation Guides
