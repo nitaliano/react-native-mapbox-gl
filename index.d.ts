@@ -342,6 +342,7 @@ interface CalloutProps {
     url?: string;
     onPress?: () => void;
     hitbox?: any;
+    title?: string;
 }
 
 interface VectorSourceProps {
@@ -365,7 +366,7 @@ interface ShapeSourceProps {
     tolerance?: number;
     images?: any;
     onPress?: () => void;
-    hitbox: any;
+    hitbox?: any;
 }
 
 interface RasterSourceProps {
