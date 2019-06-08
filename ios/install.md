@@ -70,3 +70,16 @@ Open the newly added `Run Script` and paste:
 ```
 
 Checkout the [example application](/example/README.md) to see how it's configured for an example.
+
+## Troubleshooting
+
+### Mapbox.framework is not in my node_modules
+
+Fetching the Mapbox.framework may have failed. There are two solutions that may work. 
+  1. You can try re-installing this package. With NPM:  `npm install https://github.com/nitaliano/react-native-mapbox-gl/tarball/master`. With Yarn: `yarn add https://github.com/nitaliano/react-native-mapbox-gl#master`
+  2. Install the iOS SDK directly from Mapbox
+    a. Visit https://www.mapbox.com/install/ios/
+    b. Click download to download the Mapbox iOS SDK
+    c. Unzip the folder and find the Mapbox.framework at the root of the folder
+    d. Move the Mapbox.framework folder to your `@react-native-mapbox-gl` folder inside your node_modules. Full path will be something like: `node_modules/@react-native-mapbox-gl/maps/ios/`
+    e. Once this has been done, you can continue following the manual installation steps
