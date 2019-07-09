@@ -1274,6 +1274,9 @@ public class RCTMGLMapView extends MapView implements
 
     private WritableMap makeRegionPayload() {
         CameraPosition position = mMap.getCameraPosition();
+	if (position == null || position.target == null) {
+		return new WritableNativeMap();
+	}
         LatLng latLng = new LatLng(position.target.getLatitude(), position.target.getLongitude());
 
         WritableMap properties = new WritableNativeMap();
