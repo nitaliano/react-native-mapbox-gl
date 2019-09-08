@@ -39,6 +39,7 @@ import QueryAtPoint from './components/QueryAtPoint';
 import QueryWithRect from './components/QueryWithRect';
 import ShapeSourceIcon from './components/ShapeSourceIcon';
 import CustomVectorSource from './components/CustomVectorSource';
+import ThirdPartyVectorTileSource from './components/ThirdPartyVectorTileSource';
 import ShowPointAnnotation from './components/ShowPointAnnotation';
 import CreateOfflineRegion from './components/CreateOfflineRegion';
 import DriveTheLine from './components/DriveTheLine';
@@ -113,6 +114,7 @@ const Examples = [
   new ExampleItem('Query Features Bounding Box', QueryWithRect),
   new ExampleItem('Shape Source From Icon', ShapeSourceIcon),
   new ExampleItem('Custom Vector Source', CustomVectorSource),
+  new ExampleItem('Third Party Vector Tile Source', ThirdPartyVectorTileSource),
   new ExampleItem('Show Point Annotation', ShowPointAnnotation),
   new ExampleItem('Create Offline Region', CreateOfflineRegion),
   new ExampleItem('Animation Along a Line', DriveTheLine),
