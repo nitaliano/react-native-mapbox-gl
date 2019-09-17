@@ -546,7 +546,7 @@ public class RCTMGLMapView extends MapView implements
     public boolean onTouchEvent(MotionEvent ev) {
         boolean result = super.onTouchEvent(ev);
 
-        if (result) {
+        if (result && mScrollEnabled) {
             requestDisallowInterceptTouchEvent(true);
         }
 
